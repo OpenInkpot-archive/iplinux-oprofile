@@ -201,7 +201,8 @@ void output_gprof(op_bfd const & abfd, profile_container const & samples,
 
 	op_write_file(fp, hist, histsize * sizeof(u16));
 
-	output_cg(fp, abfd, cg_db);
+	if (!cg_db.empty())
+		output_cg(fp, abfd, cg_db);
 
 	op_close_file(fp);
 
