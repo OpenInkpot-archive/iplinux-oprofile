@@ -74,8 +74,10 @@ int compare_by(sort_options::sort_order order,
 		}
 
 		default: {
+			// static_cast<> to shut up g++ 2.91.66 which warn
+			// about ambiguity between <<(int) and <<(long int)
 			cerr << "compare_by(): unknown sort option: "
-			     << order << endl;
+			     << static_cast<int>(order) << endl;
 			exit(EXIT_FAILURE);
 		}
 	}
