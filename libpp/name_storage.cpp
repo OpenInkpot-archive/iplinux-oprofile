@@ -76,6 +76,11 @@ std::string const & name_storage::demangle(name_id id) const
 
 std::string const & name_storage::basename(name_id id) const
 {
+	static string empty;
+	if (id == 0) {
+		return empty;
+	}
+
 	stored_name const & n = names.find(id)->second;
 	if (n.name_processed.empty()) {
 		n.name_processed = ::basename(n.name);

@@ -1,5 +1,9 @@
 2003-05-17  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* libpp/name_storage.cpp: basename() return an empty string for nil id
+
+2003-05-17  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libutil++/op_bfd.cpp: get_linenr() init linenr to zero
 
 	* libpp/name_storage.cpp: don't use id zero
