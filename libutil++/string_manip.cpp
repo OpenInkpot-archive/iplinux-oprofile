@@ -109,20 +109,6 @@ void separate_token(vector<string> & result, const string & str, char sep)
 }
 
 
-string sample_filename(string const& sample_dir,
-			string const& sample_filename, int counter)
-{
-	ostringstream s;
-
-	s << sample_dir;
-	if (sample_dir.length() && sample_dir[sample_dir.length() - 1] != '/')
-		s << "/";
-	s << sample_filename << '#' << counter;
-
-	return s.str();
-}
-
-
 string ltrim(string const & str, string const & totrim)
 {
 	string result;

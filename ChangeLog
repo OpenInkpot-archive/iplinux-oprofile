@@ -1,3 +1,8 @@
+2003-05-09  John Levon  <levon@movementarian.org>
+
+	* libutil++/string_manip.h:
+	* libutil++/string_manip.cpp: sample_filename() is unused
+
 2003-05-09  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libop++/op_header.h:

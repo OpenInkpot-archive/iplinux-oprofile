@@ -63,20 +63,6 @@ bool is_prefix(std::string const & s, std::string const & prefix);
 void separate_token(std::vector<std::string> & result, std::string const & str,
 		    char sep);
 
-/**
- * sample_filename - build a sample filename
- * @param  sample_dir sample files directory
- * @param sample_filename base name of sample file
- * @param counter counter nr
- *
- * If sample_dir is empty return sample_filename + "#" + counter
- * else return sample_dir + "/" + sample_filename + "#" + counter
- *
- * Existence of the samples files is not checked.
- */
-std::string sample_filename(std::string const& sample_dir,
-			    std::string const& sample_filename, int counter);
-
 /// remove trim chars from start of input string return the new string
 std::string ltrim(std::string const & str, std::string const & totrim = "\t ");
 /// remove trim chars from end of input string return the new string
