@@ -163,6 +163,7 @@ AC_OUTPUT(Makefile \
 	doc/Makefile \
 	doc/xsl/catalog-1.xml \
 	doc/oprofile.1 \
+	libpp/Makefile \
 	pp/Makefile \
 	gui/Makefile \
 	gui/ui/Makefile \

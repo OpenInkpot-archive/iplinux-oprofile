@@ -1,0 +1,128 @@
+/**
+ * @file sample_sample_filename.h
+ * Container holding a sample filename splitted into its string components
+ *
+ * @remark Copyright 2003 OProfile authors
+ * @remark Read the file COPYING
+ *
+ * @author Philippe Elie
+ */
+
+#include <stdexcept>
+#include <vector>
+#include <string>
+
+#include "split_sample_filename.h"
+#include "string_manip.h"
+
+using namespace std;
+
+
+// PP:3.19 event_name.count.unitmask.tgid.tid.cpu
+static split_sample_filename split_event_spec(string const & event_spec)
+{
+	size_t const nr_spec = 6;
+
+	vector<string> temp;
+	separate_token(temp, event_spec, '.');
+	if (temp.size() != nr_spec) {
+		throw invalid_argument("bad event specification" + event_spec);
+	}
+
+	for (size_t i = 0; i < nr_spec ; ++i) {
+		if (temp[i].empty()) {
+			throw invalid_argument("bad event specification" +
+					       event_spec);
+		}
+	}
+
+	split_sample_filename result;
+
+	int i = 0;
+	result.event = temp[i++];
+	result.count = temp[i++];
+	result.unit_mask = temp[i++];
+	result.tgid = temp[i++];
+	result.tid = temp[i++];
+	result.cpu = temp[i++];
+
+	return result;
+}
+
+
+/*
+ *  valid filename are:
+ *
+ * {kern}/name/event_spec
+ * {root}/path/to/bin/event_spec
+ * {root}/path/to/bin/{dep}/{root}/path/to/bin/event_spec
+ * {root}/path/to/bin/{dep}/{kern}/name/event_spec
+ *
+ * where /name/ denote a unique path component
+ */
+split_sample_filename split_sample_file(string const & filename)
+{
+	string::size_type pos = filename.find_last_of('/');
+	if (pos == string::npos) {
+		throw invalid_argument("split_filename() invalid filename: " +
+				       filename);
+	}
+	string event_spec = filename.substr(pos + 1);
+	string filename_spec = filename.substr(0, pos);
+
+	split_sample_filename result = split_event_spec(event_spec);
+
+	vector<string> path;
+	separate_token(path, filename_spec, '/');
+
+	// pp_interface PP:3.19 to PP:3.23 path must start either with {root}
+	// or {kern} and we must found at least 2 component
+	if (path.size() < 2 || (path[0] != "{root}" && path[0] != "{kern}")) {
+		throw invalid_argument("split_filename() invalid filename: " +
+				       filename);
+	}
+
+	// PP:3.23 {kern} must be followed by a single path component
+	if (path[0] == "{kern}" && path.size() != 2) {
+		throw invalid_argument("split_filename() invalid filename: " +
+				       filename);
+	}
+
+	size_t i;
+	for (i = 1 ; i < path.size() ; ++i) {
+		if (path[i] == "{dep}")
+			break;
+		if (i != 1)
+			result.image += "/";
+
+		result.image += path[i];
+	}
+
+	if (i == path.size())
+		return result;
+
+	++i;
+
+	// PP:3.19 {dep}/ must be followed by {kern}/ or {root}/
+	if (path[i] == "{kern}") {
+		// PP:3.23 {kern} must be followed by a single path component
+		if (path.size() - i != 2) {
+			throw invalid_argument("split_filename() invalid filename: " +
+					       filename);
+		}
+	} else if (path[i] != "{root}") {
+		throw invalid_argument("split_filename() invalid filename: " +
+				       filename);
+	}
+
+	++i;
+
+	for (size_t pos = i ; pos < path.size() ; ++pos) {
+		if (i != pos)
+			result.lib_image += "/";
+
+		result.lib_image += path[pos];
+	}
+
+	return result;
+}

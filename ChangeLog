@@ -1,3 +1,47 @@
+2003-04-16  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* starting branch pp-interface-branch
+
+	* Makefile.am:
+	* configure.in: handle new sub dir libpp
+
+	* libutil++/comma_list.h: new file handling of comma separated list of
+	  items.
+	* libutil++/generic_spec.cpp:
+	* libutil++/generic_spec.h: new file
+	* libutil++/Makefile.am: handle new file
+
+	* pp/counter_array.*:
+	* pp/counter_profile.*:
+	* pp/counter_util.*:
+	* pp/derive_files.*:
+	* pp/format_output.*:
+	* pp/opp_symbol.h:
+	* pp/outsymbflag.h:
+	* pp/profile.*:
+	* pp/profile_container.*:
+	* pp/sample_container_imp.*:
+	* pp/session.*:
+	* pp/symbol_container_imp.*:
+	* pp/symbol_functors.*: move to
+
+	* libpp/*: here
+	* libpp/filename_spec.cpp:
+	* libpp/filename_spec.h: new file handling of pp sample filename
+	* libpp/parse_cmdline.cpp:
+	* libpp/parse_cmdline.h: new file, handling of command line tag:value
+	* libpp/Makefile.am: new file build libpp.a
+
+	* pp/common_option.h:
+	* pp/common_option.cpp: common option to pp tools. Implement comon
+	  entry point to pp tools.
+	* pp/opannoate.cpp:
+	* pp/opdiff.cpp:
+	* pp/opgprof.cpp:
+	* pp/opreport.cpp:
+	* pp/opsummary.cpp: skeleton file for all pp tools.
+	* pp/Makefile.am: remove old pp tools, add the news.
+
 2003-04-15  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* events/i386-ht.events: all events allow only one counter, remove

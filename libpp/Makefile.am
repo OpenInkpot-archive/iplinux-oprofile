@@ -1,0 +1,40 @@
+AM_CPPFLAGS = \
+	-I ${top_srcdir}/libop \
+	-I ${top_srcdir}/libutil \
+	-I ${top_srcdir}/libdb \
+	-I ${top_srcdir}/libopt++ \
+	-I ${top_srcdir}/libutil++ \
+	-I ${top_srcdir}/libop++ \
+	-I ${top_srcdir}/libregex
+
+noinst_LIBRARIES = libpp.a
+libpp_a_SOURCES = \
+	counter_array.cpp \
+	counter_array.h \
+	counter_profile.cpp \
+	counter_profile.h \
+	counter_util.cpp \
+	counter_util.h \
+	derive_files.cpp \
+	derive_files.h \
+	filename_spec.cpp \
+	filename_spec.h \
+	format_output.cpp \
+	format_output.h \
+	parse_cmdline.cpp \
+	parse_cmdline.h \
+	profile.cpp \
+	profile.h \
+	profile_container.cpp \
+	profile_container.h \
+	sample_container_imp.cpp \
+	sample_container_imp.h \
+	session.cpp \
+	session.h \
+	split_sample_filename.cpp \
+	split_sample_filename.h \
+	symbol_container_imp.cpp \
+	symbol_container_imp.h \
+	outsymbflag.h \
+	opp_symbol.h \
+	symbol_functors.h
