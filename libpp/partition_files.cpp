@@ -10,6 +10,7 @@
 
 #include <set>
 #include <algorithm>
+#include <iterator>
 
 #include "cverb.h"
 #include "partition_files.h"

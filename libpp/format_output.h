@@ -110,7 +110,7 @@ private:
  
 	/// actually do output
 	void do_output(std::ostream & out, std::string const & name,
-		      sample_entry const & sample, bool hide_imutable_field);
+		      sample_entry const & sample, bool hide_immutable_field);
  
 	/// output details for the symbol
 	void output_details(std::ostream & out, symbol_entry const * symb);

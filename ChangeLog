@@ -1,3 +1,11 @@
+2003-04-25  John Levon  <levon@movementarian.org>
+
+	* libpp/format_output.cpp:
+	* libpp/format_output.h:
+	* libpp/outsymbflag.h: "immutable" not "imutable"
+
+	* libpp/partition_files.cpp: include <iterator> to compile
+
 2003-04-24  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libpp/partition_files.h: typo

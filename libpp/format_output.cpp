@@ -247,7 +247,7 @@ void formatter::output_details(ostream & out, symbol_entry const * symb)
  
 void formatter::do_output(ostream & out, string const & name,
 			  sample_entry const & sample,
-			  bool hide_imutable_field)
+			  bool hide_immutable_field)
 {
 	output_header(out);
 
@@ -257,7 +257,7 @@ void formatter::do_output(ostream & out, string const & name,
 	for (size_t i = 1 ; temp_flag != 0 ; i <<= 1) {
 		outsymbflag fl = static_cast<outsymbflag>(i);
 		if (flags & fl) {
-			if (hide_imutable_field && (fl & osf_imutable_field)) {
+			if (hide_immutable_field && (fl & osf_immutable_field)) {
 				field_description const & field(format_map[fl]);
 				padding += field.width;
 			} else {

@@ -32,12 +32,15 @@ public:
 	 * Build an object to store information on samples. All parameters
 	 * acts as hint for what you will request after recording samples and
 	 * so on allow optimizations during recording the information.
-	 * @param add_zero_samples_symbols must we add to the symbol container
+	 *
+	 * @param add_zero_samples_symbols Must we add to the symbol container
 	 * symbols with zero samples count
-	 * @param flags optimize hint to add samples. The flags is a promise
-	 * on what will be required as information in future. Avoid to pass
-	 * osf_linenr_info greatly improve performance of add.
-	 * @param need details true if we need to record all samples or to
+	 *
+	 * @param flags Optimize hint to add samples. The flags is a promise
+	 * of what will be required as information in future. Avoiding the 
+	 * lookup of line number etc. greatly improves performance.
+	 *
+	 * @param need_details true if we need to record all samples or to
 	 * to record them at symbol level. This is an optimization hint
 	 */
 	profile_container(bool add_zero_samples_symbols, outsymbflag flags,
@@ -47,6 +50,7 @@ public:
  
 	/**
 	 * add() -  record symbols/samples in the underlined container
+	 *
 	 * @param profile the samples files container
 	 * @param abfd the associated bfd object
 	 * @param app_name the owning application name of sample

@@ -68,15 +68,14 @@ struct symbol_entry {
 
 
 /**
- * Taking two opp_symbol* input iterator return true if we need to format
- * vma as 64 bits value else false.
+ * Taking two symbol_entry input iterators return true if we need to format
+ * VMA as 64 bits value else false.
  */
-template <class InputIterator>
-bool vma64_p(InputIterator first_symbol, InputIterator last_symbol)
+template <class input_iterator>
+bool vma64_p(input_iterator first_symbol, input_iterator last_symbol)
 {
-	if (sizeof(bfd_vma) == 4) {
+	if (sizeof(bfd_vma) == 4)
 		return false;
-	}
 
 	// slow way, check all address
 	for ( ; first_symbol != last_symbol ; ++first_symbol) {

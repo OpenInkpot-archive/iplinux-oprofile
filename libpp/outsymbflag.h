@@ -42,10 +42,10 @@ enum outsymbflag {
 	osf_app_name = 1 << 12,		// owning application
 	osf_short_app_name = 1 << 13,	// basename of owning application
 
-	/// These fields are considered imutable when showing details for one
+	/// These fields are considered immutable when showing details for one
 	/// symbol, we show them only when outputting the symbol itself but
 	/// we avoid to display them during details output
-	osf_imutable_field = osf_symb_name + osf_image_name +
+	osf_immutable_field = osf_symb_name + osf_image_name +
 		osf_short_image_name + osf_app_name + osf_short_app_name
 };
 
