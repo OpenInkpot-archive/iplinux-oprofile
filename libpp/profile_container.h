@@ -21,6 +21,9 @@
 #include "sample_container.h"
 #include "format_flags.h"
 
+/// a collection of sorted symbols
+typedef std::vector<symbol_entry const *> symbol_collection;
+
 class symbol_container;
 class string_filter;
 class profile_t;
@@ -72,7 +75,7 @@ public:
 
 	/// Find a list of symbol from its name, return an empty vector if no
 	/// symbol found
-	std::vector<symbol_entry const *> find_symbol(std::string const & name) const;
+	symbol_collection const find_symbol(std::string const & name) const;
 
 	/// Find a symbol from its filename, linenr, return zero if no symbol
 	/// at this location
@@ -83,9 +86,6 @@ public:
 	/// at this vma
 	sample_entry const * find_sample(symbol_entry const * symbol,
 					 bfd_vma vma) const;
-
-	/// a collection of sorted symbols
-	typedef std::vector<symbol_entry const *> symbol_collection;
 
 	/// used for select_symbols()
 	struct symbol_choice {

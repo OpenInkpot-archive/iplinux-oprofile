@@ -50,14 +50,14 @@ public:
 	symbol_entry const * find(std::string filename, size_t linenr) const;
 
 	/// return all symbols of the given name
-	std::vector<symbol_entry const *> find(std::string name) const;
+	symbol_collection const find(std::string name) const;
 
 	/// find the symbol with the given image_name vma if any
 	symbol_entry const * find_by_vma(std::string const & image_name,
 					 bfd_vma vma) const;
 
 	/// populate the given container with all the symbols, sorted by count
-	void get_symbols_by_count(profile_container::symbol_collection & v) const;
+	void get_symbols_by_count(symbol_collection & v) const;
 
 private:
 	/// build the symbol by file-location cache

@@ -90,11 +90,10 @@ bool symbol_compare::operator()(symbol_entry const * lhs,
 } // anonymous namespace
 
 
-void sort_options::sort_by(std::vector<symbol_entry const *> & syms,
-			bool reverse_sort) const
+void sort_options::sort_by(symbol_collection & syms, bool reverse_sort) const
 {
 	stable_sort(syms.begin(), syms.end(),
-		    symbol_compare(sort, reverse_sort));
+	            symbol_compare(sort, reverse_sort));
 }
 
 

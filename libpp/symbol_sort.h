@@ -12,6 +12,8 @@
 #ifndef SYMBOL_SORT_H
 #define SYMBOL_SORT_H
 
+#include "profile_container.h"
+
 #include <vector>
 #include <string>
 
@@ -34,7 +36,7 @@ struct sort_options {
 	/**
 	 * Sort the vector by the given criteria.
 	 */
-	void sort_by(std::vector<symbol_entry const *> & syms,
+	void sort_by(symbol_collection & syms,
 		     bool reverse_sort) const;
 
 private:

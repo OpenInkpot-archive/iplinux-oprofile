@@ -1,6 +1,21 @@
 2003-05-15  John Levon  <levon@movementarian.org>
 
 	* libpp/format_output.h:
+	* libpp/format_output.cpp:
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp:
+	* libpp/symbol_container.h:
+	* libpp/symbol_container.cpp:
+	* libpp/symbol_sort.h:
+	* libpp/symbol_sort.cpp:
+	* pp/opannotate.cpp:
+	* pp/opreport.cpp:
+	* pp/opgprof.cpp: move symbol_collection typedef
+	  into global namespace, and use consistently
+
+2003-05-15  John Levon  <levon@movementarian.org>
+
+	* libpp/format_output.h:
 	* libpp/format_output.cpp: add vma_format_64bit(),
 	remove bool parameter from output()
 

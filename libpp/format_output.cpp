@@ -96,11 +96,10 @@ void formatter::output(ostream & out, symbol_entry const * symb)
 }
 
 
-void formatter::output(ostream & out,
-                       vector<symbol_entry const *> const & symbols)
+void formatter::output(ostream & out, symbol_collection const & symbols)
 {
-	vector<symbol_entry const *>::const_iterator it = symbols.begin();
-	vector<symbol_entry const *>::const_iterator end = symbols.end();
+	symbol_collection::const_iterator it = symbols.begin();
+	symbol_collection::const_iterator end = symbols.end();
 	for (; it != end; ++it) {
 		output(out, *it);
 	}

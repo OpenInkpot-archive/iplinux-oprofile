@@ -325,7 +325,7 @@ void output_symbols(profile_container const & samples)
 {
 	profile_container::symbol_choice choice;
 	choice.threshold = options::threshold;
-	vector<symbol_entry const *> symbols = samples.select_symbols(choice);
+	symbol_collection symbols = samples.select_symbols(choice);
 	options::sort_by.sort_by(symbols, options::reverse_sort);
 
 	format_output::formatter out(samples);

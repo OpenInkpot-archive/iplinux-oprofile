@@ -261,7 +261,7 @@ bool is_symbol_line(string const & str, string::size_type pos)
 
 symbol_entry const * output_objdump_asm_line(symbol_entry const * last_symbol,
 		string const & app_name, string const & str,
-		vector<symbol_entry const *> const & output_symbols,
+		symbol_collection const & output_symbols,
 		bool & do_output)
 {
 	// output of objdump is a human readable form and can contain some
@@ -322,7 +322,7 @@ symbol_entry const * output_objdump_asm_line(symbol_entry const * last_symbol,
 }
 
 
-void do_one_output_objdump(vector<symbol_entry const *> const & output_symbols,
+void do_one_output_objdump(symbol_collection const & output_symbols,
 			   string const & app_name, bfd_vma start, bfd_vma end)
 {
 	vector<string> args;
@@ -387,7 +387,7 @@ void do_one_output_objdump(vector<symbol_entry const *> const & output_symbols,
 }
 
 
-void output_objdump_asm(vector<symbol_entry const *> const & output_symbols,
+void output_objdump_asm(symbol_collection const & output_symbols,
 			string const & app_name)
 {
 	// this is only an optimisation, we can either filter output by
@@ -416,7 +416,7 @@ void output_asm(string const & app_name)
 	choice.threshold = options::threshold;
 	choice.image_name = app_name;
 	choice.match_image = true;
-	vector<symbol_entry const *> symbols = samples->select_symbols(choice);
+	symbol_collection symbols = samples->select_symbols(choice);
 
 	sort_options options;
 	options.add_sort_option(sort_options::sample);

@@ -152,13 +152,10 @@ void output_gprof(profile_container const & samples,
 
 	profile_container::symbol_choice choice;
 	choice.threshold = options::threshold;
-	profile_container::symbol_collection symbols
-		= samples.select_symbols(choice);
+	symbol_collection symbols = samples.select_symbols(choice);
 
-	profile_container::symbol_collection::const_iterator sit
-		= symbols.begin();
-	profile_container::symbol_collection::const_iterator send
-		= symbols.end();
+	symbol_collection::const_iterator sit = symbols.begin();
+	symbol_collection::const_iterator send = symbols.end();
 
 	for (; sit != send; ++sit) {
 		sample_container::samples_iterator it  = samples.begin(*sit);

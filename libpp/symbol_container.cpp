@@ -57,9 +57,9 @@ symbol_container::find(string filename, size_t linenr) const
 }
 
 
-vector<symbol_entry const *> symbol_container::find(string name) const
+symbol_collection const symbol_container::find(string name) const
 {
-	vector<symbol_entry const *> v;
+	symbol_collection v;
 
 	symbols_t::const_iterator cit = symbols.begin();
 	symbols_t::const_iterator end = symbols.end();
@@ -100,11 +100,10 @@ symbol_entry const * symbol_container::find_by_vma(string const & image_name,
 }
 
 
-void symbol_container::get_symbols_by_count(
-	profile_container::symbol_collection & v) const
+void symbol_container::get_symbols_by_count(symbol_collection & v) const
 {
-	symbols_t::const_iterator cit = symbols.begin();
+	symbols_t::const_iterator it = symbols.begin();
 	symbols_t::const_iterator end = symbols.end();
-	for (; cit != end; ++cit)
-		v.push_back(&*cit);
+	for (; it != end; ++it)
+		v.push_back(&*it);
 }

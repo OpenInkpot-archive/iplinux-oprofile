@@ -155,7 +155,7 @@ profile_container::add_samples(profile_t const & profile,
 }
 
 
-profile_container::symbol_collection const
+symbol_collection const
 profile_container::select_symbols(symbol_choice & choice) const
 {
 	symbol_collection v;
@@ -259,8 +259,8 @@ u32 profile_container::samples_count() const
 
 // Rest here are delegated to our private implementation.
 
-symbol_entry const * profile_container::find_symbol(string const & image_name,
-						    bfd_vma vma) const
+symbol_entry const *
+profile_container::find_symbol(string const & image_name, bfd_vma vma) const
 {
 	return symbols->find_by_vma(image_name, vma);
 }
@@ -273,7 +273,7 @@ profile_container::find_symbol(string const & filename, size_t linenr) const
 }
 
 
-vector<symbol_entry const *> 
+symbol_collection const
 profile_container::find_symbol(string const & name) const
 {
 	return symbols->find(name);
