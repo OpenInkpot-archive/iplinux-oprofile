@@ -235,6 +235,7 @@ if test -n "$use_extra_libs" && \
    IFS=$ac_save_ifs
 fi
 
+# FIXME: automake ??? 
 AC_SUBST(extra_includes)
 AC_SUBST(extra_libraries)
 
