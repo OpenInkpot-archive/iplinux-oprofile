@@ -87,7 +87,9 @@ static void help_callback(poptContext con,  enum poptCallbackReason reason,
 
 static int showvers;
 
-// FIXME: why is this a separate table to appended_options ?
+// we need a separate table since, when a callback is specified, popt use this
+// callback for all table entries and we don't want than top level table entry
+// use the callback
 static struct poptOption help_options[] = {
   // C cast needed, pointer to function to void *
   { 0, '\0', POPT_ARG_CALLBACK, (void*)help_callback, 0, 0, 0L, },

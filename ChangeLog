@@ -9,7 +9,7 @@
 	* libpp/format_flags: cf_image_name new column_flags flag
 	* libpp/profile_container.cpp: use above flag. Don't compare app_name
 	  by string but id
-	* pp/oprereport.cpp: hide image_name when un-neccessary
+	* pp/opreport.cpp: hide image_name when un-neccessary
 
 2003-05-24  Philippe Elie  <phil.el@wanadoo.fr>
 
