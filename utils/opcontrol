@@ -1084,7 +1084,13 @@ do_save_session () {
 
 #remove all the sample files
 do_reset() {
-	rm -rf $CURRENT_SAMPLES_DIR
+	if test -z "$SAMPLES_DIR"; then
+		echo "opcontrol:do_reset() SAMPLES_DIR is empty!"
+		exit 1;
+	fi
+	# daemon use {kern} and {root} subdir, it's not a typo to not use ${}
+	rm -rf $SAMPLES_DIR/current/{kern}
+	rm -rf $SAMPLES_DIR/current/{root}
 
 	hup_daemon
 }
