@@ -141,6 +141,10 @@ get_kernel_range() {
 		return;
 	fi
 	tmp1=`nm $VMLINUX | grep ' A _text'`
+	# match start of kernel on ppc64 
+	if test -z "$tmp1"; then
+		tmp1=`nm $VMLINUX | grep ' T _stext'`
+	fi
 	tmp2=`nm $VMLINUX | grep ' A _end'`
 	if test -z "$tmp1" -o -z "$tmp2"; then
 		echo "Couldn't determine kernel start/end" >&2
