@@ -92,14 +92,6 @@ bool op_bfd_symbol::operator<(op_bfd_symbol const& lhs) const
 
 namespace {
 
-// only add symbols that would *never* be worth examining
-char const * boring_symbols[] = {
-	"gcc2_compiled."
-};
-
-size_t const nr_boring_symbols =
-	sizeof(boring_symbols) / sizeof(boring_symbols[0]);
-
 /**
  * Return true if the symbol is worth looking at
  */
@@ -114,21 +106,20 @@ bool interesting_symbol(asymbol * sym)
 	}
 
 	if (!(sym->section->flags & SEC_CODE))
-		return 0;
+		return false;
 
+	// FIXME: do we need both these checks?
 	if (!sym->name || sym->name[0] == '\0')
-		return 0;
+		return false;
 
 	// C++ exception stuff
 	if (sym->name[0] == '.' && sym->name[1] == 'L')
-		return 0;
+		return false;
 
-	for (size_t i = 0; i < nr_boring_symbols; ++i) {
-		if (!strcmp(boring_symbols[i], sym->name))
-			return 0;
-	}
+	if (!strcmp("gcc2_compiled.", sym->name))
+		return false;
 
-	return 1;
+	return true;
 }
 
 

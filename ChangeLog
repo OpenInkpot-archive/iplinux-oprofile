@@ -1,5 +1,10 @@
 2003-05-16  John Levon  <levon@movementarian.org>
 
+	* libutil++/op_bdf.cpp: clean up interesting_symbol
+	a bit
+
+2003-05-16  John Levon  <levon@movementarian.org>
+
 	* libutil++/op_bfd.cpp: make sure linenr is
 	always set to something
 
