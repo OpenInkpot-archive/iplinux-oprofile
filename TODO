@@ -57,9 +57,8 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
   encoding primary image as {root}/usr/bin/make/{dep}/{root}/usr/bin/make. If
   we fix it in this way I defer the fix after daemon rewrite
 
- o it will be simpler and more efficient to merge samples into a profile_t
-  not a profile_container, this will also avoid multiple message "last modified
-  time ... does not match ..."
+ o in some case (--separate=library and not using --merge=lib) we get multiple
+  time error message "last modified time ... does not match ..."
 
  o #pp/opreport -l -p /lib/modules/2.5.69/kernel/ oprofile.ko
    No samples files found: profile specification too strict ?
