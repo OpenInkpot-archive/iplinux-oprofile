@@ -14,6 +14,7 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
 
  o we show a header but not column headers for image report
  o write the man page and xml doc (i'll do this right at the end - john)
+ o we show "app name" when --separate=none. Don't
 
  o test opannotate -s -a on an application containing relative path debug
   info and profiled in another directory than the application build once.
@@ -22,13 +23,8 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
    --base-dir
  o opd_mangle_filename() in dae/ daemon/ use create_path blindly and try to
   recreate from /var.
- o at least add some FIXME in dae/daemon (see opd_mangle_file(),
-  op_mangle_file() and caller)
  o inhibit build of opdiff in pp/Makefile.am
- o disallow --accumulated without -l
- o opreport unhandled option (probably not exhaustive) 
-  --global-percent is not handled according to pp_interface
-
+ o disallow --accumulated without -l. Generally disable meaningless combinations
  o merging vmlinux as dependent library and as primary image
    $ pp/opreport --merge=lib | more
    194561  40.1204 /boot/2.5.66/vmlinux
