@@ -1,5 +1,11 @@
 2003-05-12  John Levon  <levon@movementarian.org>
 
+	* libpp/symbol_sort.h:
+	* libpp/symbol_sort.cpp: partial implementation
+	of other sort options
+
+2003-05-12  John Levon  <levon@movementarian.org>
+
 	* libpp/Makefile.am:
 	* libpp/symbol_sort.h:
 	* libpp/symbol_sort.cpp: add sorting code

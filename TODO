@@ -22,6 +22,7 @@ Counted CPU_CLK_UNHALTED events (clocks processor is not halted) with a unit mas
 vma      samples  %           symbol name             app name
 08048870 1        100         _init                   /usr/bin/which
 
+ o --debug-info is really slow
  o test opannotate -s -a on an application containing relative path debug
   info and profiled in another directory than the application build once.
   can objdump retrieve the source file and if no can we work-around ?
@@ -38,10 +39,10 @@ vma      samples  %           symbol name             app name
  o disallow --accumulated without -l
  o opreport unhandled option (probably not exhaustive) 
   --global-percent is not handled according to pp_interface
-  --sort= (?)
  o pp/opreport --exclude-dependent --merge lib /lib/i686/libc-2.3.2.so doesn't do anything when using
    separate, you need to remove --exclude-dependent ... makes sense ???
 
+ o --sort not handled properly (long filenames used, un-demangled symbol)
  o merging vmlinux as dependent library and as primary image
    $ pp/opreport --merge=lib | more
    194561  40.1204 /boot/2.5.66/vmlinux
