@@ -411,13 +411,15 @@ void output_objdump_asm(vector<symbol_entry const *> const & output_symbols,
 
 void output_asm(string const & app_name)
 {
-	// select the subset of symbols which satisfy the user requests
-	vector<symbol_entry const *> output_symbols =
-		samples->select_symbols(options::threshold, app_name);
+	profile_container::symbol_choice choice;
+	choice.threshold = options::threshold;
+	choice.image_name = app_name;
+	choice.match_image = true;
+	vector<symbol_entry const *> symbols = samples->select_symbols(choice);
 
 	output_info(cout);
 
-	output_objdump_asm(output_symbols, app_name);
+	output_objdump_asm(symbols, app_name);
 }
 
 

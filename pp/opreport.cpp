@@ -297,12 +297,11 @@ void populate_profiles(partition_files const & files, profile_container & sample
 }
 
 
-void output_symbols(profile_container const & samples, bool show_app_name)
+void output_symbols(profile_container const & samples)
 {
-	vector<symbol_entry const *> symbols =
-		samples.select_symbols(options::threshold);
-
-	bool need_vma64 = vma64_p(symbols.begin(), symbols.end());
+	profile_container::symbol_choice choice;
+	choice.threshold = options::threshold;
+	vector<symbol_entry const *> symbols = samples.select_symbols(choice);
 
 	format_output::formatter out(samples);
 
@@ -316,8 +315,7 @@ void output_symbols(profile_container const & samples, bool show_app_name)
 	format_flags flags = format_flags(ff_vma | ff_nr_samples);
 	flags = format_flags(flags | ff_percent | ff_symb_name);
 
-	// FIXME: this is not perfect
-	if (show_app_name && !options::merge_by.lib)
+	if (!options::merge_by.lib && (choice.hints & cf_multiple_apps))
 		flags = format_flags(flags | ff_app_name);
 	if (options::debug_info)
 		flags = format_flags(flags | ff_linenr_info);
@@ -333,7 +331,8 @@ void output_symbols(profile_container const & samples, bool show_app_name)
 
 	out.add_format(flags);
 
-	out.output(cout, symbols, options::reverse_sort, need_vma64);
+	out.output(cout, symbols, options::reverse_sort,
+	           choice.hints & cf_64bit_vma);
 }
 
 
@@ -342,8 +341,6 @@ int opreport(vector<string> const & non_options)
 	handle_options(non_options);
 
 	output_header(*sample_file_partition);
-
-	bool show_app_name = true;
 
 	if (!options::symbols) {
 		vector<group_summary> summaries;
@@ -355,15 +352,13 @@ int opreport(vector<string> const & non_options)
 		if (summaries.size() > 1 || !summaries[0].should_hide_deps()) {
 			output_summaries(summaries, total);
 			return 0;
-		} else {
-			show_app_name = false;
 		}
 	}
 
 	profile_container samples(false,
 		options::debug_info, options::details);
 	populate_profiles(*sample_file_partition, samples);
-	output_symbols(samples, show_app_name);
+	output_symbols(samples);
 	return 0;
 }
 

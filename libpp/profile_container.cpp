@@ -156,31 +156,50 @@ profile_container::add_samples(profile_t const & profile,
 
 
 profile_container::symbol_collection const
-profile_container::select_symbols(double threshold, string const & image_name,
-                                  bool sort_by_vma) const
+profile_container::select_symbols(symbol_choice & choice) const
 {
 	symbol_collection v;
 	symbol_collection result;
+	string app_name;
 
-	threshold /= 100.0;
+	double const threshold = choice.threshold / 100.0;
 
 	symbols->get_symbols_by_count(v);
 
 	symbol_collection::const_iterator it = v.begin();
 	symbol_collection::const_iterator const end = v.end();
 	for (; it < end; ++it) {
-		if (!image_name.empty() &&
-		    (*it)->image_name != image_name)
+		if (choice.match_image
+		    && (*it)->image_name != choice.image_name)
 			continue;
 
 		double const percent =
 			op_ratio((*it)->sample.count, samples_count());
 
-		if (percent >= threshold)
+		if (percent >= threshold) {
 			result.push_back(*it);
+
+			if (app_name.empty()) {
+				app_name = (*it)->app_name;
+			} else if (app_name != (*it)->app_name) {
+				choice.hints = column_flags(
+					choice.hints | cf_multiple_apps);
+			}
+
+			/**
+			 * It's theoretically possible that we get a
+			 * symbol where its samples pass the border
+			 * line, but the start is below it, but the
+			 * the hint is only used for formatting
+			 */
+			if ((*it)->sample.vma & ~0xffffffffLLU) {
+				choice.hints = column_flags(
+					choice.hints | cf_64bit_vma);
+			}
+		}
 	}
 
-	if (sort_by_vma) {
+	if (choice.sort_by_vma) {
 		sort(result.begin(), result.end(), less_sample_entry_by_vma());
 	}
 

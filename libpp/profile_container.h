@@ -19,6 +19,7 @@
 #include "utility.h"
 #include "op_bfd.h"
 #include "sample_container.h"
+#include "format_flags.h"
 
 class symbol_container;
 class string_filter;
@@ -88,22 +89,29 @@ public:
 	/// a collection of sorted symbols
 	typedef std::vector<symbol_entry const *> symbol_collection;
 
+	/// used for select_symbols()
+	struct symbol_choice {
+		symbol_choice()
+			: hints(cf_none), sort_by_vma(false),
+			  threshold(0.0), match_image(false) {}
+
+		/// hints filled in
+		column_flags hints;
+		/// sort by vma
+		bool sort_by_vma;
+		/// percentage threshold
+		double threshold;
+		/// match the image name only
+		bool match_image;
+		/// owning image name
+		std::string image_name;
+	};
+
 	/**
 	 * select_symbols - create a set of symbols sorted by sample count
-	 * @param threshold select symbols which contains more than
-	 *   threshold percent of samples
-	 * @param image_name select symbols belonging to this binary image
-	 *  or all if not set
-	 * @param sort_by_vma sort symbols by vma not counter samples
-	 * @return a sorted vector of symbols
-	 *
-	 * until_threshold and threshold acts like the -w and -u options
-	 * of op_to_source. If you need to get all symbols call it with
-	 * threshold == 0.0
+	 * @param symbol_choice parameters to use/fill in when selecting
 	 */
-	symbol_collection const select_symbols(double threshold,
-		std::string const & image_name = std::string(),
-		bool sort_by_vma = false) const;
+	symbol_collection const select_symbols(symbol_choice & choice) const;
 
 	/// Like select_symbols for filename without allowing sort by vma.
 	std::vector<std::string> const select_filename(double threshold) const;
