@@ -42,13 +42,6 @@ vma      samples  %           symbol name             app name
  o pp/opreport --exclude-dependent --merge lib /lib/i686/libc-2.3.2.so doesn't do anything when using
    separate, you need to remove --exclude-dependent ... makes sense ???
 
- o opreport /usr/bin/whatever should imply -l (like oprofpp back-compat) but
-  NOT if opreport <some spec> and it just *happens* to match one image. The
-  same idea can be applied to remove the app_name field in output since it's
-  annoying to get a report with the same application showed on each line.
-	- difficult one: without -x, it's actually useful information.
-	  what to do ?
-
  o merging vmlinux as dependent library and as primary image
    $ pp/opreport --merge=lib | more
    194561  40.1204 /boot/2.5.66/vmlinux
