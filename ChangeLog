@@ -1,5 +1,9 @@
 2003-05-16  John Levon  <levon@movementarian.org>
 
+	* pp/opannotate.cpp: small renaming
+
+2003-05-16  John Levon  <levon@movementarian.org>
+
 	* libpp/format_output.h:
 	* libpp/format_output.cpp: don't demangle and
 	basename() here.

@@ -261,7 +261,7 @@ bool is_symbol_line(string const & str, string::size_type pos)
 
 symbol_entry const * output_objdump_asm_line(symbol_entry const * last_symbol,
 		string const & app_name, string const & str,
-		symbol_collection const & output_symbols,
+		symbol_collection const & symbols,
 		bool & do_output)
 {
 	// output of objdump is a human readable form and can contain some
@@ -299,10 +299,8 @@ symbol_entry const * output_objdump_asm_line(symbol_entry const * last_symbol,
 
 		last_symbol = find_symbol(app_name, str);
 
-		symbol_collection::const_iterator cit
-			= output_symbols.begin();
-		symbol_collection::const_iterator end
-			= output_symbols.end();
+		symbol_collection::const_iterator cit = symbols.begin();
+		symbol_collection::const_iterator end = symbols.end();
 		// ! complexity: linear in number of symbol must use sorted
 		// by address vector and lower_bound ?
 		// FIXME: dubious pointer comparisons: symbol pointers
@@ -327,7 +325,7 @@ symbol_entry const * output_objdump_asm_line(symbol_entry const * last_symbol,
 }
 
 
-void do_one_output_objdump(symbol_collection const & output_symbols,
+void do_one_output_objdump(symbol_collection const & symbols,
 			   string const & app_name, bfd_vma start, bfd_vma end)
 {
 	vector<string> args;
@@ -365,7 +363,7 @@ void do_one_output_objdump(symbol_collection const & output_symbols,
 	string str;
 	while (reader.getline(str)) {
 		last_symbol = output_objdump_asm_line(last_symbol, app_name,
-					str, output_symbols, do_output);
+					str, symbols, do_output);
 	}
 
 	// objdump always returns SUCCESS so we must rely on the stderr state
@@ -392,7 +390,7 @@ void do_one_output_objdump(symbol_collection const & output_symbols,
 }
 
 
-void output_objdump_asm(symbol_collection const & output_symbols,
+void output_objdump_asm(symbol_collection const & symbols,
 			string const & app_name)
 {
 	// this is only an optimisation, we can either filter output by
@@ -402,17 +400,16 @@ void output_objdump_asm(symbol_collection const & output_symbols,
 	// a medium number of times, I dunno if the used threshold is optimal
 	// but it is a conservative value.
 	size_t const max_objdump_exec = 50;
-	if (output_symbols.size() <= max_objdump_exec) {
-		symbol_collection::const_iterator cit = output_symbols.begin();
-		symbol_collection::const_iterator end = output_symbols.end();
+	if (symbols.size() <= max_objdump_exec) {
+		symbol_collection::const_iterator cit = symbols.begin();
+		symbol_collection::const_iterator end = symbols.end();
 		for (; cit != end; ++cit) {
 			bfd_vma start = cit->sample.vma;
 			bfd_vma end  = start + cit->size;
-			do_one_output_objdump(output_symbols, app_name,
-					      start, end);
+			do_one_output_objdump(symbols, app_name, start, end);
 		}
 	} else {
-		do_one_output_objdump(output_symbols, app_name, 0, ~(bfd_vma)0);
+		do_one_output_objdump(symbols, app_name, 0, ~bfd_vma(0));
 	}
 }
 
