@@ -52,7 +52,7 @@
 
 2003-05-22  Philippe Elie  <phil.el@wanadoo.fr>
 
-	* libutil++/child_read.h: minor #include fix
+	* libutil++/child_reader.h: minor #include fix
 
 2003-05-22  Philippe Elie  <phil.el@wanadoo.fr>
 
@@ -1485,7 +1485,7 @@
 	* doc/oprofile.1.in:
 	* doc/oprofile.xml: handle --no-vmlinux
 
-	* daemon/opd_kernel.c: use /no-vmlinux not /no-vmlinux when user
+	* daemon/opd_kernel.c: use no-vmlinux not /no-vmlinux when user
 	  specify --no-vmlinux
 
 2003-04-08  John Levon  <levon@movementarian.org>
