@@ -99,10 +99,6 @@ struct oprof_sysctl {
 	int nr_interrupts; 
 	/* the cpu core type: CPU_PPRO, CPU_PII ... */
 	int cpu_type; 
-	/* pid filter value */
-	pid_t pid_filter;
-	/* pgrp filter value */
-	pid_t pgrp_filter;
 	/* counter setup */
 	struct oprof_counter ctr[OP_MAX_COUNTERS];
 };
