@@ -12,6 +12,7 @@
 #include <vector>
 #include <list>
 #include <iterator>
+#include <iostream>
 
 #include "opgprof_options.h"
 #include "popt_options.h"
@@ -27,8 +28,7 @@ namespace options {
 	string gmon_filename = "gmon.out";
 
 	// Ugly, for build only
-	bool demangle;
-	bool smart_demangle;
+	demangle_type demangle;
 }
 
 
