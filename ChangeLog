@@ -1,5 +1,11 @@
 2003-05-09  John Levon  <levon@movementarian.org>
 
+	* libpp/format_output.h:
+	* libpp/format_output.cpp: pass a symbol ref
+	not name down into the formatters
+
+2003-05-09  John Levon  <levon@movementarian.org>
+
 	* libutil++/string_manip.h:
 	* libutil++/string_manip.cpp: sample_filename() is unused
 

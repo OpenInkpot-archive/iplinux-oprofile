@@ -27,6 +27,14 @@ vma      samples  cum. samples  %           cum. %     symbol name             i
 
   Note the ellipsis
 
+ o We don't use abfd.have_debug_info() any more, gives crap reports:
+[moz@lambent oprofile-pp]$ pp/opreport -l /usr/bin/which
+Cpu type: PIII
+Cpu speed was (MHz estimation) : 863.192
+Counted CPU_CLK_UNHALTED events (clocks processor is not halted) with a unit mask of 0x00 (No unit mask) count 50000
+vma      samples  %           symbol name             app name
+08048870 1        100         _init                   /usr/bin/which
+
  o test opannotate -s -a on an application containing relative path debug
   info and profiled in another directory than the application build once.
   can objdump retrieve the source file and if no can we work-around ?
@@ -145,6 +153,7 @@ Before 1.0 big stuff
 Before 1.0 little stuff
 -----------------------
 
+ o OPD_MAX_MODULES is stupid, use a list instead
  o configure.in: OP_DATADIR=`eval echo "$datadir/$PACKAGE/"`
      AC_DEFINE_UNQUOTED(OP_DATADIR, "$OP_DATADIR", "foo path") seems to work
  o improve the *non* verbose daemon log to be a bit more informative

@@ -56,9 +56,10 @@ private:
 
 	/// data passed for output
 	struct field_datum {
-		field_datum(std::string const & n, sample_entry const & s, bool vma_64_)
-			: name(n), sample(s), vma_64(vma_64_) {}
-		std::string const & name;
+		field_datum(symbol_entry const & sym,
+		            sample_entry const & s, bool vma_64_)
+			: symbol(sym), sample(s), vma_64(vma_64_) {}
+		symbol_entry const & symbol;
 		sample_entry const & sample;
 		bool vma_64;
 	};
@@ -100,7 +101,7 @@ private:
 	format_map_t format_map;
  
 	/// actually do output
-	void do_output(std::ostream & out, std::string const & name,
+	void do_output(std::ostream & out, symbol_entry const & symbol,
 		      sample_entry const & sample, bool hide_immutable_field);
  
 	/// output details for the symbol
@@ -110,7 +111,8 @@ private:
 	void output_header(std::ostream & out);
  
 	/// returns the nr of char needed to pad this field
-	size_t output_field(std::ostream & out, std::string const & name,
+	size_t output_field(std::ostream & out,
+	                   symbol_entry const & symbol,
 			   sample_entry const & sample,
 			   outsymbflag fl, size_t padding);
  

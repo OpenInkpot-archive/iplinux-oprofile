@@ -64,7 +64,7 @@ void formatter::add_format(outsymbflag flag)
 void formatter::output(ostream & out, symbol_entry const * symb, bool vma_64_)
 {
 	vma_64 = vma_64_;
-	do_output(out, symb->name, symb->sample, false);
+	do_output(out, *symb, symb->sample, false);
 
 	if (need_details) {
 		output_details(out, symb);
@@ -114,7 +114,7 @@ void formatter::show_short_filename()
 // ratio between 100 and the selected % to grow non fixed field use also
 // lib[n?]curses to get the console width (look info source) (so on add a fixed
 // field flags)
-size_t formatter::output_field(ostream & out, string const & name,
+size_t formatter::output_field(ostream & out, symbol_entry const & symbol,
 				 sample_entry const & sample,
 				 outsymbflag fl, size_t padding)
 {
@@ -122,7 +122,8 @@ size_t formatter::output_field(ostream & out, string const & name,
 	padding = 0;
 
 	field_description const & field(format_map[fl]);
-	string str = (this->*field.formatter)(field_datum(name, sample, vma_64));
+	string str = (this->*field.formatter)
+		(field_datum(symbol, sample, vma_64));
 	out << str;
 
 	padding = 1;	// at least one separator char
@@ -171,7 +172,7 @@ void formatter::output_details(ostream & out, symbol_entry const * symb)
 	for (cur = profile.begin(symb); cur != profile.end(symb); ++cur) {
 		out << ' ';
 
-		do_output(out, symb->name, cur->second, true);
+		do_output(out, *symb, cur->second, true);
 	}
 
 	total_count = temp_total_count;
@@ -180,7 +181,7 @@ void formatter::output_details(ostream & out, symbol_entry const * symb)
 }
 
  
-void formatter::do_output(ostream & out, string const & name,
+void formatter::do_output(ostream & out, symbol_entry const & symb,
 			  sample_entry const & sample,
 			  bool hide_immutable_field)
 {
@@ -196,7 +197,7 @@ void formatter::do_output(ostream & out, string const & name,
 				field_description const & field(format_map[fl]);
 				padding += field.width;
 			} else {
-				padding = output_field(out, name, sample, fl, padding);
+				padding = output_field(out, symb, sample, fl, padding);
 			}
 			temp_flag &= ~i;
 		}
@@ -247,9 +248,9 @@ string formatter::format_vma(field_datum const & f)
  
 string formatter::format_symb_name(field_datum const & f)
 {
-	if (f.name[0] == '?')
+	if (f.symbol.name[0] == '?')
 		return "(no symbol)";
-	return demangle_symbol(f.name);
+	return demangle_symbol(f.symbol.name);
 }
 
  

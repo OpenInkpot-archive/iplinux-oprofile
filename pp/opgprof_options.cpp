@@ -30,17 +30,16 @@ namespace options {
 
 namespace {
 
-
 popt::option options_array[] = {
 	popt::option(options::gmon_filename, "output-filename", 'o',
-		     "output filename, defaults to gmon.out if not specified",
-		     "filename"),
+	             "output filename, defaults to gmon.out if not specified",
+	             "filename"),
 };
 
 
 // FIXME: pass merge_option as parameter and re-use in opreport_options.cpp
 // *probably*
-bool try_partition_file(profile_spec const & spec,  bool include_dependent)
+bool try_partition_file(profile_spec const & spec, bool include_dependent)
 {
 	list<string> sample_files = spec.generate_file_list(include_dependent);
 
