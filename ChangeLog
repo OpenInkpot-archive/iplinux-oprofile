@@ -1,3 +1,10 @@
+2003-05-25  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/format_flags: cf_image_name new column_flags flag
+	* libpp/profile_container.cpp: use above flag. Don't compare app_name
+	  by string but id
+	* pp/oprereport.cpp: hide image_name when un-neccessary
+
 2003-05-24  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* doc/srcdoc/Doxyfile:

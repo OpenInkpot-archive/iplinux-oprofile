@@ -304,7 +304,7 @@ format_flags const get_format_flags(column_flags const & cf)
 	flags = format_flags(flags | ff_vma | ff_nr_samples);
 	flags = format_flags(flags | ff_percent | ff_symb_name);
 
-	if (!options::merge_by.lib && (cf & cf_multiple_apps))
+	if (cf & cf_multiple_apps)
 		flags = format_flags(flags | ff_app_name);
 	if (options::debug_info)
 		flags = format_flags(flags | ff_linenr_info);
@@ -314,7 +314,7 @@ format_flags const get_format_flags(column_flags const & cf)
 		flags = format_flags(flags | ff_percent_cumulated);
 	}
 
-	if (!options::exclude_dependent)
+	if (!(cf & cf_image_name))
 		flags = format_flags(flags | ff_image_name);
 
 	return flags;

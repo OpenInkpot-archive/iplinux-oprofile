@@ -8,7 +8,6 @@ Before merging with trunk
 
  o we show a header but not column headers for image report
  o write the man page and xml doc (i'll do this right at the end - john)
- o we show "app name" when --separate=none. Don't
  o test opannotate -s -a on an application containing relative path debug
   info and profiled in another directory than the application build once.
   can objdump retrieve the source file and if no can we work-around ?

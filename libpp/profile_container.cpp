@@ -160,7 +160,7 @@ symbol_collection const
 profile_container::select_symbols(symbol_choice & choice) const
 {
 	symbol_collection result;
-	string app_name;
+	image_name_id app_name_id;
 
 	double const threshold = choice.threshold / 100.0;
 
@@ -178,11 +178,16 @@ profile_container::select_symbols(symbol_choice & choice) const
 		if (percent >= threshold) {
 			result.push_back(&*it);
 
-			if (app_name.empty()) {
-				app_name = image_names.name(it->app_name);
-			} else if (app_name != image_names.name(it->app_name)) {
+			if (app_name_id.id == 0) {
+				app_name_id = it->app_name;
+			} else if (app_name_id.id != it->app_name.id) {
 				choice.hints = column_flags(
 					choice.hints | cf_multiple_apps);
+			}
+
+			if (it->image_name.id) {
+				choice.hints = column_flags(
+					choice.hints | cf_image_name);
 			}
 
 			/**
@@ -204,7 +209,6 @@ profile_container::select_symbols(symbol_choice & choice) const
 
 vector<string> const profile_container::select_filename(double threshold) const
 {
-	vector<string> result;
 	set<string> filename_set;
 
 	threshold /= 100.0;
@@ -245,6 +249,7 @@ vector<string> const profile_container::select_filename(double threshold) const
 	vector<filename_by_samples>::const_iterator const cend
 		= file_by_samples.end();
 
+	vector<string> result;
 	for (; cit != cend; ++cit) {
 		if (cit->percent >= threshold)
 			result.push_back(cit->filename);
