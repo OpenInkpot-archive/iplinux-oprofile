@@ -43,9 +43,6 @@ struct opd_image * kernel_image;
 /* maintained for statistics purpose only */
 static unsigned int nr_images=0;
 
-/* reversed LRU of mapped samples files, unmapped samples are not lru'ed  */
-static struct list_head opd_samples_files = { &opd_samples_files, &opd_samples_files };
- 
 /**
  * opd_print_stats - print out latest statistics
  */
@@ -104,7 +101,7 @@ void opd_alarm(int val __attribute__((unused)))
 	struct opd_image * image;
 	struct list_head * pos;
 
-	list_for_each(pos, &opd_samples_files) {
+	list_for_each(pos, &opd_images) {
 		image = list_entry(pos, struct opd_image, list_node);
 		for (i = 0 ; i < op_nr_counters ; ++i) {
 			struct opd_sample_file * samples = 
