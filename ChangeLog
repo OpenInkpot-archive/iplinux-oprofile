@@ -1,3 +1,18 @@
+2003-04-23  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libutil++/generic_spec.h: minor formating tweak
+
+	* libpp/parse_cmdline.h:
+	* libpp/parse_cmdline.cpp: handle_non_options(): return parse_cmdline
+	  by value
+
+	* libpp/merge_spec.h:
+	* libpp/merge_spec.cpp: new files: partition list of samples filename
+	  according to merge options.
+	* libpp/Makefile.am: update
+
+	* pp/opreport_options.cpp: more options handling, use partition_files()
+
 2003-04-22  John Levon  <levon@movementarian.org>
 
 	* pp/opreport_options.cpp: compile fix

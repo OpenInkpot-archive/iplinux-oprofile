@@ -11,9 +11,9 @@
 #include <vector>
 #include <list>
 #include <iostream>
-#include <iterator>
 #include <algorithm>
 #include <set>
+#include <iterator>
 
 #include "op_config.h"
 #include "file_manip.h"
@@ -22,6 +22,7 @@
 #include "opreport_options.h"
 #include "popt_options.h"
 #include "file_manip.h"
+#include "merge_spec.h"
 #include "cverb.h"
 
 using namespace std;
@@ -31,9 +32,13 @@ namespace options {
 	bool debug_info;
 	bool details;
 	double threshold;
-	bool threshold_percent;
+	bool percent_threshold;
 	bool include_dependent;
-	vector<string> sort_by;
+	bool sort_by_vma;
+	bool sort_by_sample;
+	bool sort_by_symbol;
+	bool sort_by_debug;
+	bool sort_by_image;
 	vector<string> ignore_symbols;
 	vector<string> exclude_symbols;
 	vector<string> image_path;
@@ -54,6 +59,7 @@ namespace {
 
 string threshold;
 vector<string> merge;
+vector<string> sort_by;
 
 popt::option options_array[] = {
 	// PP:5
@@ -68,7 +74,7 @@ popt::option options_array[] = {
 		     "count or percent"),
 	popt::option(options::include_dependent, "include-dependent", 'n',
 		     "include libs, modules etc."),
-	popt::option(options::sort_by, "sort", 's',
+	popt::option(sort_by, "sort", 's',
 		     "sort by", "vma,sample,symbol,debug,image"),
 	popt::option(options::ignore_symbols, "ignore-symbols", 'i',
 		     "ignore these comma separated symbols", "symbols"),
@@ -92,26 +98,84 @@ popt::option options_array[] = {
 };
 
 // FIXME: separate file if reused
+void handle_threshold()
+{
+	if (threshold.length()) {
+		double value;
+		istringstream ss(threshold);
+		if (ss >> value) {
+			options::threshold = value;
+			char ch;
+			if (ss >> ch && ch == '%') {
+				options::percent_threshold = true;
+			}
+		}
+	}
+
+	cverb << options::threshold << (options::percent_threshold ? "%" : "")
+	      << endl;;
+}
+
+// FIXME: separate file if reused
+void handle_sort_option()
+{
+	if (sort_by.empty()) {
+		// PP:5.14 sort default to sample
+		sort_by.push_back("sample");
+	}
+
+	for (size_t i = 0; i < sort_by.size(); ++i) {
+		if (sort_by[i] == "vma") {
+			options::sort_by_vma = true;
+		} else if (sort_by[i] == "sample") {
+			options::sort_by_sample = true;
+		} else if (sort_by[i] == "symbol") {
+			options::sort_by_symbol = true;
+		} else if (sort_by[i] == "debug") {
+			options::sort_by_debug = true;
+		} else if (sort_by[i] == "image") {
+			options::sort_by_image = true;
+		} else {
+			cerr << "unknown sort option: " << sort_by[i] << endl;
+			exit(EXIT_FAILURE);
+		}
+	}
+}
+
+// FIXME: separate file if reused
 void handle_merge_option()
 {
+	if (merge.empty()) {
+		// PP:5.21 merge default to all.
+		merge.push_back("all");
+	}
+
 	for (size_t i = 0; i < merge.size(); ++i) {
 		if (merge[i] == "cpu") {
 			options::merge_cpu = true;
 		} else if (merge[i] == "tid") {
 			options::merge_tid = true;
 		} else if (merge[i] == "tgid") {
+			// PP:5.21 tgid merge imply tid merging.
 			options::merge_tgid = true;
 			options::merge_tid = true;
 		} else if (merge[i] == "lib") {
 			options::merge_lib = true;
 		} else if (merge[i] == "unitmask") {
 			options::merge_unitmask = true;
+		} else if (merge[i] == "all") {
+			options::merge_cpu = true;
+			options::merge_lib = true;
+			options::merge_tid = true;
+			options::merge_tgid = true;
+			options::merge_unitmask = true;
 		} else {
-			cerr << "unknown merge options: " << merge[i] << endl;
+			cerr << "unknown merge option: " << merge[i] << endl;
 			exit(EXIT_FAILURE);
 		}
 	}
 }
+
 
 // FIXME: separate file
 vector<string> filter_session(vector<string> const & session,
@@ -185,48 +249,6 @@ list<string> matching_sample_filename(parse_cmdline const & parser)
 	return result;
 }
 
-struct unmergeable_profile {
-	std::string event;
-	std::string count;
-
-	unmergeable_profile(std::string const & event_,
-			    std::string const & count_)
-		:
-		event(event_),
-		count(count_)
-		{
-		}
-
-	bool operator<(unmergeable_profile const & rhs) const {
-		return event < rhs.event ||
-			(event == rhs.event && count < rhs.count);
-	}
-};
-
-ostream & operator<<(ostream & out, unmergeable_profile const & lhs)
-{
-	out << lhs.event << " " << lhs.count;
-	return out;
-}
-
-vector<unmergeable_profile> merge_profile(list<string> const & files)
-{
-	set<unmergeable_profile> spec_set;
-
-	split_sample_filename model = split_sample_file(*files.begin());
-
-	list<string>::const_iterator it;
-	for (it = files.begin(); it != files.end(); ++it) {
-		split_sample_filename spec = split_sample_file(*it);
-		spec_set.insert(unmergeable_profile(spec.event, spec.count));
-	}
-
-	vector<unmergeable_profile> result;
-	copy(spec_set.begin(), spec_set.end(), back_inserter(result));
-
-	return result;
-}
-
 }  // anonymous namespace
 
 
@@ -240,34 +262,38 @@ void get_options(int argc, char const * argv[])
 
 	set_verbose(verbose);
 
+	handle_threshold();
+
+	handle_sort_option();
+
 	handle_merge_option();
 
-	parse_cmdline parser;
-	handle_non_options(parser, non_option_args);
+	parse_cmdline parser = handle_non_options(non_option_args);
 
 	list<string> sample_files = matching_sample_filename(parser);
 
-	if (verbose) {
-		cout << "Matched sample files:\n";
-		copy(sample_files.begin(), sample_files.end(),
-		     ostream_iterator<string>(cout, "\n"));
-	}
+	cverb << "Matched sample files: " << sample_files.size() << endl;
+	copy(sample_files.begin(), sample_files.end(),
+	     ostream_iterator<string>(cverb, "\n"));
 
 	vector<unmergeable_profile>
 		unmerged_profile = merge_profile(sample_files);
-	if (unmerged_profile.size() > 1) {
-		cerr << "incompatible profile specification:\n";
-		copy(unmerged_profile.begin(), unmerged_profile.end(),
-		     ostream_iterator<unmergeable_profile>(cerr, "\n"));
-		exit(EXIT_FAILURE);
-	}
 
-	if (verbose) {
-		cerr << "unmergeable profile specification:\n";
-		copy(unmerged_profile.begin(), unmerged_profile.end(),
-		     ostream_iterator<unmergeable_profile>(cout, "\n"));
-	}
+	cverb << "Unmergeable profile specification:\n";
+	copy(unmerged_profile.begin(), unmerged_profile.end(),
+	     ostream_iterator<unmergeable_profile>(cverb, "\n"));
 
-	// now the behavior depend on option and number of different
-	// specification coming from the samples files.
+	// partition sample filename in unmerged spec
+	list<list<string> > unmerged_file =
+		partition_files(sample_files, options::merge_cpu,
+				options::merge_lib, options::merge_tid,
+				options::merge_tgid, options::merge_unitmask);
+
+	cverb << "Partition entries: " << unmerged_file.size() << endl;
+	list<list<string> >::const_iterator it;
+	for (it = unmerged_file.begin(); it != unmerged_file.end(); ++it) {
+		cverb << "Partition entry:\n";
+		copy(it->begin(), it->end(), 
+		     ostream_iterator<string>(cverb, "\n"));
+	}
 }
