@@ -158,7 +158,6 @@ profile_container::add_samples(profile_t const & profile,
 symbol_collection const
 profile_container::select_symbols(symbol_choice & choice) const
 {
-	symbol_collection v;
 	symbol_collection result;
 	string app_name;
 
@@ -176,7 +175,7 @@ profile_container::select_symbols(symbol_choice & choice) const
 			op_ratio(it->sample.count, samples_count());
 
 		if (percent >= threshold) {
-			result.push_back(&*it);
+			result.push_back(*it);
 
 			if (app_name.empty()) {
 				app_name = it->app_name;

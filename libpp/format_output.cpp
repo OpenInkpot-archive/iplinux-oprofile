@@ -19,7 +19,6 @@
 #include "format_output.h"
 #include "profile_container.h"
 #include "sample_container.h"
-#include "demangle_symbol.h"
 
 using namespace std;
 
@@ -33,8 +32,7 @@ formatter::formatter(profile_container const & profile_)
 	first_output(true),
 	vma_64(false),
 	need_details(false),
-	need_header(true),
-	long_filenames(false)
+	need_header(true)
 {
 	total_count = profile.samples_count();
 	total_count_details = profile.samples_count();
@@ -68,12 +66,6 @@ void formatter::hide_header()
 }
 
 
-void formatter::show_long_filenames()
-{
-	long_filenames = true;
-}
- 
-
 void formatter::vma_format_64bit()
 {
 	vma_64 = true;
@@ -86,9 +78,9 @@ void formatter::add_format(format_flags flag)
 }
 
 
-void formatter::output(ostream & out, symbol_entry const * symb)
+void formatter::output(ostream & out, symbol_entry const & symb)
 {
-	do_output(out, *symb, symb->sample, false);
+	do_output(out, symb, symb.sample, false);
 
 	if (need_details) {
 		output_details(out, symb);
@@ -147,7 +139,7 @@ size_t formatter::output_header_field(ostream & out, format_flags fl,
 }
  
 
-void formatter::output_details(ostream & out, symbol_entry const * symb)
+void formatter::output_details(ostream & out, symbol_entry const & symb)
 {
 	// We need to save the accumulated count and to restore it on
 	// exit so global cumulation and detailed cumulation are separate
@@ -159,16 +151,17 @@ void formatter::output_details(ostream & out, symbol_entry const * symb)
 	temp_cumulated_samples = cumulated_samples;
 	temp_cumulated_percent = cumulated_percent;
 
-	total_count = symb->sample.count;
-	cumulated_percent_details -= symb->sample.count;
+	total_count = symb.sample.count;
+	cumulated_percent_details -= symb.sample.count;
 	cumulated_samples = 0;
 	cumulated_percent = 0;
 
-	sample_container::samples_iterator it = profile.begin(symb);
-	sample_container::samples_iterator end = profile.end(symb);
+	// FIXME: this address taking is rather dubious (not future proof)
+	sample_container::samples_iterator it = profile.begin(&symb);
+	sample_container::samples_iterator end = profile.end(&symb);
 	for (; it != end; ++it) {
 		out << ' ';
-		do_output(out, *symb, it->second, true);
+		do_output(out, symb, it->second, true);
 	}
 
 	total_count = temp_total_count;
@@ -247,23 +240,19 @@ string formatter::format_symb_name(field_datum const & f)
 {
 	if (f.symbol.name[0] == '?')
 		return "(no symbol)";
-	return demangle_symbol(f.symbol.name);
+	return f.symbol.name;
 }
 
  
 string formatter::format_image_name(field_datum const & f)
 {
-	return long_filenames
-		? f.symbol.image_name
-		: basename(f.symbol.image_name);
+	return f.symbol.image_name;
 }
 
  
 string formatter::format_app_name(field_datum const & f)
 {
-	return long_filenames
-		? f.symbol.app_name
-		: basename(f.symbol.app_name);
+	return f.symbol.app_name;
 }
 
  
@@ -272,10 +261,8 @@ string formatter::format_linenr_info(field_datum const & f)
 	ostringstream out;
 
 	if (!f.sample.file_loc.filename.empty()) {
-		string filename = long_filenames
-			? f.sample.file_loc.filename
-			: basename(f.sample.file_loc.filename);
-		out << filename << ":" << f.sample.file_loc.linenr;
+		out << f.sample.file_loc.filename << ':'
+		    << f.sample.file_loc.linenr;
 	} else {
 		out << "(no location information)";
 	}

@@ -14,6 +14,7 @@
 
 #include <string>
 #include <vector>
+#include <list>
 
 #include "opp_symbol.h"
 #include "utility.h"
@@ -22,7 +23,7 @@
 #include "format_flags.h"
 
 /// a collection of sorted symbols
-typedef std::vector<symbol_entry const *> symbol_collection;
+typedef std::list<symbol_entry> symbol_collection;
 
 class symbol_container;
 class string_filter;

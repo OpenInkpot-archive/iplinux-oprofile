@@ -66,7 +66,7 @@ symbol_collection const symbol_container::find(string name) const
 
 	for (; cit != end; ++cit) {
 		if (cit->name == name)
-			v.push_back(&*cit);
+			v.push_back(*cit);
 	}
 
 	return v;

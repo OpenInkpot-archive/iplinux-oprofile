@@ -1,3 +1,19 @@
+2003-05-16  John Levon  <levon@movementarian.org>
+
+	* libpp/format_output.h:
+	* libpp/format_output.cpp: don't demangle and
+	basename() here.
+
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp: return copied symbols
+	in a list from select_symbols()
+
+	* libpp/symbol_container.cpp:
+	* libpp/symbol_sort.cpp:
+	* pp/opannotate.cpp:
+	* pp/opgprof.cpp:
+	* pp/opreport.cpp: changes from above
+
 2003-05-15  John Levon  <levon@movementarian.org>
 
 	* libpp/symbol_container.h:
