@@ -8,6 +8,8 @@
  * @author Philippe Elie
  */
 
+#define _GNU_SOURCE
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,8 +24,13 @@ int odb_insert(samples_odb_t * hash, odb_key_t key, odb_value_t value)
 
 	index = hash->hash_base[odb_do_hash(hash, key)];
 	while (index) {
-		if (index <= 0 || index >= hash->descr->current_size)
+		if (index <= 0 || index >= hash->descr->current_size) {
+			char * err_msg;
+			asprintf(&err_msg, "odb_insert() invalid index %u\n",
+				 index);
+			odb_set_error(hash, err_msg);
 			return EXIT_FAILURE;
+		}
 		node = &hash->node_base[index];
 		if (node->key == key) {
 			if (node->value + value >= node->value) {
