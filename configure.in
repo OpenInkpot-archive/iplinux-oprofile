@@ -197,7 +197,6 @@ CFLAGS=$SAVE_CFLAGS
  
 AC_SUBST(EXTRA_CFLAGS)
 
-
 dnl --- user space configuration ---
 
 # we are weak, so do not support separate build dir
@@ -306,6 +305,15 @@ AM_CONDITIONAL(have_qt, test -n "$QT_LIB")
 
 # inihibited for now
 AM_CONDITIONAL(build_oprof_report, false)
+
+CFLAGS="$CFLAGS -W -Wall"
+CXXFLAGS="$CXXFLAGS -W -Wall"
+
+# enable -Werror for non-release versions.
+if echo "$VERSION" | grep cvs; then
+    CFLAGS="$CFLAGS -Werror"
+    CXXFLAGS="$CXXFLAGS -Werror"
+fi
  
 AC_OUTPUT(Makefile \
 	libutil/Makefile \
