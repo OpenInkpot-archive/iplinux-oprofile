@@ -35,9 +35,19 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
   --global-percent is not handled according to pp_interface
   --accumulated
   --sort= (?)
+ o pp/opreport --merge lib /lib/i686/libc-2.3.2.so doesn't do anything when using
+   separate
+ o if not --include-dependent, don't output e.g. :
+      208   0.1295 /bin/more
+              208 100.0000  /bin/more
  
  o opreport /usr/bin/whatever should imply -l (like oprofpp back-compat) but NOT
    if opreport <some spec> and it just *happens* to match one image.
+
+ <movement> [moz@lambent oprofile-pp]$ pp/opreport --merge=lib -n | more
+<movement>    194561  40.1204 /boot/2.5.66/vmlinux
+<movement>     62102  12.8060 /boot/2.5.66/vmlinux
+<phe> ok I see, the first is the merged vmlinux from all application the second in the default vmlinux (where we put samples when we have no ownong application)
 
  o fix John movement on 2.5: odb_insert failure (and message error corrupted ?)
 
