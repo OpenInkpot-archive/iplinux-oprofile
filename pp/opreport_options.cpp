@@ -87,7 +87,7 @@ popt::option options_array[] = {
 		     "percentage field show accumulated count"),
 	popt::option(options::reverse_sort, "reverse-sort", 'r',
 		     "use reverse sort"),
-	popt::option(options::global_percent, "global-percent", 'p',
+	popt::option(options::global_percent, "global-percent", '\0',
 		     "percentage are not relative to symbol count or image "
 		     "count but total sample count"),
 };

@@ -67,7 +67,7 @@ popt::option options_array[] = {
 		     "include these comma separated symbols", "symbols"),
 	popt::option(exclude_symbols, "exclude-symbol", 'e',
 		     "exclude these comma separated symbols", "symbols"),
-	popt::option(options::objdump_params, "objdump-params", 'p',
+	popt::option(options::objdump_params, "objdump-params", '\0',
 		     "additionnal params to pass to objdump", "parameters"),
 	popt::option(options::exclude_dependent, "exclude-dependent", 'x',
 		     "exclude libs, kernel, and module samples for applications"),
