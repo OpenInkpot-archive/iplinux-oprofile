@@ -167,17 +167,15 @@ odb_node_t * odb_get_iterator(samples_odb_t const * hash, odb_node_nr_t * nr);
 
 static __inline unsigned int odb_do_hash(samples_odb_t const * hash, odb_key_t value)
 {
-	/* FIXME FIXME: fix hash for 64 bit keys */
 	/* FIXME: better hash for eip value, needs to instrument code
 	 * and do a lot of tests ... */
 	/* trying to combine high order bits his a no-op: inside a binary image
 	 * high order bits don't vary a lot, hash table start with 7 bits mask
-	 * so this hash coding use 15 low order bits of eip, then add one hash
-	 * bits at each grow. Hash table is stored in files avoiding to rebuild
-	 * ing them at profiling re-start so on changing do_hash() change the
-	 * file format
+	 * so this hash coding use bits 3-9 of eip. Hash table is stored in
+	 * files avoiding to rebuilding them at profiling re-start so
+	 * on changing do_hash() change the file format!
 	 */
-	return ((value << 0) ^ (value >> 8)) & hash->hash_mask;
+	return (((value >> 32) ^ (value)) >> 3) & hash->hash_mask;
 }
 
 #ifdef __cplusplus
