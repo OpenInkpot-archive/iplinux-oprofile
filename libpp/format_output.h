@@ -57,7 +57,8 @@ public:
 	void show_details();
 	/// set the output_header boolean
 	void show_header();
-
+	/// set the short_filename boolean
+	void show_short_filename();
 private:
 
 	/// data passed for output
@@ -79,11 +80,8 @@ private:
 	std::string format_vma(field_datum const &);
 	std::string format_symb_name(field_datum const &);
 	std::string format_image_name(field_datum const &);
-	std::string format_short_image_name(field_datum const &);
 	std::string format_app_name(field_datum const &);
-	std::string format_short_app_name(field_datum const &);
 	std::string format_linenr_info(field_datum const &);
-	std::string format_short_linenr_info(field_datum const &);
 	std::string format_nr_samples(field_datum const &);
 	std::string format_nr_cumulated_samples(field_datum const &);
 	std::string format_percent(field_datum const &);
@@ -151,6 +149,8 @@ private:
 	bool need_details;
 	/// true if we need to show header before the beforethe first output
 	bool need_header;
+	/// true if we use basename(filename) in output rather filename
+	bool short_filename;
 };
 
 }; // namespace format_output 

@@ -42,11 +42,8 @@ static output_option const output_options[] = {
 	{ 'Q', osf_percent_cumulated_details, "nr cumulated percent samples details" },
 	{ 'n', osf_symb_name, "symbol name" },
 	{ 'l', osf_linenr_info, "source file name and line nr" },
-	{ 'L', osf_short_linenr_info, "base name of source file and line nr" },
 	{ 'i', osf_image_name, "image name" },
-	{ 'I', osf_short_image_name, "base name of image name" },
 	{ 'e', osf_app_name, "owning application name" },
-	{ 'E', osf_short_app_name, "base name of owning application" }
 };
 
 size_t const nr_output_option = sizeof(output_options) / sizeof(output_options[0]);
@@ -100,7 +97,8 @@ formatter::formatter(profile_container const & profile_)
 	first_output(true),
 	vma_64(false),
 	need_details(false),
-	need_header(false)
+	need_header(false),
+	short_filename(false)
 {
 	total_count = profile.samples_count();
 	total_count_details = profile.samples_count();
@@ -115,15 +113,12 @@ formatter::formatter(profile_container const & profile_)
 	format_map[osf_percent_cumulated] = field_description(10, "cum. %", &formatter::format_cumulated_percent);
 	format_map[osf_symb_name] = field_description(24, "symbol name", &formatter::format_symb_name);
 	format_map[osf_linenr_info] = field_description(28, "linenr info", &formatter::format_linenr_info);
-	format_map[osf_short_linenr_info] = field_description(20, "linenr info", &formatter::format_short_linenr_info);
 	format_map[osf_image_name] = field_description(24, "image name", &formatter::format_image_name);
-	format_map[osf_short_image_name] = field_description(16, "image name", &formatter::format_short_image_name);
 	format_map[osf_percent] = field_description(12, "%", &formatter::format_percent);
 	format_map[osf_percent_cumulated] = field_description(10, "cum %", &formatter::format_cumulated_percent);
 	format_map[osf_percent_details] = field_description(12, "%", &formatter::format_percent_details);
 	format_map[osf_percent_cumulated_details] =field_description(10, "cum. %", &formatter::format_cumulated_percent_details);
 	format_map[osf_app_name] = field_description(24, "app name", &formatter::format_app_name);
-	format_map[osf_short_app_name] = field_description(16, "app name", &formatter::format_short_app_name);
 }
 
  
@@ -171,6 +166,11 @@ void formatter::show_details()
 void formatter::show_header()
 {
 	need_header = true;
+}
+
+void formatter::show_short_filename()
+{
+	short_filename = true;
 }
  
 
@@ -321,50 +321,29 @@ string formatter::format_symb_name(field_datum const & f)
  
 string formatter::format_image_name(field_datum const & f)
 {
-	return f.sample.file_loc.image_name;
+	return short_filename
+		? basename(f.sample.file_loc.image_name)
+		: f.sample.file_loc.image_name;
 }
 
  
-string formatter::format_short_image_name(field_datum const & f)
-{
-	return basename(f.sample.file_loc.image_name);
-}
-
-
 string formatter::format_app_name(field_datum const & f)
 {
-	return f.sample.file_loc.app_name;
+	return short_filename
+		? basename(f.sample.file_loc.app_name)
+		: f.sample.file_loc.app_name;
 }
 
  
-string formatter::format_short_app_name(field_datum const & f)
-{
-	return basename(f.sample.file_loc.app_name);
-}
- 
-
 string formatter::format_linenr_info(field_datum const & f)
 {
 	ostringstream out;
 
 	if (f.sample.file_loc.filename.length()) {
-		out << f.sample.file_loc.filename << ":"
-		    << f.sample.file_loc.linenr;
-	} else {
-		out << "(no location information)";
-	}
-
-	return out.str();
-}
-
- 
-string formatter::format_short_linenr_info(field_datum const & f)
-{
-	ostringstream out;
-
-	if (f.sample.file_loc.filename.length()) {
-		out << basename(f.sample.file_loc.filename)
-		    << ":" << f.sample.file_loc.linenr;
+		string filename = short_filename
+			? basename(f.sample.file_loc.filename)
+			: f.sample.file_loc.filename;
+		out << filename << ":" << f.sample.file_loc.linenr;
 	} else {
 		out << "(no location information)";
 	}

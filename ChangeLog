@@ -1,5 +1,15 @@
 2003-04-27  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* libpp/outsymbflag.h: remove osf_short_xxx variant
+	* libpp/format_output.h:
+	* libpp/format_output.cpp: replace osf_short_xxx by a boolean
+	* libpp/profile_container.cpp: update according
+
+	* pp/opreport_options.h: export short_filename options
+	* pp/opreport.cpp: use short_filename
+
+2003-04-27  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libpp/symbol_functors.h: add less_symbol predicate
 	* libpp/symbol_functors.cpp: new file, less_symbol implementation
 	* libpp/Makefile.am: symbol_functors.cpp

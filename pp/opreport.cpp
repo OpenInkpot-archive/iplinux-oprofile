@@ -115,9 +115,18 @@ void output_counter(double total_count, size_t count)
 {
 	// FIXME: left or right, op_time was using left
 	// left io manipulator doesn't exist in 2.95
+//	cout.setf(ios::left, ios::adjustfield);
 	cout << setw(9) << count << " ";
 	double ratio = op_ratio(count, total_count);
 	cout << format_double(ratio * 100, 3, 4) << " ";
+}
+
+
+string get_filename(string const & filename)
+{
+	return options::short_filename
+		? basename(filename)
+		: filename;
 }
 
 
@@ -133,9 +142,9 @@ void output_sub_count(files_count const & files, double total_count)
 
 		split_sample_filename sp = split_sample_file(count.filename);
 		if (sp.lib_image.empty())
-			cout << " " << sp.image;
+			cout << " " << get_filename(sp.image);
 		else
-			cout << " " << sp.lib_image;
+			cout << " " << get_filename(sp.lib_image);
 		cout << endl;
 	}
 }
@@ -161,14 +170,14 @@ void output_files_count(partition_files const & files)
 	for (it = set_file_count.begin(); it != set_file_count.end(); ++it) {
 		output_counter(total_count, it->count);
 		if (!options::merge_by.merge_lib) {
-			cout << it->image_name;
+			cout << get_filename(it->image_name);
 		} else {
 			split_sample_filename sp =
 					split_sample_file(it->sample_filename);
 			if (sp.lib_image.empty())
-				cout << it->image_name;
+				cout << get_filename(it->image_name);
 			else
-				cout << sp.lib_image;
+				cout << get_filename(sp.lib_image);
 		}
 		cout << endl;
 		if (!options::hide_dependent && !options::merge_by.merge_lib) {
@@ -182,10 +191,10 @@ void output_symbols_count(partition_files const & files)
 {
 	// FIXME: we probably don't want to show application name if
 	// we report samples about only one application
-	outsymbflag flags = outsymbflag(osf_vma | osf_nr_samples | osf_percent | osf_symb_name | osf_short_app_name);
+	outsymbflag flags = outsymbflag(osf_vma | osf_nr_samples | osf_percent | osf_symb_name | osf_app_name);
 
 	if (options::include_dependent && !options::merge_by.merge_lib)
-		flags = outsymbflag(flags | osf_short_image_name);
+		flags = outsymbflag(flags | osf_image_name);
 
 	if (options::debug_info)
 		flags = outsymbflag(flags | osf_linenr_info);
@@ -227,10 +236,13 @@ void output_symbols_count(partition_files const & files)
 	bool need_vma64 = vma64_p(symbols.begin(), symbols.end());
 
 	format_output::formatter out(samples);
-	if (options::details) {
+
+	if (options::details)
 		out.show_details();
-	}
+	if (options::short_filename)
+		out.show_short_filename();
 	out.add_format(flags);
+
 	out.output(cout, symbols, options::reverse_sort, need_vma64);
 }
 

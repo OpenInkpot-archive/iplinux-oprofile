@@ -69,7 +69,7 @@ add(profile_t const & profile, op_bfd const & abfd,
     string const & app_name, string const & symbol_name)
 {
 	string const image_name = abfd.get_filename();
-	bool const need_linenr = flags & (osf_linenr_info | osf_short_linenr_info);
+	bool const need_linenr = flags & osf_linenr_info;
 
 	for (symbol_index_t i = 0 ; i < abfd.syms.size(); ++i) {
 
@@ -126,7 +126,7 @@ void profile_container::add_samples(profile_t const & profile,
 				      string const & app_name,
 				    symbol_entry const * symbol)
 {
-	bool const need_linenr = (flags & (osf_linenr_info | osf_short_linenr_info));
+	bool const need_linenr = flags & osf_linenr_info;
 
 	for (u32 pos = start; pos < end ; ++pos) {
 		string filename;

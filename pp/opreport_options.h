@@ -29,6 +29,7 @@ namespace options {
 	extern bool include_dependent;
 	extern merge_option merge_by;
 	extern bool global_percent;
+	extern bool short_filename;
 	extern std::vector<std::string> exclude_symbols;
 	extern std::vector<std::string> ignore_symbols;
 	extern std::vector<std::string> image_path;

@@ -30,23 +30,19 @@ enum outsymbflag {
 
 	osf_symb_name = 1 << 5,
 	osf_linenr_info = 1 << 6,
-	osf_short_linenr_info = 1 << 7,// w/o path name
-	osf_image_name = 1 << 8,
-	osf_short_image_name = 1 << 9, // w/o path name
+	osf_image_name = 1 << 7,
 
 	/// don't treat percent for details as relative to symbol but relative
 	/// to the total nr of samples
-	osf_percent_details = 1 << 10,
-	osf_percent_cumulated_details = 1 << 11,
+	osf_percent_details = 1 << 8,
+	osf_percent_cumulated_details = 1 << 9,
 
-	osf_app_name = 1 << 12,		// owning application
-	osf_short_app_name = 1 << 13,	// basename of owning application
+	osf_app_name = 1 << 10,		// owning application
 
 	/// These fields are considered immutable when showing details for one
 	/// symbol, we show them only when outputting the symbol itself but
 	/// we avoid to display them during details output
-	osf_immutable_field = osf_symb_name + osf_image_name +
-		osf_short_image_name + osf_app_name + osf_short_app_name
+	osf_immutable_field = osf_symb_name + osf_image_name + osf_app_name
 };
 
 #endif // OUTSYMBFLAG_H
