@@ -1,5 +1,9 @@
 2002-04-20  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* db-insert.c: check for count overflow
+
+2002-04-20  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* db-manage.c: properly handle already existing db file
 	* db.h: extern "C" wrapper
 

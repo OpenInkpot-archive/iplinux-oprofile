@@ -421,7 +421,11 @@ void opd_put_image_sample(struct opd_image *image, u32 offset, u16 count)
 		}
 	}
 
-	db_insert(&sample_file->tree, offset, count);
+	/* FIXME: this is no longer required ? */
+	if (image->kernel)
+		offset += OPD_KERNEL_OFFSET;
+
+	db_insert(&sample_file->tree, offset, opd_get_count(count));
 }
 
 

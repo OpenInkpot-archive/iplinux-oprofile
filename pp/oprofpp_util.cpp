@@ -341,6 +341,8 @@ opp_bfd::opp_bfd(const opd_header* header, const std::string & filename)
 	}
 
 	nr_samples = opd_get_fsize(filename.c_str(), 0);
+	if (header->is_kernel)
+		nr_samples += OPD_KERNEL_OFFSET;
 
 	open_bfd_image(filename, header->is_kernel);
 
@@ -509,7 +511,7 @@ u32 opp_bfd::sym_offset(uint sym_index, u32 num) const
 		fprintf(stderr,"oprofpp: less than zero offset ? \n");
 		exit(EXIT_FAILURE); 
 	}
-	 
+
 	/* adjust for kernel images */
 	num -= sect_offset;
 	/* take off section offset */

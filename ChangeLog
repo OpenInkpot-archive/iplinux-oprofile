@@ -1,5 +1,10 @@
 2002-04-20  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* dae/opd_proc.c: OPD_KERNEL_OFFSET thing
+	* pp/oprofpp_util.cpp:
+
+2002-04-20  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* dae/opd_proc.c: minor warning suppression
 
 	* pp/Makefile.in:
