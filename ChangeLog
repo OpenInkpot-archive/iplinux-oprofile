@@ -1,3 +1,36 @@
+2003-06-15  John Levon  <levon@movementarian.org>
+
+	* README: fix autogen.sh line
+
+2003-06-15  John Levon  <levon@movementarian.org>
+
+	* daemon/opd_image.c: 64 bit fixes
+
+2003-06-15  John Levon  <levon@movementarian.org>
+
+	* utils/op_help.c: c89 fix
+
+2003-06-15  John Levon  <levon@movementarian.org>
+
+	* daemon/opd_image.c: c89 fix
+
+2003-06-15  John Levon  <levon@movementarian.org>
+
+	* doc/oprofile.xml: document --event
+
+	* utils/opcontrol:
+	* utils/op_help.c: allow unit mask, kernel, user to be
+	optional. Verify not too many events are passed.
+
+2003-06-15  John Levon  <levon@movementarian.org>
+
+	* libop/op_cpu_type.c: fix nr_counters cpu type check
+
+	* utils/op_help: implement --check_events, event validation
+	and counter allocation
+
+	* utils/opcontrol: use the above, implement --event=default
+
 2003-06-14  John Levon  <levon@movementarian.org>
 
 	* daemon/opd_image.c: fix a stupid error in my previous TGID patch
@@ -35,7 +68,7 @@
 	* libregex/op_regex.cpp:
 	* libpp/profile.cpp: compile fix, tree was broken by my previous patch
 
-2003-06-11  Jason Yeh  <levon@movementarian.org>
+2003-06-11  Jason Yeh  <jason.yeh@amd.com>
 
 	* events/i386.athlon.events: add CPU_CLK_UNHALTED
 
@@ -225,6 +258,7 @@
 	* libop/op_config_24.h: ... here
 
 	* libop/op_hw_config.h: remove unused OP_COUNT_MAX
+
 2003-06-03  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libpp/op_header.cpp:
@@ -1180,7 +1214,7 @@
 
 	* pp/oprofpp.cpp pp/oprofpp_options.cpp pp/oprofpp_options.h:
 	* pp/op_time.cpp pp/op_time_options.cpp pp/op_time_options.h:
-	* pp/op_to_source.cpp pp/op_to_source_options.cpp
+	* pp/op_to_source.cpp pp/op_to_source_options.cpp:
 	* pp/op_to_source_options.h pp/op_merge.cpp: removed files
 
 	* pp/Makefile.am: update
