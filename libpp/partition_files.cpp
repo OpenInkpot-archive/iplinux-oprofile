@@ -86,9 +86,6 @@ bool merge_compare::operator()(string const & lhs_, string const & rhs_) const
 		if (lhs.lib_image.empty() && lhs.image != rhs.image)
 			return lhs.image < rhs.image;
 	} else {
-		if (lhs.lib_image != rhs.lib_image)
-			return lhs.lib_image < rhs.lib_image;
-
 		if (lhs.image != rhs.image)
 			return lhs.image < rhs.image;
 	}
