@@ -58,7 +58,6 @@ void get_vma_range(bfd_vma & min, bfd_vma & max,
 {
 	min = bfd_vma(-1);
 	max = 0;
-	size_t cum = 0;
 
 	sample_container::samples_iterator it  = samples.begin();
 	sample_container::samples_iterator end = samples.end();
@@ -67,11 +66,7 @@ void get_vma_range(bfd_vma & min, bfd_vma & max,
 			min = it->second.vma;
 		if (it->second.vma > max)
 			max = it->second.vma;
-		cout << hex << it->second.vma << dec << " "
-		     << it->second.count << endl;
-		cum += it->second.count;
 	}
-	cout << "count: " << cum << endl;
 }
 
 /**
