@@ -12,6 +12,7 @@
 #include <iostream>
 #include <cstdlib>
 
+#include "odb_hash.h"
 #include "op_cpu_type.h"
 #include "op_print_event.h"
 #include "op_file.h"
@@ -85,4 +86,25 @@ void output_header(ostream & out, opd_header const & header)
 
 	op_print_event(out, cpu, header.ctr_event,
 		       header.ctr_um, header.ctr_count);
+}
+
+opd_header read_header(string const & sample_filename)
+{
+	samples_odb_t samples_db;
+	char * err_msg;
+
+	int rc = odb_open(&samples_db, sample_filename.c_str(), ODB_RDONLY,
+		sizeof(struct opd_header), &err_msg);
+
+	if (rc != EXIT_SUCCESS) {
+		cerr << err_msg << endl;
+		free(err_msg);
+		exit(EXIT_FAILURE);
+	}
+
+	opd_header head = *static_cast<opd_header *>(samples_db.base_memory);
+
+	odb_close(&samples_db);
+
+	return head;
 }

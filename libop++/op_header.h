@@ -40,4 +40,12 @@ void check_mtime(std::string const & file, opd_header const & header);
  */
 void output_header(std::ostream & out, opd_header const & header);
 
+/**
+ * @param sample_filename  the sample to open
+ *
+ * Return the header of this sample file. Only the magic number is checked
+ * the version number is not checked. All error are fatal
+ */
+opd_header read_header(std::string const & sample_filename);
+
 #endif // OP_HEADER_H

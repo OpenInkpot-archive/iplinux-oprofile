@@ -93,6 +93,10 @@ vma      samples  cum. samples  %           cum. %     symbol name             i
   of add_sample_filename() (we don't want to do that for all the profiles at once)
   we have a smaller constructor, and we still delay the actual processing of the
   data until later. Comments phil ?
+  We can do that but I think it's better to sperate the error checking.
+  It will allow more freedom on how to refactorize partition_files and
+  image_set
+  
 
  o #pp/opreport -l -p /lib/modules/2.5.69/kernel/ oprofile.ko
    No samples files found: profile specification too strict ?
@@ -103,6 +107,11 @@ vma      samples  cum. samples  %           cum. %     symbol name             i
    ...
 
    It would be nice to allow at least the first alternate form.
+
+ o test with 2.95 if cout.rdbuf(os.rdbuf()); work even when there is non
+  flushed data in cout buffer. It's also not clear if at exit() we have not
+  a problem (who is the owner of the buffer and in what order of and cout will
+  be destroyed ?)
 
  o fix John movement on 2.5: odb_insert failure (and message error corrupted ?)
    - haven't been able to reproduce yet, I just get too many files open instead ;)

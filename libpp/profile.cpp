@@ -83,7 +83,7 @@ void profile_t::add_sample_file(string const & filename, u32 offset)
 		exit(EXIT_FAILURE);
 	}
 
-	// FIXME: this code not used currently - phe will need it
+	// if we already read a sample file header pointer is non null
 	if (file_header.get()) {
 		op_check_header(head, *file_header);
 	}

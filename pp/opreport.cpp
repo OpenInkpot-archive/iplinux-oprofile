@@ -47,10 +47,9 @@ void output_header(partition_files const & files)
 {
 	if (files.nr_set()) {
 		partition_files::filename_set const & file_set = files.set(0);
-		// See FIXME in opannotate.cpp  for similar code
-		profile_t profile;
-		profile.add_sample_file(file_set.begin()->sample_filename, 0);
-		output_header(cout, profile.get_header());
+		opd_header header =
+			read_header(file_set.begin()->sample_filename);
+		output_header(cout, header);
 	}
 }
 
