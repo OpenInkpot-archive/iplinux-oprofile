@@ -39,8 +39,7 @@ namespace options {
 	extern double threshold;
 	extern bool show_header;
 	extern bool accumulated;
-	// I hate C++
-	std::ostream & cout();
+	extern std::ostream cout;
 }
 
 /**

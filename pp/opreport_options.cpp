@@ -48,6 +48,7 @@ namespace options {
 	bool accumulated;
 	bool reverse_sort;
 	bool global_percent;
+	std::ostream cout(::cout.rdbuf());
 }
 
 
@@ -59,24 +60,6 @@ vector<string> mergespec;
 vector<string> sort_by;
 vector<string> exclude_symbols;
 vector<string> include_symbols;
-
-}
-
-
-std::ostream & options::cout()
-{
-	if (!outfile.empty()) {
-		static ofstream stream(outfile.c_str());
-		if (!stream) {
-			cerr << "Could not open output file \""
-			     << outfile << "\" for writing." << endl;
-			exit(EXIT_FAILURE);
-		}
-		return stream;
-	}
-	return std::cout;
-}
-
 
 popt::option options_array[] = {
 	popt::option(options::demangle, "demangle", 'd',
@@ -209,6 +192,25 @@ void handle_merge_option()
 }
 
 
+// FIXME: separate file if reused
+void handle_output_file()
+{
+	if (outfile.empty())
+		return;
+
+	static ofstream os(outfile.c_str());
+	if (!os) {
+		cerr << "Couldn't open \"" << outfile
+		     << "\" for writing." << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	options::cout.rdbuf(os.rdbuf());
+}
+
+} // namespace anon
+
+
 void handle_options(vector<string> const & non_options)
 {
 	using namespace options;
@@ -219,6 +221,7 @@ void handle_options(vector<string> const & non_options)
 	handle_threshold();
 	handle_sort_option();
 	handle_merge_option();
+	handle_output_file();
 
 	options::symbol_filter = string_filter(include_symbols, exclude_symbols);
 
