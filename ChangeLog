@@ -1,3 +1,9 @@
+2003-04-24  John Levon  <levon@movementarian.org>
+
+	* libpp/symbol_container.h:
+	* libpp/symbol_container.cpp: remove unused operator[].
+	Add some docs. Some small cleanups
+
 2003-04-24  Dave Jones <davej@codemonkey.org.uk>
 
 	* events/x86-64.hammer.events:

@@ -26,12 +26,6 @@ symbol_index_t symbol_container::size() const
 }
 
 
-symbol_entry const & symbol_container::operator[](symbol_index_t index) const
-{
-	return symbols[index];
-}
-
-
 void symbol_container::push_back(symbol_entry const & symbol)
 {
 	symbols.push_back(symbol);
@@ -57,27 +51,31 @@ symbol_container::find(string filename, size_t linenr) const
 }
 
 
-vector<symbol_entry const *>
-symbol_container::find(string name) const
+vector<symbol_entry const *> symbol_container::find(string name) const
 {
 	vector<symbol_entry const *> v;
 
-	vector<symbol_entry>::const_iterator it;
-	for (it = symbols.begin() ; it != symbols.end() ; ++it) {
-		if (it->name == name)
-			v.push_back(&*it);
+	symbols_t::const_iterator cit = symbols.begin();
+	symbols_t::const_iterator end = symbols.end();
+
+	for (; cit != end; ++cit) {
+		if (cit->name == name)
+			v.push_back(&*cit);
 	}
 
 	return v;
 }
 
 
-void  symbol_container::build_by_file_loc() const
+void symbol_container::build_by_file_loc() const
 {
-	if (symbols.size() && symbol_entry_by_file_loc.empty()) {
-		for (symbol_index_t i = 0 ; i < symbols.size() ; ++i)
-			symbol_entry_by_file_loc.insert(&symbols[i]);
-	}
+	if (!symbol_entry_by_file_loc.empty())
+		return;
+
+	symbols_t::const_iterator cit = symbols.begin();
+	symbols_t::const_iterator end = symbols.end();
+	for (; cit != end; ++cit)
+		symbol_entry_by_file_loc.insert(&*cit);
 }
 
 
@@ -101,8 +99,10 @@ symbol_entry const * symbol_container::find_by_vma(bfd_vma vma) const
 void symbol_container::get_symbols_by_count(
 	profile_container_t::symbol_collection & v) const
 {
-	for (symbol_index_t i = 0 ; i < symbols.size() ; ++i)
-		v.push_back(&symbols[i]);
+	symbols_t::const_iterator cit = symbols.begin();
+	symbols_t::const_iterator end = symbols.end();
+	for (; cit != end; ++cit)
+		v.push_back(&*cit);
 
 	stable_sort(v.begin(), v.end(), less_symbol_entry_by_samples_nr());
 }

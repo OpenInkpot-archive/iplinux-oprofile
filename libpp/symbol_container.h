@@ -18,28 +18,47 @@
 
 #include "profile_container.h"
 
+/**
+ * An arbitrary container of symbols. Supports lookup
+ * by name, by VMA, and by file location.
+ *
+ * Lookup by name or by VMA is O(n). Lookup by file location
+ * is O(log(n)).
+ */
 class symbol_container {
 public:
+	/// return the number of symbols stored
 	symbol_index_t size() const;
 
-	symbol_entry const & operator[](symbol_index_t index) const;
-
+	/**
+	 * Add a symbol. Can only be done before any file-location
+	 * based lookups, since the two lookup methods are not
+	 * synchronised.
+	 */
 	void push_back(symbol_entry const &);
 
+	/// find the symbol at the given filename and line number, if any
 	symbol_entry const * find(std::string filename, size_t linenr) const;
 
+	/// return all symbols of the given name
 	std::vector<symbol_entry const *> find(std::string name) const;
 
+	/// find the symbol with the given VMA if any
 	symbol_entry const * find_by_vma(bfd_vma vma) const;
 
-	void get_symbols_by_count(profile_container_t::symbol_collection& v) const;
+	/// populate the given container with all the symbols, sorted by count
+	void get_symbols_by_count(profile_container_t::symbol_collection & v) const;
 
 private:
+	/// build the symbol by file-location cache
 	void build_by_file_loc() const;
+
+	/// container type
+	typedef std::vector<symbol_entry> symbols_t;
 
 	/// the main container of symbols. multiple symbols with the same
 	/// name are allowed.
-	std::vector<symbol_entry> symbols;
+	symbols_t symbols;
 
 	/// different named symbol at same file location are allowed e.g.
 	/// template instanciation
