@@ -1,5 +1,12 @@
 2003-05-06  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* pp/opgprof.cpp: infamous typo
+
+	* pp/opannotate.cpp: output sample file header
+
+
+2003-05-06  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libpop++/op_mangling.h:
 	* libpop++/op_mangling.cpp: removed file
 	* libop++/op_header.h:

@@ -14,7 +14,11 @@
 #include <algorithm>
 #include <iomanip>
 #include <fstream>
+#include <utility>
 
+#include "op_header.h"
+#include "profile.h"
+#include "op_sample_file.h"
 #include "cverb.h"
 #include "string_manip.h"
 #include "demangle_symbol.h"
@@ -31,6 +35,9 @@ using namespace options;
 namespace {
 
 scoped_ptr<profile_container> samples;
+
+// needed to display samples file information
+scoped_ptr<opd_header> header;
 
 /// how op_to_source was invoked
 string cmdline;
@@ -75,6 +82,15 @@ image_set populate_samples(profile_container & samples,
 	}
 
 	return images;
+}
+
+void save_sample_file_header(partition_files const & files)
+{
+	if (files.nr_set()) {
+		partition_files::filename_set const & file_set = files.set(0);
+		profile_t profile(file_set.begin()->sample_filename);
+		header.reset(new opd_header(profile.get_header()));
+	}
 }
 
 
@@ -148,19 +164,17 @@ void output_info(ostream & out)
 		}
 	}
 
-	// FIXME: we lack this information, re-add it
-#if 0
-	out << in_comment << endl;
-	out << in_comment << "Cpu type: "
-	    << op_get_cpu_type_str(cpu_type) << endl;
-	out << in_comment << "Cpu speed (MHz estimation) : "
-	    << cpu_speed << endl;
 	out << in_comment << endl;
 
-	for (size_t i = 0 ; i < samples->get_nr_counters() ; ++i) {
-		counter_info[i].print(out, cpu_type, i);
+	stringstream stream;
+
+	output_header(stream, *header);
+	stream.seekp(0);
+
+	string line;
+	while (getline(stream, line)) {
+		out << in_comment << line << endl;
 	}
-#endif
 
 	out << end_comment << endl;
 }
@@ -618,6 +632,8 @@ int opannotate(vector<string> const & non_options)
 	handle_options(non_options);
 
 	samples.reset(new profile_container(false, true, true));
+
+	save_sample_file_header(*sample_file_partition);
 
 	image_set images = populate_samples(*samples, *sample_file_partition,
 					    false);
