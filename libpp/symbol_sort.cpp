@@ -55,7 +55,7 @@ int compare_by(sort_options::sort_order order,
 				symbol_names.demangle(rhs->name));
 
 		case sort_options::image:
-			return debug_compare(lhs->image_name, rhs->image_name);
+			return image_compare(lhs->image_name, rhs->image_name);
 
 		case sort_options::vma:
 			if (lhs->sample.vma < rhs->sample.vma)

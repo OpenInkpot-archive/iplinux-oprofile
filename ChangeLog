@@ -1,5 +1,9 @@
 2003-05-16  John Levon  <levon@movementarian.org>
 
+	* libpp/symbol_sort.cpp: fix image-sorting
+
+2003-05-16  John Levon  <levon@movementarian.org>
+
 	* libpp/name_storage.h:
 	* libpp/name_storage.cpp: make ID be per-container
 
