@@ -193,23 +193,28 @@ output_summaries(vector<group_summary> const & summaries, double total_count)
 	for (; it != end; ++it) {
 		output_counter(total_count, it->count);
 
-		if (!options::merge_by.merge_lib) {
-			cout << get_filename(it->image_name);
-		} else {
-			if (it->lib_image.empty())
-				cout << get_filename(it->image_name);
-			else
-				cout << get_filename(it->lib_image);
-		}
+		string image = it->image_name;
+		if (options::merge_by.merge_lib && !it->lib_image.empty())
+			image = it->lib_image;
 
-		cout << endl;
+		cout << get_filename(image) << endl;
 
-		bool const showdep = options::include_dependent
-			&& !options::hide_dependent;
+		bool hidedep = !options::include_dependent;
+		hidedep |= options::hide_dependent;
+		hidedep |= options::merge_by.merge_lib;
 
-		if (showdep && !options::merge_by.merge_lib) {
+		summary const & first = it->files[0];
+		string const & dep_image = first.lib_image.empty()
+			? first.image_name : first.lib_image;
+
+		// If we're only going to show the main image again,
+		// and it's the same image (can be different when
+		// it's a library and there's no samples for the main
+		// application image), then don't show it
+		hidedep |= it->files.size() == 1 && dep_image == image;
+
+		if (!hidedep)
 			output_dep_summaries(*it, total_count);
-		}
 	}
 }
 

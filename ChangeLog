@@ -1,5 +1,11 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* pp/opreport.cpp: add some logic to not output
+	duplicate lines for dep images when we've already
+	shown all the possible details in the main image summary
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* pp/common_option.h: use std::
 
 2003-05-11  Philippe Elie  <phil.el@wanadoo.fr>
