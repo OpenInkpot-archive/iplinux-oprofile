@@ -33,7 +33,6 @@ namespace options {
 	bool symbols;
 	bool debug_info;
 	bool details;
-	double threshold = 0.0;
 	bool include_dependent;
 	bool hide_dependent;
 	bool sort_by_vma;
@@ -53,7 +52,6 @@ namespace options {
 
 namespace {
 
-string threshold;
 string outfile;
 vector<string> mergespec;
 vector<string> sort_by;
@@ -76,9 +74,6 @@ popt::option options_array[] = {
 		     "add source file and line number to output"),
 	popt::option(options::details, "details", 'a',
 		     "output detailed samples for each symbol"),
-	popt::option(threshold, "threshold", 't',
-		     "threshold of minimum percentage before a symbol is printed",
-		     "percent"),
 	popt::option(options::include_dependent, "include-dependent", 'n',
 		     "include libs, modules etc."),
 	popt::option(options::hide_dependent, "hide-dependent", 'h',
@@ -192,9 +187,6 @@ void handle_options(vector<string> const & non_options)
 
 	if (options::details)
 		options::symbols = true;
-
-	if (!::threshold.empty())
-		options::threshold = handle_threshold(::threshold);
 
 	handle_sort_option();
 	handle_merge_option();

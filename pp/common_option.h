@@ -17,6 +17,7 @@
 namespace options {
 	extern bool verbose;
 	extern extra_images extra_found_images;
+	extern double threshold;
 };
 
 /**
@@ -34,12 +35,5 @@ typedef int (*pp_fct_run_t)(std::vector<std::string> const & non_options);
  * common options and providing the necessary try catch clause
  */
 int run_pp_tool(int argc, char const * argv[], pp_fct_run_t fct);
-
-/**
- * @param threshold  a percent threshold as string
- *
- * convert threshold to a double and return it. All error are fatal
- */
-double handle_threshold(std::string threshold);
 
 #endif /* !COMMON_OPTION_H */

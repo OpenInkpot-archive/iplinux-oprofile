@@ -162,6 +162,8 @@ void output_gprof(profile_container const & samples,
 			continue;
 		}
 
+		// FIXME: handle --threshold
+
 		if (hist[pos] + count > (u16)-1) {
 			hist[pos] = (u16)-1;
 			cerr <<	"Warning: capping sample count by "

@@ -36,17 +36,15 @@ namespace options {
 	bool assembly;
 	vector<string> objdump_params;
 	bool include_dependent;
-	double threshold;
 }
 
 
 namespace {
 
-	string threshold;
-	string include_symbols;
-	string exclude_symbols;
-	string include_file;
-	string exclude_file;
+string include_symbols;
+string exclude_symbols;
+string include_file;
+string exclude_file;
 
 popt::option options_array[] = {
 	popt::option(options::demangle, "demangle", 'd',
@@ -75,9 +73,6 @@ popt::option options_array[] = {
 		     "include libs, modules etc."),
 	popt::option(options::source, "source", 's', "output source"),
 	popt::option(options::assembly, "assembly", 'a', "output assembly"),
-	popt::option(threshold, "threshold", 't',
-		     "threshold of minimum value before a symbol is printed",
-		     "count or percent"),
 };
 
 }  // anonymous namespace
@@ -97,9 +92,6 @@ void handle_options(vector<string> const & non_options)
 		     << "output" << endl;
 		exit(EXIT_FAILURE);
 	}
-
-	if (!::threshold.empty())
-		options::threshold = handle_threshold(::threshold);
 
 	options::symbol_filter = string_filter(include_symbols, exclude_symbols);
 

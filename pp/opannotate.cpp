@@ -412,7 +412,7 @@ void output_objdump_asm(vector<symbol_entry const *> const & output_symbols,
 
 void output_asm(string const & app_name)
 {
-	// select the subset of symbols which statisfy the user requests
+	// select the subset of symbols which satisfy the user requests
 	vector<symbol_entry const *> output_symbols =
 		samples->select_symbols(app_name, options::threshold);
 

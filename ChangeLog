@@ -1,5 +1,13 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* pp/common_option.h:
+	* pp/common_option.cpp:
+	* pp/opannotate_options.cpp:
+	* pp/opreport_options.cpp: make --threshold
+	be a common option.
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* pp/profile_container.h:
 	* pp/profile_container.cpp:
 	* pp/opannotate.cpp:
