@@ -1,3 +1,8 @@
+2003-05-09  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/format_output.cpp: remove redudant map formater
+	* pp/opannotate.cpp: spurious cout
+
 2003-05-08  John Levon  <levon@movementarian.org>
 
 	* pp/opreport.cpp:

@@ -639,9 +639,6 @@ bool annotate_source(image_set const & images)
 	if (assembly) {
 		image_set::const_iterator it;
 		for (it = images.begin(); it != images.end(); ) {
-
-			cout << it->first << endl;
-
 			output_asm(it->first);
 
 			it = images.upper_bound(it->first);
