@@ -417,10 +417,10 @@ void output_asm(string const & app_name)
 	choice.image_name = app_name;
 	choice.match_image = true;
 	vector<symbol_entry const *> symbols = samples->select_symbols(choice);
-	// FIXME: necessary ?
+
 	sort_options options;
-	options.sample = true;
-	sort_by(symbols, options);
+	options.add_sort_option(sort_options::sample);
+	options.sort_by(symbols);
 
 	output_info(cout);
 

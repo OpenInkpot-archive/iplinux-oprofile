@@ -20,62 +20,97 @@ using namespace std;
 
 namespace {
 
-/// compare based on vma value (address)
-struct less_by_vma {
-	bool operator()(sample_entry const & lhs, sample_entry const & rhs) const {
-		return lhs.vma < rhs.vma;
+
+int compare_by(sort_options::sort_order order,
+	       symbol_entry const * lhs, symbol_entry const * rhs)
+{
+	switch (order) {
+		case sort_options::sample:
+			if (lhs->sample.count < rhs->sample.count)
+				return 1;
+			if (lhs->sample.count > rhs->sample.count)
+				return -1;
+			return 0;
+		case sort_options::symbol:
+			// FIXME demangle optionnaly the symbol
+			return lhs->name.compare(rhs->name);
+		case sort_options::image:
+			return lhs->image_name.compare(rhs->image_name);
+		case sort_options::vma:
+			if (lhs->sample.vma < rhs->sample.vma)
+				return -1;
+			if (lhs->sample.vma > rhs->sample.vma)
+				return 1;
+			return 0;
+		case sort_options::debug: {
+			file_location const & f1 = lhs->sample.file_loc;
+			file_location const & f2 = rhs->sample.file_loc;
+			// FIXME: would compare based on short or long filename
+			int ret = f1.filename.compare(f2.filename);
+			if (ret == 0)
+				ret = f1.linenr - f2.linenr;
+		}
+		default:
+			cerr << "compare_by(): unknown sort option: "
+			     << order << endl;
+			exit(EXIT_FAILURE);
 	}
 
-	bool operator()(symbol_entry const * lhs, symbol_entry const * rhs) const {
-		return (*this)(lhs->sample, rhs->sample);
-	}
-};
-
-
-/// compare based on number of accumulated samples
-struct less_by_samples {
-	bool operator()(symbol_entry const * lhs, symbol_entry const * rhs) const {
-		// sorting by vma when samples count are identical is better
-		if (lhs->sample.count != rhs->sample.count)
-			return lhs->sample.count > rhs->sample.count;
-
-		return lhs->sample.vma > rhs->sample.vma;
-	}
-};
-
-
-/// compare based on name
-struct less_by_name {
-	bool operator()(symbol_entry const * lhs, symbol_entry const * rhs) const {
-		return lhs->name < rhs->name;
-	}
-};
-
-
-/// compare based on owning image
-struct less_by_image {
-	bool operator()(symbol_entry const * lhs, symbol_entry const * rhs) const {
-		return lhs->image_name < rhs->image_name;
-	}
-};
-
+	return false;
 }
 
 
-void sort_by(std::vector<symbol_entry const *> & syms,
-             sort_options const & options)
+struct symbol_compare {
+	symbol_compare(vector<sort_options::sort_order> const & _compare_order)
+		: compare_order(_compare_order) {}
+
+	bool operator()(symbol_entry const * lhs,
+			symbol_entry const * rhs) const;
+private:
+	vector<sort_options::sort_order> const & compare_order;
+};
+
+
+bool symbol_compare::operator()(symbol_entry const * lhs,
+				symbol_entry const * rhs) const
 {
-	if (options.sample)
-		sort(syms.begin(), syms.end(), less_by_samples());
-	if (options.vma)
-		stable_sort(syms.begin(), syms.end(), less_by_vma());
-	// FIXME: the three below are not correct: the displayed values
-	// can be different (short filenames, demangling) so the sort
-	// will look wrong
-	if (options.symbol)
-		stable_sort(syms.begin(), syms.end(), less_by_name());
-	if (options.image)
-		stable_sort(syms.begin(), syms.end(), less_by_image());
-	if (options.debug)
-		stable_sort(syms.begin(), syms.end(), less_by_file_loc());
+	for (size_t i = 0; i < compare_order.size(); ++i) {
+		int ret = compare_by(compare_order[i], lhs, rhs);
+		if (ret != 0)
+			return ret < 0;
+	}
+	return true;
+}
+
+} // anonymous namespace
+
+
+void sort_options::sort_by(std::vector<symbol_entry const *> & syms) const
+{
+	stable_sort(syms.begin(), syms.end(), symbol_compare(sort));
+}
+
+
+void sort_options::add_sort_option(std::string const & name)
+{
+	if (name == "vma") {
+		sort.push_back(vma);
+	} else if (name == "sample") {
+		sort.push_back(sample);
+	} else if (name == "symbol") {
+		sort.push_back(symbol);
+	} else if (name == "debug") {
+		sort.push_back(debug);
+	} else if (name == "image") {
+		sort.push_back(image);
+	} else {
+		cerr << "unknown sort option: " << name << endl;
+		exit(EXIT_FAILURE);
+	}
+}
+
+
+void sort_options::add_sort_option(sort_options::sort_order order)
+{
+	sort.push_back(order);
 }

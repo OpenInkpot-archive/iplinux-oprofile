@@ -105,20 +105,7 @@ void handle_sort_option()
 	vector<string>::const_iterator end = sort.end();
 
 	for (; cit != end; ++cit) {
-		if (*cit == "vma") {
-			options::sort_by.vma = true;
-		} else if (*cit == "sample") {
-			options::sort_by.sample = true;
-		} else if (*cit == "symbol") {
-			options::sort_by.symbol = true;
-		} else if (*cit == "debug") {
-			options::sort_by.debug = true;
-		} else if (*cit == "image") {
-			options::sort_by.image = true;
-		} else {
-			cerr << "unknown sort option: " << *cit << endl;
-			exit(EXIT_FAILURE);
-		}
+		options::sort_by.add_sort_option(*cit);
 	}
 }
 

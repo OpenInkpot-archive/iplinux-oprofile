@@ -13,24 +13,31 @@
 #define SYMBOL_SORT_H
 
 #include <vector>
+#include <string>
 
 class symbol_entry;
 
 struct sort_options {
-	sort_options()
-		: vma(false), sample(false), symbol(false),
-		  image(false), debug(false) {}
-	bool vma;
-	bool sample;
-	bool symbol;
-	bool image;
-	bool debug;
-};
+	enum sort_order {
+		vma,
+		sample,
+		symbol,
+		image,
+		debug
+	};
 
-/**
- * Sort the vector by the given criteria.
- */
-void sort_by(std::vector<symbol_entry const *> & syms,
-             sort_options const & options);
+	sort_options() {}
+
+	void add_sort_option(std::string const & name);
+	void add_sort_option(sort_order order);
+
+	/**
+	 * Sort the vector by the given criteria.
+	 */
+	void sort_by(std::vector<symbol_entry const *> & syms) const;
+
+private:
+	std::vector<sort_order> sort;
+};
 
 #endif // SYMBOL_SORT_H
