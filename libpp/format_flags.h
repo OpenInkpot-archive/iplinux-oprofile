@@ -12,36 +12,48 @@
 #ifndef FORMAT_FLAGS_H
 #define FORMAT_FLAGS_H
 
-// FIXME
-
 /**
  * flags passed to the ctor of an output_symbol object. This also specify the
- * order of field output: lower enum tag ==> comes first in output order
- * Note than changing value of enum is not safe.
+ * order of field output: lower enum tag ==> comes first in output order.
+ * Note than changing value of enum is not safe. (why not ?)
+ *
+ * \sa formatter
  */
 enum format_flags {
 	osf_none = 0,
+	/// a formatted memory address
 	osf_vma = 1 << 0,
-	/// this four field can be repeated on output for each counter.
+	/// number of samples
 	osf_nr_samples = 1 << 1,
+	/// number of samples accumulated
 	osf_nr_samples_cumulated = 1 << 2,
+	/// relative percentage of samples
 	osf_percent = 1 << 3,
+	/// relative percentage of samples accumulated
 	osf_percent_cumulated = 1 << 4,
-
+	/// output the (demangled) symbol name
 	osf_symb_name = 1 << 5,
+	/// output debug filename and line nr.
 	osf_linenr_info = 1 << 6,
+	/// output the image name for this line
 	osf_image_name = 1 << 7,
-
-	/// don't treat percent for details as relative to symbol but relative
-	/// to the total nr of samples
+	/**
+	 * Output percentage for details, not relative
+	 * to symbol but relative to the total nr of samples
+	 */
 	osf_percent_details = 1 << 8,
+	/**
+	 * Output percentage for details, not relative
+	 * to symbol but relative to the total nr of samples,
+	 * accumulated
+	 */
 	osf_percent_cumulated_details = 1 << 9,
-
-	osf_app_name = 1 << 10,		// owning application
+	/// output owning application name
+	osf_app_name = 1 << 10,
 
 	/// These fields are considered immutable when showing details for one
 	/// symbol, we show them only when outputting the symbol itself but
-	/// we avoid to display them during details output
+	/// we don't display them in the details output line
 	osf_immutable_field = osf_symb_name + osf_image_name + osf_app_name
 };
 

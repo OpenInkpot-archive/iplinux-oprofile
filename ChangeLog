@@ -1,5 +1,9 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* libpp/format_flags.h: source doc improvements
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* libpp/opp_symbol.h: move vma64_p to ...
 
 	* libpp/format_flags.h: ... here
