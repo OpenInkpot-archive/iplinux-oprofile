@@ -15,7 +15,6 @@
 #include "opd_cookie.h"
 
 #include "odb_hash.h"
-#include "ocg_hash.h"
 #include "op_hw_config.h"
 #include "op_types.h"
 #include "op_list.h"
@@ -54,7 +53,7 @@ struct sfile {
 	/** opened sample files */
 	samples_odb_t files[OP_MAX_COUNTERS];
 	/** opened cg sample files */
-	samples_ocg_t cg_files[OP_MAX_COUNTERS];
+	samples_odb_t cg_files[OP_MAX_COUNTERS];
 };
 
 /** clear any sfiles that are for the kernel */

@@ -194,7 +194,6 @@ AC_OUTPUT(Makefile \
 	libop/tests/Makefile \
 	libopt++/Makefile \
 	libdb/Makefile \
-	libcgdb/Makefile \
 	libdb/tests/Makefile \
 	libabi/Makefile \
 	libregex/Makefile \

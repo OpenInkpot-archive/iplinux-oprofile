@@ -23,6 +23,6 @@
 #define OP_DUMP_STATUS OP_BASE_DIR "complete_dump"
 
 #define OPD_MAGIC "DAE\n"
-#define OPD_VERSION 0x9
+#define OPD_VERSION 0x10
 
 #endif /* OP_CONFIG_H */

@@ -22,7 +22,7 @@
 #include "image_errors.h"
 #include "opgprof_options.h"
 #include "cverb.h"
-#include "ocg_hash.h"
+#include "odb_hash.h"
 
 using namespace std;
 
@@ -103,10 +103,10 @@ bool aligned_samples(profile_container const & samples, int gap)
 }
 
 
-void output_cg(FILE * fp, op_bfd const & abfd, samples_ocg_t const & cg_db)
+void output_cg(FILE * fp, op_bfd const & abfd, samples_odb_t const & cg_db)
 {
-	ocg_node_nr_t node_nr, pos;
-	ocg_node_t * node = ocg_get_iterator(&cg_db, &node_nr);
+	odb_node_nr_t node_nr, pos;
+	odb_node_t * node = odb_get_iterator(&cg_db, &node_nr);
 
 	opd_header const & head = *static_cast<opd_header *>(cg_db.base_memory);
 	bfd_vma offset = abfd.get_start_offset();
@@ -131,7 +131,7 @@ void output_cg(FILE * fp, op_bfd const & abfd, samples_ocg_t const & cg_db)
 
 
 void output_gprof(op_bfd const & abfd, profile_container const & samples,
-                  samples_ocg_t const & cg_db, bool is_cg,
+                  samples_odb_t const & cg_db, bool is_cg,
                   string const & gmon_filename)
 {
 	static gmon_hdr hdr = { { 'g', 'm', 'o', 'n' }, GMON_VERSION, {0,0,0,},};
@@ -239,7 +239,7 @@ void load_samples(op_bfd const & abfd, list<string> const & files,
 
 
 // FIXME: merging
-bool load_cg(samples_ocg_t & cg_db, string const & filename)
+bool load_cg(samples_odb_t & cg_db, string const & filename)
 {
 	string::size_type prefixend = filename.find_last_of("/");
 	string const base = filename.substr(0, prefixend + 1);
@@ -247,7 +247,7 @@ bool load_cg(samples_ocg_t & cg_db, string const & filename)
 
 	string const cg_file = base + "{cg}/" + end;
 
-	int rc = ocg_open(&cg_db, cg_file.c_str(), OCG_RDONLY,
+	int rc = odb_open(&cg_db, cg_file.c_str(), ODB_RDONLY,
 		sizeof(struct opd_header));
 
 	return rc == EXIT_SUCCESS;
@@ -274,7 +274,7 @@ int opgprof(vector<string> const & non_options)
 	load_samples(abfd, image_profile.groups[0].begin()->files,
 	             image_profile.image, samples);
 
-	samples_ocg_t cg_db;
+	samples_odb_t cg_db;
 
 	bool const is_cg = load_cg(cg_db,
 		*(image_profile.groups[0].begin()->files.begin()));
@@ -282,7 +282,7 @@ int opgprof(vector<string> const & non_options)
 	output_gprof(abfd, samples, cg_db, is_cg, options::gmon_filename);
 
 	if (is_cg)
-		ocg_close(&cg_db);
+		odb_close(&cg_db);
 
 	return 0;
 }

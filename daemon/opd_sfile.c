@@ -124,7 +124,7 @@ create_sfile(struct transient const * trans, struct kernel_image * ki)
 
 	for (i = 0 ; i < op_nr_counters ; ++i) {
 		odb_init(&sf->files[i]);
-		ocg_init(&sf->cg_files[i]);
+		odb_init(&sf->cg_files[i]);
 	}
 
 	if (separate_thread) {
@@ -196,16 +196,21 @@ lru:
 }
 
 
-static samples_ocg_t * get_cg_file(struct sfile * sf, uint counter)
+static samples_odb_t * get_file(struct sfile * sf, uint counter, int cg)
 {
-	if (!sf->cg_files[counter].base_memory)
-		opd_open_cg_sample_file(sf, counter);
+	samples_odb_t * file = &sf->files[counter];
+
+	if (cg)
+		file = &sf->cg_files[counter];
+
+	if (!file->base_memory)
+		opd_open_sample_file(sf, counter, cg);
 
 	/* Error is logged by opd_open_sample_file */
-	if (!sf->cg_files[counter].base_memory)
+	if (!file->base_memory)
 		return NULL;
 
-	return &sf->cg_files[counter];
+	return file;
 }
 
 
@@ -215,13 +220,13 @@ static void sfile_log_arc(struct transient const * trans)
 	vma_t to = trans->pc;
 	vma_t from = trans->last_pc;
 	uint64_t key;
-	samples_ocg_t * file;
+	samples_odb_t * file;
 
 	/* FIXME: cross-binary arcs not yet handled */
 	if (trans->last != trans->current)	
 		return;
 
-	file = get_cg_file(trans->current, trans->event);
+	file = get_file(trans->current, trans->event, 1);
 
 	/* absolute value -> offset */
 	if (trans->current->kernel)
@@ -247,24 +252,11 @@ static void sfile_log_arc(struct transient const * trans)
 	key = to & (0xffffffff);
 	key |= ((uint64_t)from) << 32;
 
-	err = ocg_insert(file, key, 1);
+	err = odb_insert(file, key, 1);
 	if (err) {
 		fprintf(stderr, "%s\n", strerror(err));
 		abort();
 	}
-}
-
-
-static samples_odb_t * get_file(struct sfile * sf, uint counter)
-{
-	if (!sf->files[counter].base_memory)
-		opd_open_sample_file(sf, counter);
-
-	/* Error is logged by opd_open_sample_file */
-	if (!sf->files[counter].base_memory)
-		return NULL;
-
-	return &sf->files[counter];
 }
 
 
@@ -289,7 +281,7 @@ void sfile_log_sample(struct transient const * trans)
 		return;
 	}
 
-	file = get_file(trans->current, trans->event);
+	file = get_file(trans->current, trans->event, 0);
 
 	/* absolute value -> offset */
 	if (trans->current->kernel)
@@ -304,8 +296,7 @@ void sfile_log_sample(struct transient const * trans)
 	opd_stats[OPD_SAMPLES]++;
 	opd_stats[trans->current->kernel ? OPD_KERNEL : OPD_PROCESS]++;
 
-	/* Possible narrowing to 32-bit value only. */
-	err = odb_insert(file, (unsigned long)pc, 1);
+	err = odb_insert(file, (uint64_t)pc, 1);
 	if (err) {
 		fprintf(stderr, "%s\n", strerror(err));
 		abort();
@@ -320,7 +311,7 @@ static void kill_sfile(struct sfile * sf)
 	/* it's OK to close a non-open odb file */
 	for (i = 0; i < op_nr_counters; ++i) {
 		odb_close(&sf->files[i]);
-		ocg_close(&sf->cg_files[i]);
+		odb_close(&sf->cg_files[i]);
 	}
 
 	list_del(&sf->lru);
@@ -353,7 +344,7 @@ void sfile_sync_files(void)
 		sf = list_entry(pos, struct sfile, lru);
 		for (i = 0; i < op_nr_counters; ++i) {
 			odb_sync(&sf->files[i]);
-			ocg_sync(&sf->cg_files[i]);
+			odb_sync(&sf->cg_files[i]);
 		}
 	}
 }
@@ -369,7 +360,7 @@ void sfile_close_files(void)
 		sf = list_entry(pos, struct sfile, lru);
 		for (i = 0; i < op_nr_counters; ++i) {
 			odb_close(&sf->files[i]);
-			ocg_close(&sf->cg_files[i]);
+			odb_close(&sf->cg_files[i]);
 		}
 	}
 }

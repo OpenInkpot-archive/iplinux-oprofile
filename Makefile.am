@@ -4,7 +4,6 @@ SUBDIRS = \
 	libutil \
 	libop \
 	libdb \
-	libcgdb \
 	libutil++ \
 	libopt++ \
 	libabi \

@@ -18,14 +18,13 @@ struct sfile;
  * opd_open_sample_file - open a sample file
  * @param sf  sfile to open sample file for
  * @param counter  counter number
+ * @param cg if this is a callgraph file
  *
  * Open image sample file for the sfile, counter
  * counter and set up memory mappings for it.
  *
  * Returns 0 on success.
  */
-int opd_open_sample_file(struct sfile * sf, int counter);
-
-int opd_open_cg_sample_file(struct sfile * sf, int counter);
+int opd_open_sample_file(struct sfile * sf, int counter, int cg);
 
 #endif /* OPD_MANGLING_H */

@@ -13,9 +13,10 @@
 #define ODB_HASH_H
 
 #include <stddef.h>
+#include <stdint.h>
 
-/** the type of key */
-typedef unsigned int odb_key_t;
+/** the type of key. 64-bit because CG needs 32-bit pair {from,to} */
+typedef uint64_t odb_key_t;
 /** the type of an information in the database */
 typedef unsigned int odb_value_t;
 /** the type of index (node number), list are implemented through index */
@@ -166,6 +167,7 @@ odb_node_t * odb_get_iterator(samples_odb_t const * hash, odb_node_nr_t * nr);
 
 static __inline unsigned int odb_do_hash(samples_odb_t const * hash, odb_key_t value)
 {
+	/* FIXME FIXME: fix hash for 64 bit keys */
 	/* FIXME: better hash for eip value, needs to instrument code
 	 * and do a lot of tests ... */
 	/* trying to combine high order bits his a no-op: inside a binary image
