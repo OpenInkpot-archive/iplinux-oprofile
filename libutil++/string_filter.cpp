@@ -9,6 +9,8 @@
  * @author John Levon
  */
 
+#include <algorithm>
+
 #include "string_filter.h"
 #include "string_manip.h"
 

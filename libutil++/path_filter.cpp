@@ -11,8 +11,7 @@
 
 #include <fnmatch.h>
 
-#include <string>
-#include <vector>
+#include <algorithm>
 
 #include "path_filter.h"
 #include "string_manip.h"
