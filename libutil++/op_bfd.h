@@ -18,6 +18,7 @@
 
 #include <vector>
 #include <string>
+#include <list>
 
 #include "utility.h"
 #include "op_types.h"
@@ -173,13 +174,23 @@ private:
 	// by this value.
 	u32 text_offset;
 
+	/// temporary container for getting symbols
+	typedef std::list<op_bfd_symbol> symbols_found_t;
+
 	/**
 	 * Collect the symbols excluding any in the given vector.
 	 *
 	 * Returns false if there were no symbols in the binary
 	 * before filtering.
 	 */
-	void get_symbols(string_filter const & symbol_filter);
+	void get_symbols(symbols_found_t & symbols);
+
+	/**
+	 * Add the symbols in the binary, applying filtering,
+	 * and handling artificial symbol.
+	 */
+	void add_symbols(symbols_found_t & symbols,
+	                 string_filter const & symbol_filter);
 
 	/**
 	 * symbol_size - return the size of a symbol

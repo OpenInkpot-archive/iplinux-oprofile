@@ -11,16 +11,13 @@
 
 #include "op_file.h"
 
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
+#include <cstring>
+#include <cstdlib>
 
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
-#include <string>
-#include <list>
-
-#include <cstdlib>
 
 #include "op_bfd.h"
 #include "string_filter.h"
@@ -63,7 +60,13 @@ op_bfd::op_bfd(string const & filename, string_filter const & symbol_filter)
 		cverb << ".text filepos " << hex << text_offset << endl;
 	}
 
-	get_symbols(symbol_filter);
+	// after creating all symbol it's convenient for user code to access
+	// symbols through a vector. We use an intermediate list to avoid a
+	// O(N²) behavior when we will filter vector element below
+	symbols_found_t symbols;
+
+	get_symbols(symbols);
+	add_symbols(symbols, symbol_filter);
 }
 
 
@@ -146,6 +149,7 @@ struct remove_filter {
 
 } // namespace anon
 
+
 /**
  * get_symbols - op_bfd ctor helper
  *
@@ -157,31 +161,24 @@ struct remove_filter {
  * the interesting_symbol() predicate and sorted
  * with the symcomp() comparator.
  */
-void op_bfd::get_symbols(string_filter const & symbol_filter)
+void op_bfd::get_symbols(op_bfd::symbols_found_t & symbols)
 {
 	uint nr_all_syms;
 	size_t size;
 
-	list<op_bfd_symbol>::iterator it;
-
-	// after creating all symbol it's convenient for user code to access
-	// symbols through a vector. We use an intermediate list to avoid a
-	// O(N²) behavior when we will filter vector element below
-	list<op_bfd_symbol> symbols;
-
 	if (!(bfd_get_file_flags(ibfd) & HAS_SYMS))
-		goto out;
+		return;
 
 	size = bfd_get_symtab_upper_bound(ibfd);
 
 	/* HAS_SYMS can be set with no symbols */
 	if (size < 1)
-		goto out;
+		return;
 
 	bfd_syms.reset(new asymbol*[size]);
 	nr_all_syms = bfd_canonicalize_symtab(ibfd, bfd_syms.get());
 	if (nr_all_syms < 1)
-		goto out;
+		return;
 
 	for (symbol_index_t i = 0; i < nr_all_syms; i++) {
 		if (interesting_symbol(bfd_syms[i])) {
@@ -201,12 +198,14 @@ void op_bfd::get_symbols(string_filter const & symbol_filter)
 
 	symbols.sort();
 
+	symbols_found_t::iterator it = symbols.begin();
+
 	// we need to ensure than for a given vma only one symbol exist else
 	// we read more than one time some samples. Fix #526098
 	// ELF symbols size : potential bogosity here because when using
 	// elf symbol size we need to check than two symbols does not overlap.
-	for (it = symbols.begin() ; it != symbols.end(); ) {
-		list<op_bfd_symbol>::iterator temp = it;
+	for (; it != symbols.end();) {
+		symbols_found_t::iterator temp = it;
 		++temp;
 		if (temp != symbols.end() && (it->vma() == temp->vma())) {
 			// FIXME: choose more carefully the symbol we drop.
@@ -223,20 +222,25 @@ void op_bfd::get_symbols(string_filter const & symbol_filter)
 	// between the vma of a symbol and the next one.
 	for (it = symbols.begin() ; it != symbols.end(); ++it) {
 		op_bfd_symbol const * next = 0;
-		list<op_bfd_symbol>::iterator temp = it;
+		symbols_found_t::iterator temp = it;
 		++temp;
 		if (temp != symbols.end())
 			next = &*temp;
 		it->size(symbol_size(*it, next));
 	}
+}
 
-out:
+
+void op_bfd::add_symbols(op_bfd::symbols_found_t & symbols,
+                         string_filter const & symbol_filter)
+{
 	// images with no symbols debug info available get a placeholder symbol
 	if (symbols.empty())
 		symbols.push_back(create_artificial_symbol());
 
 	cverb << "number of symbols before filtering " << dec << symbols.size() << endl;
 
+	symbols_found_t::iterator it;
 	it = remove_if(symbols.begin(), symbols.end(), remove_filter(symbol_filter));
 	symbols.erase(it, symbols.end());
 
