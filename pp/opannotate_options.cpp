@@ -88,7 +88,7 @@ void handle_options(vector<string> const & non_options)
 	}
 
 	if (!objdump_params.empty() && !assembly) {
-		cerr << "--objdump-params is meaningless without --assembly\n"
+		cerr << "--objdump-params is meaningless without --assembly\n";
 		exit(EXIT_FAILURE);
 	}
 
