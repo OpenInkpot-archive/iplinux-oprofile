@@ -18,7 +18,7 @@
 /// fnmatch(pattern, filename, 0); eg * match '/' character. See the man page
 /// of fnmatch for further details.
 class filename_match {
- public:
+public:
 	/// multiple pattern must be separate by ','. each pattern can contain
 	/// leading and trailing blank which are stripped from pattern.
 	filename_match(std::string const & include_patterns,
@@ -37,11 +37,7 @@ class filename_match {
 	/// exclude_pattern
 	bool strict_match(std::string const & filename) const;
 
- private:
-	// match helper
-	static bool match(std::vector<std::string> const & patterns,
-			  std::string const & filename);
-
+private:
 	std::vector<std::string> include_pattern;
 	std::vector<std::string> exclude_pattern;
 };

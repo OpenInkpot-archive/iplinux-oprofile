@@ -20,12 +20,31 @@
 
 using namespace std;
 
+
+namespace {
+
+/// return true if the filename matches any of the patterns
+bool do_match(vector<string> const & patterns, string const & filename)
+{
+	bool ok = false;
+	for (size_t i = 0 ; i < patterns.size() && !ok; ++i) {
+		if (fnmatch(patterns[i].c_str(), filename.c_str(), 0) != FNM_NOMATCH)
+			ok = true;
+	}
+
+	return ok;
+}
+
+};
+
+
 filename_match::filename_match(string const & include_patterns,
 			       string const & exclude_patterns)
 {
 	separate_token(include_pattern, include_patterns, ',');
 	separate_token(exclude_pattern, exclude_patterns, ',');
 }
+
 
 filename_match::filename_match(vector<string> const & include_patterns,
 			       vector<string> const & exclude_patterns)
@@ -35,6 +54,7 @@ filename_match::filename_match(vector<string> const & include_patterns,
 {
 }
 
+
 bool filename_match::match(string const & filename) const
 {
 	string const & base = basename(filename);
@@ -42,7 +62,7 @@ bool filename_match::match(string const & filename) const
 	// first, if any component of the dir is listed in exclude -> no
 	string comp = dirname(filename);
 	while (!comp.empty() && comp != "/") {
-		if (match(exclude_pattern, basename(comp)))
+		if (do_match(exclude_pattern, basename(comp)))
 			return false;
 		// FIXME: test uneccessary, wait a decent testsuite before
 		// removing
@@ -52,18 +72,18 @@ bool filename_match::match(string const & filename) const
 	}
 
 	// now if the file name is specifically excluded -> no
-	if (match(exclude_pattern, base))
+	if (do_match(exclude_pattern, base))
 		return false;
 
 	// now if the file name is specifically included -> yes
-	if (match(include_pattern, base))
+	if (do_match(include_pattern, base))
 		return true;
 
 	// now if any component of the path is included -> yes
 	// note that the include pattern defaults to '*'
 	string compi = dirname(filename);
 	while (!compi.empty() && compi != "/") {
-		if (match(include_pattern, basename(compi)))
+		if (do_match(include_pattern, basename(compi)))
 			return true;
 		// FIXME see above.
 		if (compi == dirname(compi))
@@ -74,25 +94,14 @@ bool filename_match::match(string const & filename) const
 	return false;
 }
 
+
 bool filename_match::strict_match(std::string const & filename) const
 {
-	if (match(exclude_pattern, filename))
+	if (do_match(exclude_pattern, filename))
 		return false;
 
-	if (match(include_pattern, filename))
+	if (do_match(include_pattern, filename))
 		return true;
 
 	return false;
-}
-
-bool filename_match::match(vector<string> const & patterns,
-			   string const & filename)
-{
-	bool ok = false;
-	for (size_t i = 0 ; i < patterns.size() && !ok; ++i) {
-		if (fnmatch(patterns[i].c_str(), filename.c_str(), 0) != FNM_NOMATCH)
-			ok = true;
-	}
-
-	return ok;
 }
