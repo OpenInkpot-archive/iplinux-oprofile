@@ -2,7 +2,7 @@
  * @file symbol_functors.h
  * Functors for symbol/sample comparison
  *
- * @remark Copyright 2002 OProfile authors
+ * @remark Copyright 2002, 2003 OProfile authors
  * @remark Read the file COPYING
  *
  * @author Philippe Elie
@@ -20,12 +20,10 @@ struct less_sample_entry_by_vma {
 		return lhs.vma < rhs.vma;
 	}
 
-	bool operator()(symbol_entry const & lhs, symbol_entry const & rhs) const {
-		return (*this)(lhs.sample, rhs.sample);
-	}
 	bool operator()(symbol_entry const * lhs, symbol_entry const * rhs) const {
 		return (*this)(lhs->sample, rhs->sample);
 	}
+
 };
 
 /// compare based on number of accumulated samples
