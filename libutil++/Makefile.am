@@ -4,12 +4,16 @@ noinst_LIBRARIES = libutil++.a
 libutil___a_SOURCES = \
 	op_bfd.cpp \
 	op_bfd.h \
+	string_filter.cpp \
+	string_filter.h \
+	glob_filter.cpp \
+	glob_filter.h \
+	path_filter.cpp \
+	path_filter.h \
 	file_manip.cpp \
 	file_manip.h \
 	string_manip.cpp \
 	string_manip.h \
-	filename_match.cpp \
-	filename_match.h \
 	cverb.cpp \
 	cverb.h \
 	generic_spec.cpp \

@@ -33,7 +33,7 @@
 #include "child_reader.h"
 #include "string_manip.h"
 #include "file_manip.h"
-#include "filename_match.h"
+#include "path_filter.h"
 
 #include "version.h"
 
@@ -105,13 +105,13 @@ string annotation_fill;
 /**
  * @param image_name the samples owner image name
  * @param sample_file the sample file base name (w/o counter nr suffix)
- * @param fn_match only source filename which match this filter will be output
+ * @param filter only source filename which match this filter will be output
  *
  * This is the entry point of the source annotation utility called after
  * parsing and checking command line argument
  */
 bool annotate_source(string const & image_name, string const & sample_file,
-		     filename_match const & fn_match);
+		     path_filter const & filter);
 
 /**
  * @param out output stream
@@ -174,13 +174,13 @@ void output_objdump_asm(vector<symbol_entry const *> const & output_symbols,
 	string const & app_name);
 
 /**
- * @param fn_match only source filename which match this filter will be output
+ * @param filter only source filename which match this filter will be output
  * @param output_separate_file true if user request for creating on file for
  * each annotated source else op_to_source output only one report on cout
  *
- * output all annotated source matching the fn_match parameters
+ * output all annotated source matching the filter parameters
  */
-void output_source(filename_match const & fn_match, bool output_separate_file);
+void output_source(path_filter const & filter, bool output_separate_file);
 
 /**
  * @param in input stream, in is not necessary valid if input source file is
@@ -324,7 +324,7 @@ void counter_setup::print(ostream & out, op_cpu cpu_type, int counter) const
 namespace op_to_source {
 
 bool annotate_source(string const & image_name, string const & sample_file,
-		     filename_match const & fn_match)
+		     path_filter const & filter)
 {
 	bool output_separate_file = false;
 	if (!source_dir.empty()) {
@@ -396,7 +396,7 @@ bool annotate_source(string const & image_name, string const & sample_file,
 	if (assembly)
 		output_asm(image_name);
 	else
-		output_source(fn_match, output_separate_file);
+		output_source(filter, output_separate_file);
 
 	return true;
 }
@@ -634,7 +634,7 @@ string const get_annotation_fill()
 }
 
 
-void output_source(filename_match const & fn_match, bool output_separate_file)
+void output_source(path_filter const & filter, bool output_separate_file)
 {
 	if (!output_separate_file)
 		output_info(cout);
@@ -646,7 +646,7 @@ void output_source(filename_match const & fn_match, bool output_separate_file)
 			do_until_more_than_samples);
 
 	for (size_t i = 0 ; i < filenames.size() ; ++i) {
-		if (!fn_match.match(filenames[i]))
+		if (!filter.match(filenames[i]))
 			continue;
 
 		ifstream in(filenames[i].c_str());
@@ -1002,13 +1002,13 @@ static int do_op_to_source(int argc, char const * argv[])
 	string samples_dir = handle_session_options();
 	sample_file = relative_to_absolute_path(sample_file, samples_dir);
 
-	filename_match fn_match(output_filter, no_output_filter);
+	path_filter filter(output_filter, no_output_filter);
 
 	// set the invocation, for the file headers later
 	for (int i = 0 ; i < argc ; ++i)
 		cmdline += string(argv[i]) + " ";
 
-	if (!annotate_source(image_file, sample_file, fn_match))
+	if (!annotate_source(image_file, sample_file, filter))
 		return EXIT_FAILURE;
 
 	return EXIT_SUCCESS;

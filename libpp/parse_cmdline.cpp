@@ -10,7 +10,7 @@
 
 #include "parse_cmdline.h"
 #include "string_manip.h"
-#include "filename_match.h"
+#include "glob_filter.h"
 
 
 using namespace std;
@@ -220,15 +220,15 @@ bool parse_cmdline::match(string const & filename) const
 	}
 
 	if (!image.empty()) {
-		filename_match fnmatch(image, image_exclude);
-		if (!fnmatch.strict_match(spec.image)) {
+		glob_filter filter(image, image_exclude);
+		if (!filter.match(spec.image)) {
 			return false;
 		}
 	}
 
 	if (!lib_image.empty()) {
-		filename_match fnmatch(lib_image, lib_image_exclude);
-		if (!fnmatch.strict_match(spec.lib_image)) {
+		glob_filter filter(lib_image, lib_image_exclude);
+		if (!filter.match(spec.lib_image)) {
 			return false;
 		}
 	}
