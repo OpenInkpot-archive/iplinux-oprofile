@@ -16,12 +16,15 @@
 #include <sstream>
 #include <numeric>
 
-#include "op_header.h"
+#include "op_exception.h"
+#include "stream_util.h"
 #include "string_manip.h"
 #include "file_manip.h"
 #include "opreport_options.h"
+#include "op_header.h"
 #include "profile.h"
-#include "partition_files.h"
+#include "populate.h"
+#include "arrange_profiles.h"
 #include "profile_container.h"
 #include "symbol_sort.h"
 #include "format_output.h"
@@ -35,14 +38,33 @@ static size_t nr_groups;
 /// storage for a merged file summary
 struct summary {
 	count_array_t counts;
-	string image;
 	string lib_image;
 
 	bool operator<(summary const & rhs) const {
 		return options::reverse_sort
 		    ? counts[0] < rhs.counts[0] : rhs.counts[0] < counts[0];
 	}
+
+	/// add a set of files to a summary
+	size_t add_files(list<string> const & files, size_t count_group);
 };
+
+
+size_t summary::add_files(list<string> const & files, size_t count_group)
+{
+	size_t subtotal = 0;
+
+	list<string>::const_iterator it = files.begin();
+	list<string>::const_iterator const end = files.end();
+
+	for (; it != end; ++it) {
+		size_t count = profile_t::sample_count(*it);
+		counts[count_group] += count;
+		subtotal += count;
+	}
+
+	return subtotal;
+}
 
 
 /**
@@ -51,88 +73,74 @@ struct summary {
  * dependent images such as libraries.
  */
 struct app_summary {
+	/// total count of us and all dependents
 	count_array_t counts;
+	/// the main image
 	string image;
-	string lib_image;
-	vector<summary> files;
+	/// our dependent images
+	vector<summary> deps;
 
-	// return the number of samples added
-	size_t add_samples(split_sample_filename const &, size_t count_group);
+	/// construct and fill in the data
+	size_t add_profile(profile_set const & profile, size_t count_group);
 
 	bool operator<(app_summary const & rhs) const {
 		return options::reverse_sort 
 		    ? counts[0] < rhs.counts[0] : rhs.counts[0] < counts[0];
 	}
 
-	/// return true if the deps should not be output
-	bool should_hide_deps() const;
+private:
+	/// find a matching summary (including main app summary)
+	summary & find_summary(string const & image);
 };
 
 
-size_t app_summary::
-add_samples(split_sample_filename const & split, size_t count_group)
+summary & app_summary::find_summary(string const & image)
 {
-	// FIXME: linear search inefficient ?
-	vector<summary>::iterator it = files.begin();
-	vector<summary>::iterator const end = files.end();
+	vector<summary>::iterator sit = deps.begin();
+	vector<summary>::iterator const send = deps.end();
+	for (; sit != send; ++sit) {
+		if (sit->lib_image == image)
+			return *sit;
+	}
+
+	summary summ;
+	summ.lib_image = image;
+	deps.push_back(summ);
+	return deps.back();
+}
+
+
+size_t app_summary::add_profile(profile_set const & profile,
+                                size_t count_group)
+{
+	size_t group_total = 0;
+
+	// first the main image
+	summary & summ = find_summary(profile.image);
+	size_t app_count = summ.add_files(profile.files, count_group);
+	counts[count_group] += app_count;
+	group_total += app_count;
+
+	// now all dependent images if any
+	list<profile_dep_set>::const_iterator it = profile.deps.begin();
+	list<profile_dep_set>::const_iterator const end = profile.deps.end();
+
 	for (; it != end; ++it) {
-		if (it->image == split.image && 
-		    it->lib_image == split.lib_image)
-			break;
+		summary & summ = find_summary(it->lib_image);
+		size_t lib_count = summ.add_files(it->files, count_group);
+		counts[count_group] += lib_count;
+		group_total += lib_count;
 	}
 
-	size_t nr_samples = profile_t::sample_count(split.sample_filename);
-
-	if (it == end) {
-		summary summary;
-		summary.image = split.image;
-		summary.lib_image = split.lib_image;
-		summary.counts[count_group] = nr_samples;
-		counts[count_group] += nr_samples;
-		files.push_back(summary);
-	} else {
-		// assert it->counts[count_group] == 0
-		it->counts[count_group] = nr_samples;
-		counts[count_group] += nr_samples;
-	}
-
-	return nr_samples;
+	return group_total;
 }
 
 
-bool app_summary::should_hide_deps() const
-{
-	if (files.size() == 0)
-		return true;
-
-	// can this happen ?
-	if (counts.zero())
-		return true;
-
-	string image_name = image;
-	if (options::merge_by.lib && !lib_image.empty())
-		image_name = lib_image;
-
-	summary const & first = files[0];
-	string const & dep_image = first.lib_image.empty()
-		? first.image : first.lib_image;
-
-	bool hidedep = options::exclude_dependent;
-	hidedep |= options::merge_by.lib;
-
-	// If we're only going to show the main image again,
-	// and it's the same image (can be different when
-	// it's a library and there's no samples for the main
-	// application image), then don't show it
-	hidedep |= files.size() == 1 && dep_image == image;
-	return hidedep;
-}
-
-
-/// All image summaries to be output are contained here.
+/// all the summaries
 struct summary_container {
-	summary_container(vector<partition_files> const & sample_files);
-	/// all app summaries
+	summary_container(vector<profile_class> const & pclasses);
+
+	/// all map summaries
 	vector<app_summary> apps;
 	/// total count of samples for all summaries
 	count_array_t total_counts;
@@ -140,54 +148,45 @@ struct summary_container {
 
 
 summary_container::
-summary_container(vector<partition_files> const & sample_files)
+summary_container(vector<profile_class> const & pclasses)
 {
-	// second member is the partition file index i.e. the events/counts
-	// identifier
-	typedef pair<split_sample_filename const *, size_t> value_t;
-	typedef multimap<string, value_t> map_t;
-	map_t sample_filenames;
+	typedef map<string, app_summary> app_map_t;
+	app_map_t app_map;
 
-	for (size_t i = 0; i < sample_files.size(); ++i) {
-		partition_files const & partition = sample_files[i];
-		for (size_t j = 0; j < partition.nr_set(); ++j) {
-			partition_files::filename_set const & files =
-				partition.set(j);
-			partition_files::filename_set::const_iterator it;
-			for (it = files.begin(); it != files.end(); ++it) {
-				value_t value(&*it, i);
-				string name = it->image;
-				if (!it->lib_image.empty() &&
-				    options::merge_by.lib)
-					name = it->lib_image;
-				map_t::value_type val(name, value);
-				sample_filenames.insert(val);
+	for (size_t i = 0; i < pclasses.size(); ++i) {
+		list<profile_set>::const_iterator it
+			= pclasses[i].profiles.begin();
+		list<profile_set>::const_iterator const end
+			= pclasses[i].profiles.end();
+
+		for (; it != end; ++it) {
+			app_map_t::iterator ait = app_map.find(it->image);
+			if (ait == app_map.end()) {
+				app_summary app;
+				app.image = it->image;
+				total_counts[i] += app.add_profile(*it, i);
+				app_map[app.image] = app;
+			} else {
+				total_counts[i]
+					+= ait->second.add_profile(*it, i);
 			}
 		}
 	}
 
-	map_t::const_iterator it = sample_filenames.begin();
-	for (; it != sample_filenames.end(); ) {
-		split_sample_filename const * cur = it->second.first;
+	app_map_t::const_iterator it = app_map.begin();
+	app_map_t::const_iterator const end = app_map.end();
 
-		app_summary app;
-		app.image = cur->image;
-		app.lib_image = cur->lib_image;
-
-		pair<map_t::const_iterator, map_t::const_iterator> p_it =
-			sample_filenames.equal_range(it->first);
-		for (it = p_it.first; it != p_it.second; ++it) {
-			size_t nr_samples = app.add_samples(
-				*it->second.first, it->second.second);
-			total_counts[it->second.second] += nr_samples;
-		}
-
-		stable_sort(app.files.begin(), app.files.end());
-
-		apps.push_back(app);
+	for (; it != end; ++it) {
+		apps.push_back(it->second);
 	}
 
+	// sort by count
 	stable_sort(apps.begin(), apps.end());
+	vector<app_summary>::iterator ait = apps.begin();
+	vector<app_summary>::iterator const aend = apps.end();
+	for (; ait != aend; ++ait) {
+		stable_sort(ait->deps.begin(), ait->deps.end());
+	}
 }
 
 
@@ -196,25 +195,13 @@ void output_header()
 	if (!options::show_header)
 		return;
 
-	bool first_output = true;
+	cout << classes.cpuinfo << endl;
+	if (!classes.event.empty())
+		cout << classes.event << endl;
 
-	for (vector<partition_files const *>::size_type i = 0;
-	     i < sample_file_partition.size(); ++i) {
-
-		if (!sample_file_partition[i].nr_set())
-			continue;
-
-		partition_files::filename_set const & file_set =
-			sample_file_partition[i].set(0);
-		opd_header const & header =
-			read_header(file_set.begin()->sample_filename);
-
-		if (first_output) {
-			output_cpu_info(cout, header);
-			first_output = false;
-		}
-
-		cout << header;
+	for (vector<profile_class>::size_type i = 0;
+	     i < classes.v.size(); ++i) {
+		cout << classes.v[i].longname << endl;
 	}
 }
 
@@ -235,24 +222,84 @@ void output_count(double total_count, size_t count)
 }
 
 
+void output_col_headers(bool indent)
+{
+	if (!options::show_header)
+		return;
+
+	if (indent)
+		cout << '\t';
+
+	size_t colwidth = 9 + 1 + percent_width;
+
+	for (size_t i = 0; i < classes.v.size(); ++i) {
+		string name = classes.v[i].name;
+		if (name.length() > colwidth)
+			name = name.substr(0, colwidth - 3)
+				+ "...";
+		io_state state(cout);
+		// gcc 2.95 doesn't know right io manipulator
+		cout.setf(ios::right, ios::adjustfield);
+		// gcc 2.95 doesn't honor setw() for std::string
+		cout << setw(colwidth) << name.c_str();
+		cout << '|';
+	}
+	cout << '\n';
+
+	if (indent)
+		cout << '\t';
+
+	for (size_t i = 0; i < classes.v.size(); ++i) {
+		cout << "  samples| ";
+		io_state state(cout);
+		// gcc 2.95 doesn't know right io manipulator
+		cout.setf(ios::right, ios::adjustfield);
+		cout << setw(percent_width) << "%|";
+	}
+
+	cout << '\n';
+
+	if (indent)
+		cout << '\t';
+
+	for (size_t i = 0; i < classes.v.size(); ++i) {
+		cout << "-----------";
+		string str(percent_width, '-');
+		cout << str;
+	}
+
+	cout << '\n';
+}
+
+
 void
 output_deps(summary_container const & summaries,
 	    app_summary const & app)
 {
-	for (size_t j = 0 ; j < app.files.size(); ++j) {
-		cout << "\t";
-		summary const & file = app.files[j];
+	// the app summary itself is *always* present
+	// (perhaps with zero counts) so this test
+	// is correct
+	if (app.deps.size() == 1)
+		return;
+
+	output_col_headers(true);
+
+	for (size_t j = 0 ; j < app.deps.size(); ++j) {
+		summary const & summ = app.deps[j];
+
+		if (summ.counts.zero())
+			continue;
+
+		cout << '\t';
+
 		for (size_t i = 0; i < nr_groups; ++i) {
 			double tot_count = options::global_percent
 				? summaries.total_counts[i] : app.counts[i];
 
-			output_count(tot_count, file.counts[i]);
+			output_count(tot_count, summ.counts[i]);
 		}
 
-		if (file.lib_image.empty())
-			cout << get_filename(file.image);
-		else
-			cout << get_filename(file.lib_image);
+		cout << get_filename(summ.lib_image);
 		cout << '\n';
 	}
 }
@@ -263,6 +310,8 @@ output_deps(summary_container const & summaries,
  */
 void output_summaries(summary_container const & summaries)
 {
+	output_col_headers(false);
+
 	for (size_t i = 0; i < summaries.apps.size(); ++i) {
 		app_summary const & app = summaries.apps[i];
 
@@ -276,66 +325,9 @@ void output_summaries(summary_container const & summaries)
 			             app.counts[j]);
 		}
 
-		if (app.lib_image.empty() || !options::merge_by.lib)
-			cout << get_filename(app.image) << "\n";
-		else
-			cout << get_filename(app.lib_image) << "\n";
+		cout << get_filename(app.image) << '\n';
 
-		if (!app.should_hide_deps())
-			output_deps(summaries, app);
-	}
-}
-
-
-/**
- * Load the given samples container with the profile data from
- * the files container, merging as appropriate.
- */
-void populate_profiles(partition_files const & files,
-                       profile_container & samples, size_t count_group)
-{
-	image_set images = sort_by_image(files, options::extra_found_images);
-
-	image_set::const_iterator it;
-	for (it = images.begin(); it != images.end(); ) {
-		pair<image_set::const_iterator, image_set::const_iterator>
-			p_it = images.equal_range(it->first);
-
-		op_bfd abfd(it->first, options::symbol_filter);
-
-		// we can optimize by cumulating samples to this binary in
-		// a profile_t only if we merge by lib since for non merging
-		// case application name change and must be recorded
-		if (options::merge_by.lib) {
-			string app_name = p_it.first->first;
-
-			profile_t profile;
-
-			for (;  it != p_it.second; ++it) {
-				profile.add_sample_file(
-					it->second.sample_filename,
-					abfd.get_start_offset());
-			}
-
-			check_mtime(abfd.get_filename(), profile.get_header());
-	
-			samples.add(profile, abfd, app_name, count_group);
-		} else {
-			for (; it != p_it.second; ++it) {
-				string app_name = it->second.image;
-
-				profile_t profile;
-				profile.add_sample_file(
-					it->second.sample_filename,
-					abfd.get_start_offset());
-
-				check_mtime(abfd.get_filename(),
-					    profile.get_header());
-	
-				samples.add(profile, abfd,
-				            app_name, count_group);
-			}
-		}
+		output_deps(summaries, app);
 	}
 }
 
@@ -343,11 +335,12 @@ void populate_profiles(partition_files const & files,
 format_flags const get_format_flags(column_flags const & cf)
 {
 	format_flags flags(ff_none);
-	flags = format_flags(flags | ff_vma | ff_nr_samples);
+	flags = format_flags(flags | ff_nr_samples);
 	flags = format_flags(flags | ff_percent | ff_symb_name);
 
-	if (cf & cf_multiple_apps)
-		flags = format_flags(flags | ff_app_name);
+	if (options::show_address)
+		flags = format_flags(flags | ff_vma);
+
 	if (options::debug_info)
 		flags = format_flags(flags | ff_linenr_info);
 
@@ -363,7 +356,7 @@ format_flags const get_format_flags(column_flags const & cf)
 }
 
 
-void output_symbols(profile_container const & samples)
+void output_symbols(profile_container const & samples, bool multiple_apps)
 {
 	profile_container::symbol_choice choice;
 	choice.threshold = options::threshold;
@@ -384,7 +377,11 @@ void output_symbols(profile_container const & samples)
 	if (choice.hints & cf_64bit_vma)
 		out.vma_format_64bit();
 
-	out.add_format(get_format_flags(choice.hints));
+	format_flags flags = get_format_flags(choice.hints);
+	if (multiple_apps)
+		flags = format_flags(flags | ff_app_name);
+
+	out.add_format(flags);
 	out.output(cout, symbols);
 }
 
@@ -393,22 +390,36 @@ int opreport(vector<string> const & non_options)
 {
 	handle_options(non_options);
 
-	output_header();
-
-	nr_groups = sample_file_partition.size();
+	nr_groups = classes.v.size();
 
 	if (!options::symbols) {
-		summary_container summaries(sample_file_partition);
+		summary_container summaries(classes.v);
+		output_header();
 		output_summaries(summaries);
 		return 0;
 	}
 
 	profile_container samples(options::debug_info, options::details);
 
-	for (size_t i = 0; i < sample_file_partition.size(); ++i)
-		populate_profiles(sample_file_partition[i], samples, i);
+	bool multiple_apps = false;
 
-	output_symbols(samples);
+	for (size_t i = 0; i < classes.v.size(); ++i) {
+		if (classes.v[i].profiles.size() > 1)
+			multiple_apps = true;
+	}
+
+	list<inverted_profile> iprofiles
+		= invert_profiles(classes, options::extra_found_images);
+
+	list<inverted_profile>::const_iterator it = iprofiles.begin();
+	list<inverted_profile>::const_iterator const end = iprofiles.end();
+
+	for (; it != end; ++it)
+		populate_for_image(samples, *it);
+
+	output_header();
+
+	output_symbols(samples, multiple_apps);
 	return 0;
 }
 

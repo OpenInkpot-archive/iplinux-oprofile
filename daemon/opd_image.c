@@ -146,7 +146,7 @@ static void opd_init_image(struct opd_image * image, cookie_t cookie,
 	if (lookup_dcookie(cookie, buf, PATH_MAX) <= 0) {
 		fprintf(stderr, "Lookup of cookie %llx failed, errno=%d\n",
 		       cookie, errno); 
-		exit(EXIT_FAILURE);
+		abort();
 	}
 
 	image->name = xstrdup(buf);
@@ -154,7 +154,7 @@ static void opd_init_image(struct opd_image * image, cookie_t cookie,
 	if (lookup_dcookie(app_cookie, buf, PATH_MAX) <= 0) {
 		fprintf(stderr, "Lookup of cookie %llx failed, errno=%d\n",
 			cookie, errno); 
-		exit(EXIT_FAILURE);
+		abort();
 	}
 
 	image->app_name = xstrdup(buf);
@@ -249,8 +249,8 @@ void opd_put_image_sample(struct opd_image * image, vma_t offset, int counter)
  
 	/* Possible narrowing to 32-bit value only. */
 	if (odb_insert(sample_file, (unsigned long)offset, 1) != EXIT_SUCCESS) {
-		fprintf(stderr, "odb_insert() %s\n", sample_file->err_msg);
-		exit(EXIT_FAILURE);
+		fprintf(stderr, "%s\n", sample_file->err_msg);
+		abort();
 	}
 }
 
@@ -322,8 +322,8 @@ static struct opd_image * opd_add_image(cookie_t cookie, cookie_t app_cookie)
 	if (separate_lib_samples) {
 		image->app_image = opd_find_image(app_cookie, app_cookie);
 		if (!image->app_image) {
-			verbprintf("image->app_image %p for cookie %llx\n",
-				   image->app_image, app_cookie);
+			verbprintf("NULL image->app_image for cookie %llx\n",
+				   app_cookie);
 		}
 	}
 
@@ -436,7 +436,7 @@ static uint64_t pop_buffer_value(struct transient * trans)
 
 	if (!trans->remaining) {
 		fprintf(stderr, "BUG: popping empty buffer !\n");
-		exit(EXIT_FAILURE);
+		abort();
 	}
 
 	val = get_buffer_value(trans->buffer, 0);
@@ -573,7 +573,7 @@ static void opd_put_sample(struct transient * trans, vma_t eip)
 static void code_unknown(struct transient * trans __attribute__((unused)))
 {
 	fprintf(stderr, "Unknown code !\n");
-	exit(EXIT_FAILURE);
+	abort();
 }
 
 
@@ -605,6 +605,36 @@ static void get_tgid(struct transient * trans)
 }
 
 
+/**
+ * There are two cases where we will not get a cookie switch after a context
+ * switch so we must take care to update properly trans->image.
+ * These two case are:
+ * - context switch followed by a kernel sample
+ * - context switch followed by a sample to the same shared libs as
+ * the last sample went.
+ *
+ * The last case can cause an image A/B where task A doesn't
+ * actually mmap image B, no big deal.
+ */
+static void ctx_switch_set_image(struct transient * trans)
+{
+	cookie_t cookie = trans->cookie;
+
+	if (!trans->app_cookie) {
+		trans->image = 0;
+		return;
+	}
+
+	// If cookie == 0 and a kernel sample follows this
+	// we need to make sure that it is attributed to the
+	// right application, namely the one we just swiched to
+	if (!cookie)
+		cookie = trans->app_cookie;
+
+	trans->image = opd_get_image(cookie, trans->app_cookie);
+}
+
+
 static void code_ctx_switch(struct transient * trans)
 {
 	if (!enough_remaining(trans, 2)) {
@@ -615,14 +645,7 @@ static void code_ctx_switch(struct transient * trans)
 	trans->pid = pop_buffer_value(trans);
 	trans->app_cookie = pop_buffer_value(trans);
 
-	/* This is a corner case - if a kernel sample follows this,
-	 * we need to make sure that it is attributed to the
-	 * right application, namely the one we just switched into.
-	 */
-	if (trans->app_cookie)
-		trans->image = opd_get_image(trans->app_cookie, trans->app_cookie);
-	else
-		trans->image = 0;
+	ctx_switch_set_image(trans);
 
 	/* Look for a possible tgid postscript */
 	get_tgid(trans);
@@ -755,7 +778,7 @@ void opd_process_samples(char const * buffer, size_t count)
 	
 		if (code >= LAST_CODE) {
 			fprintf(stderr, "Unknown code %llu\n", code);
-			exit(EXIT_FAILURE);
+			abort();
 		}
 
 		handlers[code](&trans);

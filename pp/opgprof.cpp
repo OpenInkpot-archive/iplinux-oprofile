@@ -19,7 +19,7 @@
 #include "string_filter.h"
 #include "file_manip.h"
 #include "profile_container.h"
-#include "partition_files.h"
+#include "arrange_profiles.h"
 #include "opgprof_options.h"
 #include "cverb.h"
 #include "ocg_hash.h"
@@ -221,36 +221,28 @@ void output_gprof(op_bfd const & abfd, profile_container const & samples,
 }
 
 
-string load_samples(op_bfd const & abfd, image_set const & images,
-                    profile_container & samples)
+void load_samples(op_bfd const & abfd, list<string> const & files,
+                  string const & image, profile_container & samples)
 {
-	image_set::const_iterator it;
-	for (it = images.begin(); it != images.end(); ) {
-		pair<image_set::const_iterator, image_set::const_iterator>
-			p_it = images.equal_range(it->first);
+	list<string>::const_iterator it = files.begin();
+	list<string>::const_iterator const end = files.end();
 
-		string app_name = p_it.first->first;
+	for (; it != end; ++it) {
 
 		profile_t profile;
 
-		for (;  it != p_it.second; ++it) {
-			profile.add_sample_file(it->second.sample_filename,
-						abfd.get_start_offset());
-		}
+		profile.add_sample_file(*it, abfd.get_start_offset());
 
 		check_mtime(abfd.get_filename(), profile.get_header());
 
-		samples.add(profile, abfd, app_name, 0);
+		samples.add(profile, abfd, image, 0);
 	}
-
-	return images.begin()->first;
 }
 
 
-bool load_cg(samples_ocg_t & cg_db, image_set const & images)
+// FIXME: merging
+bool load_cg(samples_ocg_t & cg_db, string const & filename)
 {
-	string const filename = images.begin()->second.sample_filename;
-
 	string::size_type prefixend = filename.find_last_of("/");
 	string const base = filename.substr(0, prefixend + 1);
 	string const end = filename.substr(prefixend + 1, string::npos);
@@ -270,17 +262,14 @@ int opgprof(vector<string> const & non_options)
 
 	profile_container samples(false, true);
 
-	image_set images = sort_by_image(*sample_file_partition,
-					 options::extra_found_images);
-
 	// FIXME: symbol_filter would be allowed through option
-	op_bfd abfd(images.begin()->first, string_filter());
+	op_bfd abfd(profiles.image, string_filter());
 
-	load_samples(abfd, images, samples);
+	load_samples(abfd, profiles.files, profiles.image, samples);
 
 	samples_ocg_t cg_db;
 
-	bool const is_cg = load_cg(cg_db, images);
+	bool const is_cg = load_cg(cg_db, *(profiles.files.begin()));
 
 	output_gprof(abfd, samples, cg_db, is_cg, options::gmon_filename);
 

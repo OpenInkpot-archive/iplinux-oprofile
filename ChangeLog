@@ -1,3 +1,319 @@
+2003-09-14  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* pp/opreport.cpp: handle 2.95 right io manipulator and the lack
+	  of a proper setw(w) << std::string
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* pp/opreport.cpp: re-add header for image summary
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* libpp/arrange_profiles.cpp: throw an exception
+	if there are two many unmerged profiles, with details
+	of how to fix it
+
+	* pp/opgprof_options.cpp:
+	* pp/common_option.cpp: clean up error messages
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* libpp/arrange_profiles.h:
+	* libpp/arrange_profiles.cpp: add location of 
+	images when inverting profiles
+
+	* libpp/locate_images.cpp: return empty string
+	if file isn't readable
+
+	* pp/opannotate.cpp: use the above
+
+	* pp/opreport.cpp: use the above; place warnings
+	before any other output
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* pp/opgprof_options.cpp: use locate_image_path
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* Makefile.am:
+	* populate.h:
+	* populate.cpp: shared code for populating from
+	inverted profiles
+
+	* opreport.cpp:
+	* opannotate.cpp: use above
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* libpp/arrange_profiles.h:
+	* libpp/arrange_profiles.cpp: add invert_profiles
+
+	* pp/opreport.cpp: use it
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* doc/oprofile.xml:
+	* pp/opreport.cpp:
+	* pp/opreport_options.cpp:
+	* pp/opreport_options.h: Turn off VMA report by
+	default, add --show-address
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* pp/opreport.cpp: nice formatting of image report
+	column headers, respect --no-header
+
+2003-09-14  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/arrange_profiles.cpp: use string::erase() not string::clear()
+	  for 2.95
+
+	* libutil++/generic_spec.h: allow to ignore "all" match
+	* libutil++/comma_list.h: use it
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* pp/opreport.cpp: output column headers for
+	image report
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* libpp/arrange_profiles.cpp:
+	* pp/opreport.cpp:
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* libpp/op_header.h:
+	* libpp/op_header.cpp: output header info to
+	a string not a stream
+
+	* libpp/arrange_profiles.h:
+	* libpp/arrange_profiles.cpp: give classes a long
+	name, and fill in global event/cpu info
+
+	* pp/opannotate.cpp:
+	* pp/opannotate_options.cpp:
+	* pp/opannotate_options.h:
+	* pp/opgprof_options.cpp:
+	* pp/opreport.cpp:
+	* pp/opreport_options.cpp:
+	* pp/opreport_options.h: use the class long names
+	and info
+
+2003-09-14  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/profile_spec.cpp: handle symlink
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* arrange_profiles.h:
+	* arrange_profiles.cpp: Add code to give short names
+	to each class, unused yet
+
+2003-09-14  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/arrange_profiles.cpp: missing include<> with gcc 2.95
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* libpp/Makefile.am:
+	* libpp/split_sample_filename.cpp:
+	* libpp/split_sample_filename.h: rename as ...
+
+	* libpp/parse_filename.cpp:
+	* libpp/parse_filename.h: ... this
+
+	* libpp/filename_spec.cpp:
+	* libpp/arrange_profiles.cpp:
+	* libpp/arrange_profiles.h: sort classes for niceness,
+	changes from above
+
+	* pp/opreport.cpp: remove needless double check of
+	exclude_dependent
+
+	* libutil++/string_manip.cpp: touint should init to 0
+	in case of parse failure
+
+2003-09-14  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* configure.in: fix maximum template depth to 50
+	* libutil/op_fileio.c: op_get_link() don't truncate silently results
+	* m4/sstream.m4: use OP_CXXFLAGS not CXXFLAGS
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* pp/partition_files.h:
+	* pp/partition_files.cpp: remove, now unused
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* pp/opannotate.cpp:
+	* pp/opannotate_options.cpp:
+	* pp/opannotate_options.h: use arrange_profiles API
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* pp/opgprof_options.h:
+	* pp/opgprof_options.cpp:
+	* pp/opgprof.cpp: use arrange_profiles API
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* libpp/Makefile.am:
+	* libpp/arrange_profiles.cpp:
+	* libpp/arrange_profiles.h: introduce new
+	code for partitioning profiles and handling
+	merging
+
+	* libpp/partition_files.h:
+	* pp/opreport_options.cpp:
+	* pp/opreport_options.h:
+	* pp/opreport.cpp: use the above code
+
+	* libpp/format_flags.h:
+	* libpp/profile_container.cpp: remove unneeded
+	multiple apps hint
+
+	* libpp/count_array.cpp:
+	* libpp/count_array.h: remove unnecessary code
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* configure.in: back to 0.7cvs
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* pp/opannotate.cpp: gcc 2.91 workaround
+	(in 0.6.1 release)
+
+2003-09-14  John Levon  <levon@movementarian.org>
+
+	* configure.in: bump to 0.6.1
+
+2003-09-13  John Levon  <levon@movementarian.org>
+
+	* doc/oprofile.xml: document "incorrect source attribution"
+	a bit
+
+2003-09-12  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/op_header.cpp: typo in comment
+
+2003-09-11  John Levon  <levon@movementarian.org>
+
+	* configure.in: check for -lintl, tweak -ldl check
+
+2003-09-11  John Levon  <levon@movementarian.org>
+
+	* dae/oprofiled.c:
+	* daemon/oprofiled.c:
+	* libdb/db_manage.c:
+	* libdb/db_test.c: correct headers
+
+2003-09-11  John Levon  <levon@movementarian.org>
+
+	* op_lockfile.c: use correct headers
+
+2003-09-07  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* utils/op_help.c: check than all events are distincts
+
+2003-09-06  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* pch-c++.h:
+	* m4/precompiledheader.m4: new file to handle precompiled header
+	* m4/Makefile.am:
+	* configure.in:
+	* Makefile.am: handle precompiled header
+
+2003-09-05  John Levon  <levon@movementarian.org>
+
+	* opd_image.c: cleanup of ctx_switch_set_image()
+
+2003-09-05  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* daemon/opd_image.c: After a context switch ensure we update correctly
+	  the current image.
+
+2003-09-04  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* pp/opreport.cpp:
+	* pp/opannotate.cpp: catch op_bfd exception and recover gracefully
+
+2003-09-04  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* utils/opcontrol: tweak "signalling daemon " message as suggested
+	  by Carlo Wood
+
+2003-09-04  John Levon  <levon@movementarian.org>
+
+	* doc/oprofile.xml: mention --reset in
+	"Getting Started"
+
+2003-09-03  John Levon  <levon@movementarian.org>
+
+	* libop/op_events.c:
+	* libpp/op_header.cpp:
+	* dae/opd_sample_files.c:
+	* daemon/opd_sample_files.c: propagate event
+	error back up to caller
+
+	* libdb/odb_hash.h: fix comment
+
+2003-09-02  John Levon  <levon@movementarian.org>
+
+	* dae/opd_image.c:
+	* dae/opd_proc.c:
+	* dae/oprofiled.c:
+	* daemon/opd_image.c: use abort() not exit()
+	on "can't happen" errors
+
+2003-09-02  John Levon  <levon@movementarian.org>
+
+	* dae/opd_proc.c:
+	* daemon/opd_image.c: fix error message
+
+2003-08-28  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* events/alpha.ev6.events: fix duplicate um tag
+
+2003-08-28  John Levon  <levon@movementarian.org>
+
+	* events/i386.athlon.events: fix duplicate minimum tag
+
+	* daemon/opd_image.c:
+	* libop/op_events.c: check for duplicate tags
+
+2003-08-28  John Levon  <levon@movementarian.org>
+
+
+2003-08-27  Will Cohen  <wcohen@redhat.com>
+
+	* utils/op_help.c (resolve_events): Typecast printf argument.
+
+2003-08-25  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* pp/opannotate_options.cpp:
+	* pp/opannotate_options.h:
+	* pp/opannotate.cpp: enable multiple events
+
+	* pp/opreport_options.cpp: remove #if 0 .... #endif
+
+2003-08-25  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/count_array.cpp: avoid to access invalid memory
+
+2003-08-25  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* configure.in:
+	* m4/builtinexpect.m4:
+	* m4/configmodule.m4:
+	* module/Makefile.in:
+	* module/ia64/Makefile.in:
+	* module/x86/makefile.in: always use EXTRA_CFLAGS_MODULE not
+	EXTRA_CFLAGS for module build flags
+
 2003-08-23  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libregex/op_regex.h:
@@ -847,7 +1163,7 @@
 2003-06-11  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libutil++/op_bfd.cpp: boring_symbol() new to get a better choice
-	when eliminatiing symbol at identical vma
+	when eliminating symbol at identical vma
 
 2003-06-11  Philippe Elie  <phil.el@wanadoo.fr>
 

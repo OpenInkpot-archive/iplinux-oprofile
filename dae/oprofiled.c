@@ -48,6 +48,7 @@
 #include <errno.h>
 #include <string.h>
 #include <stdlib.h>
+#include <limits.h>
 
 // GNU libc bug
 pid_t getpgid(pid_t pid);
@@ -422,7 +423,7 @@ static void opd_do_notes(struct op_note const * opd_buf, size_t count)
 
 			default:
 				fprintf(stderr, "Received unknown notification type %u\n", note->type);
-				exit(EXIT_FAILURE);
+				abort();
 				break;
 		}
 	}

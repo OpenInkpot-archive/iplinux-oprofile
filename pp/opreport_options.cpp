@@ -17,15 +17,15 @@
 #include <fstream>
 
 #include "profile_spec.h"
+#include "arrange_profiles.h"
 #include "opreport_options.h"
 #include "popt_options.h"
 #include "file_manip.h"
-#include "partition_files.h"
 #include "cverb.h"
 
 using namespace std;
 
-vector<partition_files> sample_file_partition;
+profile_classes classes;
 
 namespace options {
 	bool demangle = true;
@@ -39,6 +39,7 @@ namespace options {
 	merge_option merge_by;
 	bool show_header = true;
 	bool long_filenames;
+	bool show_address;
 	bool accumulated;
 	bool reverse_sort;
 	bool global_percent;
@@ -80,7 +81,9 @@ popt::option options_array[] = {
 	popt::option(mergespec, "merge", 'm',
 		     "comma separated list", "cpu,pid,lib"),
 	popt::option(options::show_header, "no-header", 'n',
-		     "remove all header from output"),
+		     "remove all headers from output"),
+	popt::option(options::show_address, "show-address", 'w',
+	             "show VMA address of each symbol"),
 	popt::option(options::long_filenames, "long-filenames", 'f',
 		     "show the full path of filenames"),
 	popt::option(options::accumulated, "accumulated", 'c',
@@ -170,6 +173,12 @@ void check_options()
 	bool do_exit = false;
 
 	if (!symbols) {
+		if (show_address) {
+			cerr << "--show-address is meaningless "
+				"without --symbols" << endl;
+			do_exit = true;
+		}
+
 		if (debug_info || accumulated) {
 			cerr << "--debug-info and --accumulated are "
 			     << "meaningless without --symbols" << endl;
@@ -209,8 +218,10 @@ void handle_options(vector<string> const & non_options)
 {
 	using namespace options;
 
-	if (details)
+	if (details) {
 		symbols = true;
+		show_address = true;
+	}
 
 	handle_sort_option();
 	handle_merge_option();
@@ -228,39 +239,11 @@ void handle_options(vector<string> const & non_options)
 	copy(sample_files.begin(), sample_files.end(),
 	     ostream_iterator<string>(cverb, "\n"));
 
-	vector<unmergeable_profile>
-		unmerged_profile = merge_profile(sample_files);
+	classes = arrange_profiles(sample_files, merge_by);
 
-	cverb << "Unmergeable profile specification:\n";
-	copy(unmerged_profile.begin(), unmerged_profile.end(),
-	     ostream_iterator<unmergeable_profile>(cverb, "\n"));
-
-	if (unmerged_profile.empty()) {
+	if (classes.v.empty()) {
 		cerr << "No samples files found: profile specification too "
 		     << "strict ?" << endl;
 		exit(EXIT_FAILURE);
-	}
-
-/* This should probably be removed now ? */
-#if 0
-	if (unmerged_profile.size() > 1) {
-		// quick and dirty check for now
-		cerr << "Can't handle multiple counters." << endl;
-		cerr << "use event:xxxx and/or count:yyyyy to restrict "
-		     << "samples files set considered\n" << endl;
-		exit(EXIT_FAILURE);
-	}
-#endif
-
-	unmergeable_samplefile unmerged_samplefile =
-		unmerge_samplefile(sample_files, unmerged_profile);
-
-	unmergeable_samplefile::const_iterator const cend =
-		unmerged_samplefile.end();
-	unmergeable_samplefile::const_iterator cit =
-		unmerged_samplefile.begin();
-	for ( ; cit != cend ; ++cit) {
-		sample_file_partition.push_back(
-			partition_files(*cit, merge_by));
 	}
 }

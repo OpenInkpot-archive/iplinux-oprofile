@@ -16,8 +16,10 @@
 #include <fstream>
 #include <utility>
 
+#include "op_exception.h"
 #include "op_header.h"
 #include "profile.h"
+#include "populate.h"
 #include "op_sample_file.h"
 #include "cverb.h"
 #include "string_manip.h"
@@ -25,7 +27,7 @@
 #include "child_reader.h"
 #include "op_file.h"
 #include "file_manip.h"
-#include "partition_files.h"
+#include "arrange_profiles.h"
 #include "opannotate_options.h"
 #include "profile_container.h"
 #include "symbol_sort.h"
@@ -35,10 +37,9 @@ using namespace options;
 
 namespace {
 
-scoped_ptr<profile_container> samples;
+size_t nr_events;
 
-// needed to display samples file information
-scoped_ptr<opd_header> header;
+scoped_ptr<profile_container> samples;
 
 /// how opannotate was invoked
 string cmdline;
@@ -54,58 +55,20 @@ string const end_comment(" */");
 /// field width for the sample count
 unsigned int const count_width = 6;
 
-
-// FIXME share with opgprof.cpp and opreport.cpp
-image_set populate_samples(profile_container & samples,
-			   partition_files const & files,
-			   bool merge_lib, size_t count_group)
-{
-	image_set images = sort_by_image(files, extra_found_images);
-
-	image_set::const_iterator it;
-	for (it = images.begin(); it != images.end(); ) {
-		pair<image_set::const_iterator, image_set::const_iterator>
-			p_it = images.equal_range(it->first);
-
-		op_bfd abfd(p_it.first->first, symbol_filter);
-		profile_t profile;
-
-		string app_name = p_it.first->second.image;
-		if (merge_lib) {
-			app_name = p_it.first->first;
-		}
-
-		for (; it != p_it.second; ++it) {
-			profile.add_sample_file(it->second.sample_filename,
-						abfd.get_start_offset());
-		}
-
-		check_mtime(abfd.get_filename(), profile.get_header());
-	
-		samples.add(profile, abfd, app_name, count_group);
-	}
-
-	return images;
-}
-
-
-void save_sample_file_header(partition_files const & files)
-{
-	if (files.nr_set()) {
-		partition_files::filename_set const & file_set = files.set(0);
-		opd_header temp = read_header(file_set.begin()->sample_filename);
-		header.reset(new opd_header(temp));
-	}
-}
-
-
 string get_annotation_fill()
 {
 	string str;
 
-	str += string(count_width, ' ') + ' ';
-	str += string(percent_width, ' '); 
+	for (size_t i = 0; i < nr_events; ++i) {
+		str += string(count_width, ' ') + ' ';
+		str += string(percent_width, ' ');
+	}
 
+	for (size_t i = 1; i < nr_events; ++i) {
+		str += "  ";
+	}
+
+	str += " :";
 	return str;
 }
 
@@ -160,14 +123,18 @@ void output_info(ostream & out)
 
 	out << in_comment << '\n';
 
-	stringstream stream;
+	stringstream ss;
 
-	output_cpu_info(stream, *header);
-	stream << *header;
-	stream.seekp(0);
+	ss << classes.cpuinfo << endl;
+	if (!classes.event.empty())
+		ss << classes.event << endl;
+
+	for (size_t i = 0; i < classes.v.size(); ++i)
+		ss << classes.v[i].longname << endl;
+	ss.seekp(0);
 
 	string line;
-	while (getline(stream, line)) {
+	while (getline(ss, line)) {
 		out << in_comment << line << '\n';
 	}
 
@@ -179,11 +146,12 @@ string count_str(count_array_t const & count,
 		   count_array_t const & total)
 {
 	ostringstream os;
-	os << setw(count_width) << count[0] << ' ';
+	for (size_t i = 0; i < nr_events; ++i) {
+		os << setw(count_width) << count[i] << ' ';
 
-	// FIXME: multiple counts
-	os << format_double(op_ratio(count[0], total[0]) * 100.0,
-			    percent_int_width, percent_fract_width);
+		os << format_double(op_ratio(count[i], total[i]) * 100.0,
+				    percent_int_width, percent_fract_width);
+	}
 	return os.str();
 }
 
@@ -196,18 +164,22 @@ string asm_line_annotation(symbol_entry const * last_symbol,
 	//  - we does not need cross architecture compile so the native
 	// strtoull must work, assuming unsigned long long can contain a vma
 	// and on 32/64 bits box bfd_vma is 64 bits
-	bfd_vma vma = strtoull(value.c_str(), NULL, 16);
+	// gcc 2.91.66 workaround
+	bfd_vma vma = 0;
+	vma = strtoull(value.c_str(), NULL, 16);
 
 	string str;
 
 	sample_entry const * sample = samples->find_sample(last_symbol, vma);
-	if (sample)
+	if (sample) {
 		str += count_str(sample->counts, samples->samples_count());
-
-	if (str.empty())
+		for (size_t i = 1; i < nr_events; ++i)
+			str += "  ";
+		str += " :";
+	} else {
 		str = annotation_fill;
+	}
 
-	str += " :";
 	return str;
 }
 
@@ -264,7 +236,7 @@ symbol_entry const * output_objdump_asm_line(symbol_entry const * last_symbol,
 
 	if (pos == str.length() || !isxdigit(str[pos])) {
 		if (do_output) {
-			cout << annotation_fill << " :" << str << '\n';
+			cout << annotation_fill << str << '\n';
 			return last_symbol;
 		}
 	}
@@ -274,7 +246,7 @@ symbol_entry const * output_objdump_asm_line(symbol_entry const * last_symbol,
 
 	if (pos == str.length() || (!isspace(str[pos]) && str[pos] != ':')) {
 		if (do_output) {
-			cout << annotation_fill << " :" << str << '\n';
+			cout << annotation_fill << str << '\n';
 			return last_symbol;
 		}
 	}
@@ -425,13 +397,15 @@ string const source_line_annotation(debug_name_id filename, size_t linenr)
 	string str;
 
 	count_array_t counts = samples->samples_count(filename, linenr);
-	if (!counts.zero())
+	if (!counts.zero()) {
 		str += count_str(counts, samples->samples_count());
-
-	if (str.empty())
+		for (size_t i = 1; i < nr_events; ++i)
+			str += "  ";
+		str += " :";
+	} else {
 		str = annotation_fill;
+	}
 
-	str += " :";
 	return str;
 }
 
@@ -620,7 +594,7 @@ void output_source(path_filter const & filter)
 }
 
 
-bool annotate_source(image_set const & images)
+bool annotate_source(list<string> const & images)
 {
 	annotation_fill = get_annotation_fill();
 
@@ -647,13 +621,14 @@ bool annotate_source(image_set const & images)
 
 	if (assembly) {
 		bool some_output = false;
-		image_set::const_iterator it;
-		for (it = images.begin(); it != images.end(); ) {
-			if (output_asm(it->first)) {
+
+		list<string>::const_iterator it = images.begin();
+		list<string>::const_iterator const end = images.end();
+
+		for (; it != end; ++it) {
+			if (output_asm(*it)) {
 				some_output = true;
 			}
-
-			it = images.upper_bound(it->first);
 		}
 
 		if (!some_output) {
@@ -674,12 +649,23 @@ int opannotate(vector<string> const & non_options)
 {
 	handle_options(non_options);
 
+	nr_events = classes.v.size();
+
 	samples.reset(new profile_container(true, true));
 
-	save_sample_file_header(*sample_file_partition);
+	list<string> images;
 
-	image_set images = populate_samples(*samples, *sample_file_partition,
-					    false, 0);
+	list<inverted_profile> iprofiles
+		= invert_profiles(classes, options::extra_found_images);
+
+	list<inverted_profile>::const_iterator it = iprofiles.begin();
+	list<inverted_profile>::const_iterator const end = iprofiles.end();
+
+	for (; it != end; ++it) {
+		populate_for_image(*samples, *it);
+		images.push_back(it->image);
+	}
+
 	annotate_source(images);
 
 	return 0;

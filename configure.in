@@ -44,7 +44,7 @@ AC_SUBST(MODINSTALLDIR)
 AX_MALLOC_ATTRIBUTE
 AX_BUILTIN_EXPECT
 
-AC_SUBST(EXTRA_CFLAGS)
+AC_SUBST(EXTRA_CFLAGS_MODULE)
 
 topdir=`pwd`
 AC_SUBST(topdir)
@@ -59,7 +59,8 @@ AC_CHECK_FUNCS(xmemdump)
 
 ORIG_SAVE_LIBS="$LIBS"
 AC_CHECK_LIB(popt, poptGetContext,, AC_MSG_ERROR([popt library not found]))
-AC_CHECK_LIB(dl, dlopen,, AC_MSG_ERROR([dl library not found]))
+AC_CHECK_LIB(dl, dlopen, LIBS="$LIBS -ldl"; DL_LIB="-ldl", DL_LIB="")
+AC_CHECK_LIB(intl, main, LIBS="$LIBS -lintl"; INTL_LIB="-lintl", INTL_LIB="")
 AC_CHECK_LIB(bfd, bfd_openr,, AC_MSG_ERROR([bfd library not found]))
 
 # C++ tests
@@ -98,13 +99,21 @@ if test "$enable_abi" = yes; then
 fi
 AM_CONDITIONAL(enable_abi, test "$enable_abi" = yes)
 
+dnl enable pch for c++
+AC_ARG_ENABLE(pch,
+	[  --enable-pch                 enable precompiled header (default is disabled)],
+	enable_pch=$enableval, enable_pch=no)
+if test "$enable_pch" = yes; then
+	AX_CHECK_PRECOMPILED_HEADER(OP_CXXFLAGS, enable_pch)
+fi
+AM_CONDITIONAL(enable_pch, test "$enable_pch" = yes)
+
 AX_CHECK_DOCBOOK
 
 dnl finally restore the original libs setting
 LIBS="$ORIG_SAVE_LIBS"
-dnl some libiberties need -ldl ...
-LIBERTY_LIBS="-liberty -ldl"
-BFD_LIBS="-lbfd -liberty -ldl"
+LIBERTY_LIBS="-liberty $DL_LIB $INTL_LIB"
+BFD_LIBS="-lbfd -liberty $DL_LIB $INTL_LIB"
 POPT_LIBS="-lpopt"
 AC_SUBST(LIBERTY_LIBS)
 AC_SUBST(BFD_LIBS)
@@ -120,6 +129,7 @@ AX_CFLAGS_OPTION(OP_CFLAGS,[-Wall])
 AX_CXXFLAGS_OPTION(OP_CXXFLAGS,[-Wall])
 AX_CFLAGS_OPTION(OP_CFLAGS,[-fno-common])
 AX_CXXFLAGS_OPTION(OP_CXXFLAGS,[-fno-common])
+AX_CXXFLAGS_OPTION(OP_CXXFLAGS,[-ftemplate-depth-50])
 
 dnl enable option to use GCC test coverage
 AC_ARG_ENABLE(gcov,

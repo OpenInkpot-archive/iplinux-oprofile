@@ -960,7 +960,6 @@ do_dump() {
 	if test -e "$DIR/lock"; then
 		OPROFILED_PID=`cat $DIR/lock`
 		if test ! -d "/proc/$OPROFILED_PID"; then
-			echo "Don't exist"
 			return 1;
 		fi
 	else
@@ -994,8 +993,9 @@ do_dump() {
 #tell daemon to re-open the sample files
 hup_daemon() {
 	if test -f "$LOCK_FILE"; then
-		echo "Signalling daemon..."
+		echo -n "Signalling daemon... "
 		kill -HUP `cat $LOCK_FILE` 
+		echo "done"
 	fi
 }
  

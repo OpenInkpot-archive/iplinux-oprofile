@@ -14,7 +14,7 @@
 #include <iterator>
 
 #include "profile_spec.h"
-#include "partition_files.h"
+#include "arrange_profiles.h"
 #include "op_exception.h"
 #include "opannotate_options.h"
 #include "popt_options.h"
@@ -22,7 +22,7 @@
 
 using namespace std;
 
-scoped_ptr<partition_files> sample_file_partition;
+profile_classes classes;
 
 namespace options {
 	bool demangle = true;
@@ -112,29 +112,8 @@ void handle_options(vector<string> const & non_options)
 	copy(sample_files.begin(), sample_files.end(),
 	     ostream_iterator<string>(cverb, "\n"));
 
-	vector<unmergeable_profile>
-		unmerged_profile = merge_profile(sample_files);
-
-	cverb << "Unmergeable profile specification:\n";
-	copy(unmerged_profile.begin(), unmerged_profile.end(),
-	     ostream_iterator<unmergeable_profile>(cverb, "\n"));
-
-	if (unmerged_profile.empty()) {
-		cerr << "No samples files found: profile specification too "
-		     << "strict ?" << endl;
-		exit(EXIT_FAILURE);
-	}
-
-	if (unmerged_profile.size() > 1) {
-		// quick and dirty check for now
-		cerr << "Can't handle multiple counter!" << endl;
-		cerr << "use event:xxxx and/or count:yyyyy to restrict "
-		     << "samples files set considered\n" << endl;
-		exit(EXIT_FAILURE);
-	}
-
 	// we always merge but this have no effect on output since at source
-	// or assembly point of view the result be merged anyway
+	// or assembly point of view the result will be merged anyway
 	merge_option merge_by;
 	merge_by.cpu = true;
 	merge_by.lib = true;
@@ -142,6 +121,11 @@ void handle_options(vector<string> const & non_options)
 	merge_by.tgid = true;
 	merge_by.unitmask = true;
 
-	sample_file_partition.reset(
-		new partition_files(sample_files, merge_by));
+	classes = arrange_profiles(sample_files, merge_by);
+
+	if (classes.v.empty()) {
+		cerr << "No samples files found: profile specification too "
+		     << "strict ?" << endl;
+		exit(EXIT_FAILURE);
+	}
 }

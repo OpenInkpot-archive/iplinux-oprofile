@@ -21,7 +21,7 @@
 #include "string_filter.h"
 #include "symbol_sort.h"
 
-class partition_files;
+class profile_classes;
 class merge_option;
 
 namespace options {
@@ -36,17 +36,15 @@ namespace options {
 	extern merge_option merge_by;
 	extern bool global_percent;
 	extern bool long_filenames;
+	extern bool show_address;
 	extern string_filter symbol_filter;
 	extern double threshold;
 	extern bool show_header;
 	extern bool accumulated;
 }
 
-/**
- * a vector of partition of sample filename to treat. filled by
- * handle_options()
- */
-extern std::vector<partition_files> sample_file_partition;
+/// All the chosen sample files.
+extern profile_classes classes;
 
 /**
  * get_options - process command line
