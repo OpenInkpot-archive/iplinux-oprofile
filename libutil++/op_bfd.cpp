@@ -92,11 +92,9 @@ bool op_bfd_symbol::operator<(op_bfd_symbol const& lhs) const
 
 namespace {
 
-// only add symbols that would /never/ be
-// worth examining
+// only add symbols that would *never* be worth examining
 char const * boring_symbols[] = {
-	"gcc2_compiled.",
-	"_init"
+	"gcc2_compiled."
 };
 
 size_t const nr_boring_symbols =
