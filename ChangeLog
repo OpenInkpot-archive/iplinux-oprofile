@@ -1,3 +1,29 @@
+2003-05-04  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libutil/op_file.h:
+	* libutil/op_file.c: sanitize create_path()
+
+	* libutil++/path_filter.h: default ctor match all
+
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp:
+	* libpp/sample_container.h:
+	* libpp/sample_container.cpp:
+	* libpp/symbol_container.h:
+	* libpp/symbol_container.cpp: extend api to allow selecting symbol
+	  restricted to one appication, ditto for retrieving samples
+
+	* pp/opannotate_options.h:
+	* pp/opannotate_options.cpp:
+	* pp/opannotate.cpp: implement
+
+	* pp/opgprof_options.h:
+	* pp/opgprof_options.cpp:
+	* pp/opreport_options.h:
+	* pp/opreport_options.cpp: comment fix
+
+	* pp/opreport.cpp: update to match new profile_container api
+
 2003-05-03  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* pp/opreport.cpp: don't show dependent file if !--include-dependent

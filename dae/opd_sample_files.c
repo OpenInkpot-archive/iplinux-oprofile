@@ -2,7 +2,7 @@
  * @file dae/opd_sample_files.c
  * Management of sample files
  *
- * @remark Copyright 2002 OProfile authors
+ * @remark Copyright 2002, 2003 OProfile authors
  * @remark Read the file COPYING
  *
  * @author John Levon

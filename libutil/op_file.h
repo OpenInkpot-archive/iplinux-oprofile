@@ -41,7 +41,7 @@ int create_dir(char const * dir);
  * create directory for each dir components in path
  * return false if one of the path cannot be created.
  */
-int create_path(char * path);
+int create_path(char const * path);
 
 #ifdef __cplusplus
 }

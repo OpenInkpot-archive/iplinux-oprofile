@@ -2,7 +2,7 @@
  * @file sample_container.cpp
  * Internal container for samples
  *
- * @remark Copyright 2002 OProfile authors
+ * @remark Copyright 2002, 2003 OProfile authors
  * @remark Read the file COPYING
  *
  * @author Philippe Elie
@@ -94,25 +94,13 @@ sample_container::accumulate_samples(string const & filename) const
 }
 
 
-sample_entry const * sample_container::find_by_vma(bfd_vma vma) const
+sample_entry const *
+sample_container::find_by_vma(symbol_entry const * symbol, bfd_vma vma) const
 {
-	// can't work, no big deal, will be used by opannotate but the inteface
-	// is no longer sufficient, I need a find_by_vma(symbol*, vma);
-#if 0
-	sample_entry value;
-
-	value.vma = vma;
-
-	samples_iterator it =
-		lower_bound(samples.begin(), samples.end(), value,
-			    less_sample_entry_by_vma());
-
-	if (it != samples.end() && it->second.vma == vma)
+	sample_index_t key(symbol, vma);
+	samples_iterator it = samples.find(key);
+	if (it != samples.end())
 		return &it->second;
-#else
-	cerr << "FIXME: sample_container::find_by_vma() " << vma << endl;
-	exit(EXIT_FAILURE);
-#endif
 
 	return 0;
 }

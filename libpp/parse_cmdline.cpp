@@ -12,6 +12,7 @@
 #include <set>
 #include <sstream>
 #include <iterator>
+#include <iostream>
 
 #include "file_manip.h"
 #include "op_config.h"

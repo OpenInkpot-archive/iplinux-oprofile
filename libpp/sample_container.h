@@ -51,8 +51,9 @@ public:
 	unsigned int accumulate_samples(std::string const & filename,
 					size_t linenr) const;
 
-	/// return the sample entry for the given VMA if any
-	sample_entry const * find_by_vma(bfd_vma vma) const;
+	/// return the sample entry for the given image_name and vma if any
+	sample_entry const * find_by_vma(symbol_entry const * symbol,
+					 bfd_vma vma) const;
 
 private:
 	/// build the symbol by file-location cache

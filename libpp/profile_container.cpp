@@ -161,7 +161,8 @@ profile_container::add_samples(profile_t const & profile,
 
 
 profile_container::symbol_collection const
-profile_container::select_symbols(double threshold, bool until_threshold,
+profile_container::select_symbols(string const & image_name,
+				  double threshold, bool until_threshold,
                                   bool sort_by_vma) const
 {
 	symbol_collection v;
@@ -172,6 +173,10 @@ profile_container::select_symbols(double threshold, bool until_threshold,
 	symbol_collection::const_iterator it = v.begin();
 	symbol_collection::const_iterator const end = v.end();
 	for (; it < end && threshold >= 0; ++it) {
+		if (!image_name.empty() &&
+		    (*it)->sample.file_loc.image_name != image_name)
+			continue;
+
 		double const percent =
 			op_ratio((*it)->sample.count, samples_count());
 
@@ -245,9 +250,10 @@ u32 profile_container::samples_count() const
 
 // Rest here are delegated to our private implementation.
 
-symbol_entry const * profile_container::find_symbol(bfd_vma vma) const
+symbol_entry const * profile_container::find_symbol(string const & image_name,
+						    bfd_vma vma) const
 {
-	return symbols->find_by_vma(vma);
+	return symbols->find_by_vma(image_name, vma);
 }
 
 
@@ -265,9 +271,10 @@ profile_container::find_symbol(string const & name) const
 }
 
 
-sample_entry const * profile_container::find_sample(bfd_vma vma) const
+sample_entry const *
+profile_container::find_sample(symbol_entry const * symbol, bfd_vma vma) const
 {
-	return samples->find_by_vma(vma);
+	return samples->find_by_vma(symbol, vma);
 }
 
 

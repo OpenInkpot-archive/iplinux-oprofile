@@ -29,8 +29,8 @@ public:
 	 * Initialise the filter with the include and exclude list, comma-separated.
 	 * Whitespace in each pattern is stripped.
 	 */
-	path_filter(std::string const & include_patterns,
-	            std::string const & exclude_patterns)
+	path_filter(std::string const & include_patterns = "*",
+	            std::string const & exclude_patterns = std::string())
 		: glob_filter(include_patterns, exclude_patterns) {}
 
 	/**

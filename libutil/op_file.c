@@ -269,19 +269,24 @@ int create_dir(char const * dir)
  * the last path component is not considered as a directory
  * but as a filename
  */
-int create_path(char * path)
+int create_path(char const * path)
 {
 	int ret;
-	char * pos;
 
-	pos = path[0] == '/' ? path + 1 : path;
+	char * str = xstrdup(path);
+
+	char * pos = str[0] == '/' ? str + 1 : str;
 
 	for ( ; (pos = strchr(pos, '/')) != NULL; ++pos) {
 		*pos = '\0';
-		ret = create_dir(path);
+		ret = create_dir(str);
 		*pos = '/';
-		if (ret)
+		if (ret) {
+			free(str);
 			return ret;
+		}
 	}
+
+	free(str);
 	return 0;
 }

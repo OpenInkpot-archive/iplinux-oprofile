@@ -86,25 +86,16 @@ void symbol_container::build_by_loc() const
 }
 
 
-symbol_entry const * symbol_container::find_by_vma(bfd_vma /*vma*/) const
+symbol_entry const * symbol_container::find_by_vma(string const & image_name,
+						   bfd_vma vma) const
 {
-	// can't work, symbol are no longer sorted by vma, anyway the interface
-	// is no longer sufficient
-#if 0
-	symbol_entry value;
-
-	value.sample.vma = vma;
-
-	symbols_t::const_iterator it =
-		lower_bound(symbols.begin(), symbols.end(),
-			    value, less_sample_entry_by_vma());
-
-	if (it != symbols.end() && it->sample.vma == vma)
-		return &(*it);
-#else
-	cerr << "FIXME: symbol_container::find_by_vma()" << endl;
-	exit(EXIT_FAILURE);
-#endif
+	// FIXME: this is too inneffcient probably
+	symbols_t::const_iterator it;
+	for (it = symbols.begin(); it != symbols.end(); ++it) {
+		if (it->sample.vma == vma &&
+		    it->sample.file_loc.image_name == image_name)
+			return &*it;
+	}
 
 	return 0;
 }

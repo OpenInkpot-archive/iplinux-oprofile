@@ -2,9 +2,10 @@
  * @file opreport_options.cpp
  * Options for opreport tool
  *
- * @remark Copyright 2002, 2003 OProfile authors
+ * @remark Copyright 2003 OProfile authors
  * @remark Read the file COPYING
  *
+ * @author John Levon
  * @author Philippe Elie
  */
 

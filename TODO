@@ -16,6 +16,9 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
  o test opannotate -s -a on an application containing relative path debug
   info and profiled in another directory than the application build once.
   can objdump retrieve the source file and if no can we work-around ?
+ o opannotate unhandled option (probably not exhaustive) 
+   --base-dir
+   --threshold
  o move oprofiled.log to OP_SAMPLE_DIR/current ?
  o mtime checking in dae is in the wrong place: we must check at each
   samples files open not at image opening
@@ -39,10 +42,18 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
  o opreport /usr/bin/whatever should imply -l (like oprofpp back-compat) but NOT
    if opreport <some spec> and it just *happens* to match one image.
 
- <movement> [moz@lambent oprofile-pp]$ pp/opreport --merge=lib -n | more
-<movement>    194561  40.1204 /boot/2.5.66/vmlinux
-<movement>     62102  12.8060 /boot/2.5.66/vmlinux
-<phe> ok I see, the first is the merged vmlinux from all application the second is the default vmlinux (where we put samples when we have no owning application)
+ o merging vmlinux as dependent library and as primary image
+   $ pp/opreport --merge=lib -n | more
+   194561  40.1204 /boot/2.5.66/vmlinux
+    62102  12.8060 /boot/2.5.66/vmlinux
+  The first is the dependent and merged vmlinux from all application the
+  second is the default vmlinux (where we put samples when we have no owning
+  application)
+  I looked and got problem to fix it, I suspect by adding this constraint we
+  have no longer a strict weak ordering relation and either partition_files
+  must be rewritten or we must fix it in dae. It make sense to fix it in dae by
+  encoding primary image as {root}/usr/bin/make/{dep}/{root}/usr/bin/make. If
+  we fix it in this way I defer the fix after daemon rewrite
 
  o it will be simpler and more efficient to merge samples into a profile_t
   not a profile_container, this will also avoid multiple message "last modified

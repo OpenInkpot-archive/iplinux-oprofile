@@ -208,7 +208,7 @@ void output_symbols_count(partition_files const & files)
 	}
 
 	vector<symbol_entry const *> symbols =
-		samples.select_symbols(options::threshold / 100.0, false);
+		samples.select_symbols(string(), options::threshold / 100.0, false);
 
 	bool need_vma64 = vma64_p(symbols.begin(), symbols.end());
 

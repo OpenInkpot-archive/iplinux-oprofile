@@ -2,7 +2,7 @@
  * @file profile_container.h
  * Container associating symbols and samples
  *
- * @remark Copyright 2002 OProfile authors
+ * @remark Copyright 2002, 2003 OProfile authors
  * @remark Read the file COPYING
  *
  * @author Philippe Elie
@@ -67,8 +67,10 @@ public:
 	void add(profile_t const & profile, op_bfd const & abfd,
 		 std::string const & app_name);
 
-	/// Find a symbol from its vma, return zero if no symbol at this vma
-	symbol_entry const * find_symbol(bfd_vma vma) const;
+	/// Find a symbol from its image_name, vma, return zero if no symbol
+	/// for this image at this vma
+	symbol_entry const * find_symbol(std::string const & image_name,
+					 bfd_vma vma) const;
 
 	/// Find a list of symbol from its name, return an empty vector if no
 	/// symbol found
@@ -79,14 +81,18 @@ public:
 	symbol_entry const * find_symbol(std::string const & filename,
 					size_t linenr) const;
 
-	/// Find a sample by its vma, return zero if no sample at this vma
-	sample_entry const * find_sample(bfd_vma vma) const;
+	/// Find a sample by its symbol, vma, return zero if there is no sample
+	/// at this vma
+	sample_entry const * find_sample(symbol_entry const * symbol,
+					 bfd_vma vma) const;
 
 	/// a collection of sorted symbols
 	typedef std::vector<symbol_entry const *> symbol_collection;
 
 	/**
 	 * select_symbols - create a set of symbols sorted by sample count
+	 * @param image_name select symbols belonging to this binary image
+	 *  or all if image_name is empty
 	 * @param threshold select symbols which contains more than
 	 *   threshold percent of samples
 	 * @param until_threshold rather to get symbols with more than
@@ -99,7 +105,7 @@ public:
 	 * of op_to_source. If you need to get all symbols call it with
 	 * threshold == 0.0 and !until_threshold
 	 */
-	symbol_collection const select_symbols(
+	symbol_collection const select_symbols(std::string const & image_name,
 		double threshold, bool until_threshold,
 		bool sort_by_vma = false) const;
 
@@ -129,7 +135,7 @@ public:
 	sample_container::samples_iterator end(symbol_entry const *) const;
 
 private:
-	/// helper for do_add()
+	/// helper for add()
 	void add_samples(profile_t const & profile,
 			 op_bfd const & abfd, symbol_index_t sym_index,
 			 u32 start, u32 end, bfd_vma base_vma,

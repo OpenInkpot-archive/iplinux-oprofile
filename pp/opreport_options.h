@@ -2,9 +2,10 @@
  * @file opreport_options.h
  * Options for opreport tool
  *
- * @remark Copyright 2002, 2003 OProfile authors
+ * @remark Copyright 2003 OProfile authors
  * @remark Read the file COPYING
  *
+ * @author John Levon
  * @author Philippe Elie
  */
 
@@ -41,7 +42,7 @@ namespace options {
 
 /**
  * a partition of sample filename to treat, each sub-list is a list of
- * sample to merge. filled by get_options()
+ * sample to merge. filled by handle_options()
  */
 extern scoped_ptr<partition_files> sample_file_partition;
 
