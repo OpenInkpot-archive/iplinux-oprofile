@@ -48,8 +48,8 @@ void op_check_header(opd_header const & h1, opd_header const & h2)
 		exit(EXIT_FAILURE);
 	}
 
-	// note than we don't check cpu_speed since the reported cpu_speed
-	// can vary at each reboot.
+	// Note that we don't check CPU speed since that can vary
+	// freely on the same machine
 }
 
 
