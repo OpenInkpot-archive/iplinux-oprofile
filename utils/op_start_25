@@ -394,8 +394,9 @@ do_start() {
 		fi
 	done
  
-	echo "Daemon started. Remember you may need to use op_dump"
-	echo "to retrieve profile data"
+	echo 1 >$MOUNT/enable
+ 
+	echo "Daemon started."
 }
  
 # main
