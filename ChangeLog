@@ -1,3 +1,15 @@
+2003-07-02  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* pp/opreport.cpp: honor options::show_header
+
+2003-06-30  Graydon Hoare  <graydon@redhat.com>
+
+	* libpp/op_header.cpp: Handle printing multiple bitmask values.
+
+2003-06-19  John Levon  <levon@movementarian.org>
+
+	* doc/Makefile.am: fix make distcheck
+
 2003-06-18  John Levon  <levon@movementarian.org>
 
 	* pp/opannotate_options.c: hide the unhandled
