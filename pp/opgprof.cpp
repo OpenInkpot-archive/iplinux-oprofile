@@ -53,6 +53,7 @@ void op_write_vma(FILE * fp, op_bfd const & abfd, bfd_vma vma)
 	}
 }
 
+
 void get_vma_range(bfd_vma & min, bfd_vma & max,
 		   profile_container const & samples)
 {
@@ -68,6 +69,7 @@ void get_vma_range(bfd_vma & min, bfd_vma & max,
 			max = it->second.vma;
 	}
 }
+
 
 /**
  * @param abfd  bfd object
@@ -90,6 +92,7 @@ bool aligned_samples(profile_container const & samples, int gap)
 
 	return true;
 }
+
 
 void output_gprof(profile_container const & samples,
 		  string gmon_filename, string image_name)
@@ -154,6 +157,7 @@ void output_gprof(profile_container const & samples,
 			continue;
 		}
 
+		// FIXME: this doesn't actually cap to max value ?
 		if (hist[pos] + count > (u16)-1) {
 			cerr <<	"Warning: capping sample count by "
 			     << hist[pos] + count - ((u16)-1) << endl;
@@ -167,6 +171,7 @@ void output_gprof(profile_container const & samples,
 
 	free(hist);
 }
+
 
 string load_samples(partition_files const & files, profile_container & samples)
 {
@@ -189,8 +194,8 @@ string load_samples(partition_files const & files, profile_container & samples)
 		// no need to warn if image_name is not readable
 		// check_image_name() already do that
 		if (op_file_readable(image_name)) {
-			// FIXME: inneficient since we can have multiple
-			// time the same binary file open bfd openened
+			// FIXME: inefficient since we can have multiple
+			// time the same binary file open bfd opened
 			add_samples(samples, it->sample_filename,
 				    image_name, image_name,
 				    string_filter());
@@ -214,7 +219,9 @@ int opgprof(int argc, char const * argv[])
 	return 0;
 }
 
+
 } // anonymous namespace
+
 
 int main(int argc, char const * argv[])
 {

@@ -10,6 +10,7 @@
 
 #include <vector>
 #include <list>
+#include <iterator>
 
 #include "opgprof_options.h"
 #include "popt_options.h"
@@ -33,10 +34,10 @@ vector<string> image_path;
 
 popt::option options_array[] = {
 	popt::option(options::gmon_filename, "output-filename", 'o',
-		     "output filename, default to gmon.out if not specified",
+		     "output filename, defaults to gmon.out if not specified",
 		     "filename"),
 	popt::option(image_path, "image-path", 'p',
-		     "comma separated path to search missing binaries","path"),
+		     "comma-separated path to search missing binaries","path"),
 };
 
 
@@ -65,9 +66,9 @@ bool try_partition_file(parse_cmdline const & parser,  bool include_dependent)
 	}
 
 	if (unmerged_profile.size() > 1) {
-		cerr << "too many unmergeable profile specification" << endl;
-		cerr << "use event:xxxx and/or count:yyyyy to restrict "
-		     << "samples files set considered\n" << endl;
+		cerr << "Too many unmergeable profile specifications." << endl;
+		cerr << "Use event:xxxx and/or count:yyyyy to restrict "
+		     << "sample files considered.\n" << endl;
 		exit(EXIT_FAILURE);
 	}
 
@@ -82,11 +83,14 @@ bool try_partition_file(parse_cmdline const & parser,  bool include_dependent)
 	sample_file_partition.reset(
 		new partition_files(sample_files, merge_by));
 
-	// FIXME: above check check would be suppressed
+	// FIXME: above check should be suppressed
 	if (sample_file_partition->nr_set() > 1) {
-		cerr << "too many unmerged profile specification" << endl;
+		// FIXME: we can do a lot better in telling the user the
+		// *exact* problem: sample_file_partition::report()
+		// or whatever
+		cerr << "Too many unmerged profile specifications." << endl;
 		cerr << "use event:xxxx and/or count:yyyyy to restrict "
-		     << "samples files set considered\n" << endl;
+		     << "samples files considered.\n" << endl;
 		exit(EXIT_FAILURE);
 	}
 

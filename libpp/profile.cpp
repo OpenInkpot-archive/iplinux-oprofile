@@ -72,6 +72,7 @@ unsigned int profile_t::accumulate_samples(uint index) const
 	return accumulate_samples(index, index + 1);
 }
 
+
 unsigned int profile_t::accumulate_samples(uint start, uint end) const
 {
 	unsigned int count = 0;
@@ -89,6 +90,7 @@ unsigned int profile_t::accumulate_samples(uint start, uint end) const
 	return count;
 }
 
+
 void profile_t::set_start_offset(u32 start_offset_)
 {
 	if (!first_header().is_kernel)
@@ -97,12 +99,7 @@ void profile_t::set_start_offset(u32 start_offset_)
 	start_offset = start_offset_;
 }
 
-/**
- * output_header() - output counter setup
- *
- * output to stdout the cpu type, cpu speed
- * and all counter description available
- */
+
 void profile_t::output_header() const
 {
 	opd_header const & header = first_header();
@@ -116,6 +113,7 @@ void profile_t::output_header() const
 	op_print_event(cout, cpu, header.ctr_event,
 		       header.ctr_um, header.ctr_count);
 }
+
 
 void profile_t::check_headers(profile_t const & rhs) const
 {
@@ -153,6 +151,7 @@ void profile_t::check_headers(profile_t const & rhs) const
 	}
 }
 
+
 void profile_t::build_ordered_samples(string const & filename)
 {
 	samples_odb_t samples_db;
@@ -181,10 +180,10 @@ void profile_t::build_ordered_samples(string const & filename)
 	odb_node_nr_t node_nr, pos;
 	odb_node_t * node = odb_get_iterator(&samples_db, &node_nr);
 
-	for ( pos = 0 ; pos < node_nr ; ++pos) {
+	for (pos = 0; pos < node_nr; ++pos) {
 		if (node[pos].key) {
-			ordered_samples_t::value_type val(node[pos].key,
-							node[pos].value);
+			ordered_samples_t::value_type
+				val(node[pos].key, node[pos].value);
 			ordered_samples.insert(val);
 		}
 	}

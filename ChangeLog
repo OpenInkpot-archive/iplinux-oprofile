@@ -1,3 +1,9 @@
+2003-04-30  John Levon  <levon@movementarian.org>
+
+	* pp/opgprof.cpp:
+	* pp/opgprof_options.cpp:
+	* libpp/profile.cpp: tiny cleanups, fix compile
+
 2003-04-30  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libdb/db_stat.c: minor improvment to stat, usefull to track missed
