@@ -1,5 +1,10 @@
 2002-04-19  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* dae/opd_proc.h:
+	* dae/oprofiled.h: enable db samples file format
+
+2002-04-19  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libdb/*: initial import from oprofile-tests module
 	  note than this direcroty have it's own ChangeLog file
 	* dae/Makefile.in: use libdb.a
