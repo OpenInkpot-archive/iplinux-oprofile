@@ -387,36 +387,37 @@ opd_find_app_kernel_image(vma_t * eip, struct opd_image * app_image)
 struct opd_image *
 opd_find_kernel_image(vma_t * eip, struct opd_image * app_image)
 {
+	struct opd_module * module;
+
 	if (no_vmlinux) {
 		opd_stats[OPD_KERNEL]++;
 		return kernel_image;
 	}
 
-	if (!app_image) {
-		struct opd_module * module;
-
-		if (*eip >= kernel_start && *eip < kernel_end) {
-			opd_stats[OPD_KERNEL]++;
-			*eip -= kernel_start;
-			return kernel_image;
-		}
-
-		module = opd_find_module_by_eip(*eip);
-
-		if (!module) {
-			opd_stats[OPD_LOST_MODULE]++;
-			return 0;
-		}
-
-		if (module->image) {
-			opd_stats[OPD_MODULE]++;
-			*eip -= module->start;
-			return module->image;
-		}
-
-		opd_stats[OPD_LOST_MODULE]++;
-		verbprintf("No image for sampled module %s\n", module->name);
+	if (app_image) {
+		return opd_find_app_kernel_image(eip, app_image);
 	}
 
-	return opd_find_app_kernel_image(eip, app_image);
+	if (*eip >= kernel_start && *eip < kernel_end) {
+		opd_stats[OPD_KERNEL]++;
+		*eip -= kernel_start;
+		return kernel_image;
+	}
+
+	module = opd_find_module_by_eip(*eip);
+
+	if (!module) {
+		opd_stats[OPD_LOST_MODULE]++;
+		return 0;
+	}
+
+	if (module->image) {
+		opd_stats[OPD_MODULE]++;
+		*eip -= module->start;
+		return module->image;
+	}
+
+	opd_stats[OPD_LOST_MODULE]++;
+	verbprintf("No image for sampled module %s\n", module->name);
+	return NULL;
 }
