@@ -54,7 +54,7 @@
 	* pp/op_to_source.cpp pp/op_to_source_options.cpp
 	* pp/op_to_source_options.h pp/op_merge.cpp: removed files
 
-	* pp/makefile.am: update
+	* pp/Makefile.am: update
 
 2003-05-06  Philippe Elie  <phil.el@wanadoo.fr>
 
