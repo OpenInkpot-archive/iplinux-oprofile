@@ -30,17 +30,15 @@ namespace format_output {
 /// class to output in a columned format symbols and associated samples
 class formatter {
 public:
-	/// build an output_symbol object, the profile_container life time
-	/// object must be > of the life time of the output_symbol object.
 	formatter(profile_container const & profile);
 
-	/// convenience to add output options flags w/o worrying about cast
+	/// add a given column
 	void add_format(format_flags flag);
 
 	/** output a vector of symbols to out according to the output format
 	 * specifier previously set by call(s) to add_format() */
 	void output(std::ostream & out,
-		    std::vector<symbol_entry const *> const & v, bool vma_64);
+		    std::vector<symbol_entry const *> const & v);
 
 	/// set the output_details boolean
 	void show_details();
@@ -48,6 +46,8 @@ public:
 	void hide_header();
 	/// show long (full path) filenames
 	void show_long_filenames();
+	/// format for 64 bit wide VMAs
+	void vma_format_64bit();
 
 private:
 

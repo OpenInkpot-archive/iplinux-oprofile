@@ -73,11 +73,8 @@ void formatter::output(ostream & out, symbol_entry const * symb)
 
 
 void formatter::output(ostream & out,
-                       vector<symbol_entry const *> const & symbols,
-		       bool vma_64_)
+                       vector<symbol_entry const *> const & symbols)
 {
-	vma_64 = vma_64_;
-
 	vector<symbol_entry const *>::const_iterator it;
 	for (it = symbols.begin(); it != symbols.end(); ++it) {
 		output(out, *it);
@@ -102,6 +99,12 @@ void formatter::show_long_filenames()
 	long_filenames = true;
 }
  
+
+void formatter::vma_format_64bit()
+{
+	vma_64 = true;
+}
+
 
 /// describe each possible field of colummned output.
 // FIXME: some field have header_name too long (> field_description::width)

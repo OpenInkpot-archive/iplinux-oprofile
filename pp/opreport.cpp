@@ -298,6 +298,29 @@ void populate_profiles(partition_files const & files, profile_container & sample
 }
 
 
+format_flags const get_format_flags(column_flags const & cf)
+{
+	format_flags flags(ff_none);
+	flags = format_flags(flags | ff_vma | ff_nr_samples);
+	flags = format_flags(flags | ff_percent | ff_symb_name);
+
+	if (!options::merge_by.lib && (cf & cf_multiple_apps))
+		flags = format_flags(flags | ff_app_name);
+	if (options::debug_info)
+		flags = format_flags(flags | ff_linenr_info);
+
+	if (options::accumulated) {
+		flags = format_flags(flags | ff_nr_samples_cumulated);
+		flags = format_flags(flags | ff_percent_cumulated);
+	}
+
+	if (!options::exclude_dependent)
+		flags = format_flags(flags | ff_image_name);
+
+	return flags;
+}
+
+
 void output_symbols(profile_container const & samples)
 {
 	profile_container::symbol_choice choice;
@@ -313,27 +336,11 @@ void output_symbols(profile_container const & samples)
 		out.show_long_filenames();
 	if (!options::show_header)
 		out.hide_header();
+	if (choice.hints & cf_64bit_vma)
+		out.vma_format_64bit();
 
-	format_flags flags = format_flags(ff_vma | ff_nr_samples);
-	flags = format_flags(flags | ff_percent | ff_symb_name);
-
-	if (!options::merge_by.lib && (choice.hints & cf_multiple_apps))
-		flags = format_flags(flags | ff_app_name);
-	if (options::debug_info)
-		flags = format_flags(flags | ff_linenr_info);
-
-	if (options::accumulated) {
-		flags = format_flags(flags | ff_nr_samples_cumulated);
-		flags = format_flags(flags | ff_percent_cumulated);
-	}
-
-	if (!options::exclude_dependent)
-		flags = format_flags(flags | ff_image_name);
-
-
-	out.add_format(flags);
-
-	out.output(cout, symbols, choice.hints & cf_64bit_vma);
+	out.add_format(get_format_flags(choice.hints));
+	out.output(cout, symbols);
 }
 
 
