@@ -114,11 +114,13 @@ split_sample_filename split_sample_file(string const & filename)
 				       filename);
 	}
 
+#if 0
 	// PP:3.23 {kern} must be followed by a single path component
 	if (path[0] == "{kern}" && path.size() != 2) {
 		throw invalid_argument("split_filename() invalid filename: " +
 				       filename);
 	}
+#endif
 
 	size_t i;
 	for (i = 1 ; i < path.size() ; ++i) {
