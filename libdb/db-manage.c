@@ -122,11 +122,6 @@ void db_open(db_tree_t * tree, const char * filename, size_t sizeof_header)
 		}
 	} else {
 		nr_page = (stat_buf.st_size - tree->offset_page) / sizeof(db_page_t);
-
-		if (nr_page != tree->descr->size) {
-			fprintf(stderr, "nr_page != tree->descr->size\n");
-			exit(EXIT_FAILURE);
-		}
 	}
 
 	tree->base_memory = 
@@ -149,6 +144,11 @@ void db_open(db_tree_t * tree, const char * filename, size_t sizeof_header)
 		tree->descr->root_idx = db_nil_page;
 
 		db_init_page(tree, 0, tree->descr->size);
+	} else {
+		if (nr_page != tree->descr->size) {
+			fprintf(stderr, "nr_page != tree->descr->size\n");
+			exit(EXIT_FAILURE);
+		}
 	}
 }
 

@@ -81,6 +81,10 @@ typedef struct {
 	size_t is_locked;		/*< is fd already locked */
 } db_tree_t;
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /* db-manage.c */
 /** 
  * \param tree the data base object to setup 
@@ -138,5 +142,9 @@ static __inline db_page_t * page_nr_to_page_ptr(const db_tree_t * tree,
 	assert(page_nr < tree->descr->current_size);
 	return &tree->page_base[page_nr];
 }
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* !DB_H */
