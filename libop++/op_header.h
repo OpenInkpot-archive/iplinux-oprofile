@@ -38,6 +38,6 @@ void check_mtime(std::string const & file, opd_header const & header);
 /**
  * output a readable form of header to out
  */
-void output_header(ostream & out, opd_header const & header);
+void output_header(std::ostream & out, opd_header const & header);
 
 #endif // OP_HEADER_H
