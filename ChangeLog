@@ -1,3 +1,7 @@
+2003-05-03  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* pp/opreport.cpp: don't show dependent file if !--include-dependent
+
 2003-05-02  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libpp/partition_files.h:

@@ -12,11 +12,10 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
 
    - race with opcontrol --shutdown on odb_open() ?
 
+ o write the man page and xml doc
  o test opannotate -s -a on an application containing relative path debug
   info and profiled in another directory than the application build once.
   can objdump retrieve the source file and if no can we work-around ?
- o "no samples files found". Make that check if there were some, but they
-   didn't match, and if so, give a different message w/o mentioning --dump
  o move oprofiled.log to OP_SAMPLE_DIR/current ?
  o mtime checking in dae is in the wrong place: we must check at each
   samples files open not at image opening
@@ -30,10 +29,6 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
  o inhibit build of opdiff in pp/Makefile.am
  o consider to do the symbol (details too ?) sort at output, format_output receive
   a vector of symbol to consider, we can perhaps sort in format_output
- o when a library is not accessible we warn each time we try to bfd_open this
-  lib so on multiple time with --seperate=lib, we must warn once. The best way
-  is to bfd_open only one time each binary. It will also speed up opreport
-  (see opreport.cpp:output_symbols_count() comment above add_samples() call)
  o opreport unhandled option (probably not exhaustive) 
   --global-percent is not handled according to pp_interface
   --accumulated
@@ -41,17 +36,17 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
   --output-file filename
  o pp/opreport --merge lib /lib/i686/libc-2.3.2.so doesn't do anything when using
    separate
- o if not --include-dependent, don't output e.g. :
-      208   0.1295 /bin/more
-              208 100.0000  /bin/more
- 
  o opreport /usr/bin/whatever should imply -l (like oprofpp back-compat) but NOT
    if opreport <some spec> and it just *happens* to match one image.
 
  <movement> [moz@lambent oprofile-pp]$ pp/opreport --merge=lib -n | more
 <movement>    194561  40.1204 /boot/2.5.66/vmlinux
 <movement>     62102  12.8060 /boot/2.5.66/vmlinux
-<phe> ok I see, the first is the merged vmlinux from all application the second in the default vmlinux (where we put samples when we have no owning application)
+<phe> ok I see, the first is the merged vmlinux from all application the second is the default vmlinux (where we put samples when we have no owning application)
+
+ o it will be simpler and more efficient to merge samples into a profile_t
+  not a profile_container, this will also avoid multiple message "last modified
+  time ... does not match ..."
 
  o fix John movement on 2.5: odb_insert failure (and message error corrupted ?)
 

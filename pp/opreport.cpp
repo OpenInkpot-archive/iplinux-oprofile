@@ -124,9 +124,7 @@ void output_counter(double total_count, size_t count)
 
 string get_filename(string const & filename)
 {
-	return options::short_filename
-		? basename(filename)
-		: filename;
+	return options::short_filename ? basename(filename) : filename;
 }
 
 
@@ -177,7 +175,8 @@ void output_files_count(partition_files const & files)
 				cout << get_filename(it->lib_image);
 		}
 		cout << endl;
-		if (!options::hide_dependent && !options::merge_by.merge_lib) {
+		if (options::include_dependent && !options::hide_dependent &&
+		    !options::merge_by.merge_lib) {
 			output_sub_count(*it, total_count);
 		}
 	}
