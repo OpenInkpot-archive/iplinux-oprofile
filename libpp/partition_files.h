@@ -25,11 +25,11 @@
  * store merging options options used to partition samples filename
  */
 struct merge_option {
-	bool merge_cpu;
-	bool merge_lib;
-	bool merge_tid;
-	bool merge_tgid;
-	bool merge_unitmask;
+	bool cpu;
+	bool lib;
+	bool tid;
+	bool tgid;
+	bool unitmask;
 };
 
 /**

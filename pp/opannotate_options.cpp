@@ -138,11 +138,11 @@ void handle_options(vector<string> const & non_options)
 	// we always merge but this have no effect on output since at source
 	// or assembly point of view the result be merged anyway
 	merge_option merge_by;
-	merge_by.merge_cpu = true;
-	merge_by.merge_lib = true;
-	merge_by.merge_tid = true;
-	merge_by.merge_tgid = true;
-	merge_by.merge_unitmask = true;
+	merge_by.cpu = true;
+	merge_by.lib = true;
+	merge_by.tid = true;
+	merge_by.tgid = true;
+	merge_by.unitmask = true;
 
 	sample_file_partition.reset(
 		new partition_files(sample_files, merge_by));

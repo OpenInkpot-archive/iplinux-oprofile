@@ -88,7 +88,7 @@ merge_compare::merge_compare(merge_option const & merge_by_)
 bool merge_compare::operator()(split_sample_filename const & lhs,
 			       split_sample_filename const & rhs) const
 {
-	if (merge_by.merge_lib) {
+	if (merge_by.lib) {
 		if (lhs.lib_image != rhs.lib_image)
 			return lhs.lib_image < rhs.lib_image;
 		if (lhs.lib_image.empty() && lhs.image != rhs.image)
@@ -104,16 +104,16 @@ bool merge_compare::operator()(split_sample_filename const & lhs,
 	if (lhs.count != rhs.count)
 		return lhs.count < rhs.count;
 
-	if (!merge_by.merge_cpu && lhs.cpu != rhs.cpu)
+	if (!merge_by.cpu && lhs.cpu != rhs.cpu)
 		return lhs.cpu < rhs.cpu;
 
-	if (!merge_by.merge_tid && lhs.tid != rhs.tid)
+	if (!merge_by.tid && lhs.tid != rhs.tid)
 		return lhs.tid < rhs.tid;
 
-	if (!merge_by.merge_tgid && lhs.tgid != rhs.tgid)
+	if (!merge_by.tgid && lhs.tgid != rhs.tgid)
 		return lhs.tgid < rhs.tgid;
 
-	if (!merge_by.merge_unitmask && lhs.unitmask != rhs.unitmask)
+	if (!merge_by.unitmask && lhs.unitmask != rhs.unitmask)
 		return lhs.unitmask < rhs.unitmask;
 
 	return false;

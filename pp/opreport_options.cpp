@@ -142,23 +142,23 @@ void handle_merge_option()
 
 	for (; cit != end; ++cit) {
 		if (*cit == "cpu") {
-			options::merge_by.merge_cpu = true;
+			options::merge_by.cpu = true;
 		} else if (*cit == "tid") {
-			options::merge_by.merge_tid = true;
+			options::merge_by.tid = true;
 		} else if (*cit == "tgid") {
 			// PP:5.21 tgid merge imply tid merging.
-			options::merge_by.merge_tgid = true;
-			options::merge_by.merge_tid = true;
+			options::merge_by.tgid = true;
+			options::merge_by.tid = true;
 		} else if (*cit == "lib") {
-			options::merge_by.merge_lib = true;
+			options::merge_by.lib = true;
 		} else if (*cit == "unitmask") {
-			options::merge_by.merge_unitmask = true;
+			options::merge_by.unitmask = true;
 		} else if (*cit == "all") {
-			options::merge_by.merge_cpu = true;
-			options::merge_by.merge_lib = true;
-			options::merge_by.merge_tid = true;
-			options::merge_by.merge_tgid = true;
-			options::merge_by.merge_unitmask = true;
+			options::merge_by.cpu = true;
+			options::merge_by.lib = true;
+			options::merge_by.tid = true;
+			options::merge_by.tgid = true;
+			options::merge_by.unitmask = true;
 		} else {
 			cerr << "unknown merge option: " << *cit << endl;
 			exit(EXIT_FAILURE);

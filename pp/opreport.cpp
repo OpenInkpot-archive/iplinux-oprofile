@@ -194,14 +194,14 @@ output_summaries(vector<group_summary> const & summaries, double total_count)
 		output_counter(total_count, it->count);
 
 		string image = it->image_name;
-		if (options::merge_by.merge_lib && !it->lib_image.empty())
+		if (options::merge_by.lib && !it->lib_image.empty())
 			image = it->lib_image;
 
 		cout << get_filename(image) << endl;
 
 		bool hidedep = !options::include_dependent;
 		hidedep |= options::hide_dependent;
-		hidedep |= options::merge_by.merge_lib;
+		hidedep |= options::merge_by.lib;
 
 		summary const & first = it->files[0];
 		string const & dep_image = first.lib_image.empty()
@@ -240,7 +240,7 @@ void populate_profiles(partition_files const & files, profile_container & sample
 		// we can optimize by cumulating samples to this binary in
 		// a profile_t only if we merge by lib since for non merging
 		// case application name change and must be recorded
-		if (options::merge_by.merge_lib) {
+		if (options::merge_by.lib) {
 			string app_name = p_it.first->first;
 
 			profile_t profile;
@@ -301,7 +301,7 @@ void output_symbols(profile_container const & samples)
 		flags = outsymbflag(flags | osf_percent_cumulated);
 	}
 
-	if (options::include_dependent && !options::merge_by.merge_lib)
+	if (options::include_dependent && !options::merge_by.lib)
 		flags = outsymbflag(flags | osf_image_name);
 
 	if (options::debug_info)
