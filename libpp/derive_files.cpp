@@ -232,7 +232,6 @@ string check_image_name(alt_filename_t const & alternate_filename,
 	}
 
 	if (distance(p_it.first, p_it.second) != 1) {
-		return string();
 		cerr << "The image name " << samples_filename
 		     << " matches more than one filename, and will be ignored." << endl;
 		return string();
