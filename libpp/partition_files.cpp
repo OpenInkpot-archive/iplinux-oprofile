@@ -13,6 +13,7 @@
 #include <iterator>
 
 #include "cverb.h"
+#include "file_manip.h"
 #include "partition_files.h"
 #include "split_sample_filename.h"
 
@@ -167,4 +168,35 @@ partition_files::filename_set const & partition_files::set(size_t index) const
 	advance(it, filename_partition::difference_type(index));
 
 	return *it;
+}
+
+
+image_set sort_by_image(partition_files const & files,
+			alt_filename_t const & alternate_filename)
+{
+	image_set result;
+
+	for (size_t i = 0 ; i < files.nr_set(); ++i) {
+		partition_files::filename_set const & file_set = files.set(i);
+
+		partition_files::filename_set::const_iterator it;
+		for (it = file_set.begin(); it != file_set.end(); ++it) {
+			string image_name = it->lib_image.empty() ?
+				it->image : it->lib_image;
+
+
+			// if the image files does not exist try to retrieve it
+			image_name = check_image_name(alternate_filename,
+				image_name, it->sample_filename);
+
+			// no need to warn if image_name is not readable
+			// check_image_name() already do that
+			if (op_file_readable(image_name)) {
+				image_set::value_type value(image_name, *it);
+				result.insert(value);
+			}
+		}
+	}
+
+	return result;
 }

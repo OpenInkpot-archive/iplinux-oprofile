@@ -10,6 +10,7 @@
 
 #include <vector>
 
+#include "string_filter.h"
 #include "op_exception.h"
 #include "opannotate_options.h"
 #include "popt_options.h"
@@ -25,14 +26,16 @@ namespace options {
 	string base_dir;
 	string include_file;
 	string exclude_file;
-	string include_symbol;
-	string exclude_symbol;
+	string_filter symbol_filter;
 	bool source;
 	bool assembly;
 }
 
 
 namespace {
+
+	string include_symbols;
+	string exclude_symbols;
 
 popt::option options_array[] = {
 	popt::option(options::demangle, "demangle", 'd',
@@ -51,9 +54,9 @@ popt::option options_array[] = {
 		     "include these comma separated filename", "filenames"),
 	popt::option(options::exclude_file, "exclude-file", '\0',
 		     "exclude these comma separated filename", "filenames"),
-	popt::option(options::include_symbol, "include-symbols", 'i',
+	popt::option(include_symbols, "include-symbols", 'i',
 		     "include these comma separated symbols", "symbols"),
-	popt::option(options::exclude_symbol, "exclude-symbol", 'e',
+	popt::option(exclude_symbols, "exclude-symbol", 'e',
 		     "exclude these comma separated symbols", "symbols"),
 	popt::option(options::source, "source", 's', "output source"),
 	popt::option(options::assembly, "assembly", 'a', "output assembly"),
@@ -69,4 +72,7 @@ void handle_options(vector<string> const & /*non_options*/)
 	if (!assembly && !source) {
 		throw invalid_argument("you must specify at least --source or --assembly\n");
 	}
+
+	options::symbol_filter = string_filter(include_symbols, exclude_symbols);
+
 }

@@ -47,13 +47,13 @@ struct filename_by_samples {
 
 
 profile_container::profile_container(bool add_zero_samples_symbols_,
-                                     outsymbflag flags_,
+                                     bool debug_info_,
                                      bool need_details_)
 	:
 	symbols(new symbol_container),
 	samples(new sample_container),
 	total_count(0),
-	flags(flags_),
+	debug_info(debug_info_),
 	add_zero_samples_symbols(add_zero_samples_symbols_),
 	need_details(need_details_)
 {
@@ -74,7 +74,6 @@ void profile_container::add(profile_t const & profile,
                             string const & app_name)
 {
 	string const image_name = abfd.get_filename();
-	bool const need_linenr = flags & osf_linenr_info;
 
 	for (symbol_index_t i = 0; i < abfd.syms.size(); ++i) {
 
@@ -97,7 +96,7 @@ void profile_container::add(profile_t const & profile,
 
 		symb_entry.name = abfd.syms[i].name();
 
-		if (need_linenr && abfd.get_linenr(i, start, filename, linenr)) {
+		if (debug_info && abfd.get_linenr(i, start, filename, linenr)) {
 			symb_entry.sample.file_loc.filename = filename;
 			symb_entry.sample.file_loc.linenr = linenr;
 		} else {
@@ -131,7 +130,6 @@ profile_container::add_samples(profile_t const & profile,
                                string const & app_name,
                                symbol_entry const * symbol)
 {
-	bool const need_linenr = flags & osf_linenr_info;
 
 	for (u32 pos = start; pos < end ; ++pos) {
 		string filename;
@@ -142,7 +140,7 @@ profile_container::add_samples(profile_t const & profile,
 		if (!sample.count)
 			continue;
 
-		if (need_linenr && sym_index != nil_symbol_index &&
+		if (debug_info && sym_index != nil_symbol_index &&
 		    abfd.get_linenr(sym_index, pos, filename, linenr)) {
 			sample.file_loc.filename = filename;
 			sample.file_loc.linenr = linenr;
@@ -314,15 +312,12 @@ sample_container::samples_iterator profile_container::end() const
 
 bool add_samples(profile_container & samples,
 		 string const & sample_filename,
-		 string const & image_name,
-		 string const & app_name,
-		 string_filter const & symbol_filter)
+		 op_bfd const & abfd,
+		 string const & app_name)
 {
 	profile_t profile(sample_filename);
 
-	op_bfd abfd(image_name, symbol_filter);
-
-	profile.check_mtime(image_name);
+	profile.check_mtime(abfd.get_filename());
 	profile.set_start_offset(abfd.get_start_offset());
 	
 	samples.add(profile, abfd, app_name);

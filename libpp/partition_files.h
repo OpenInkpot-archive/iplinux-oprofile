@@ -15,8 +15,11 @@
 #include <iostream>
 #include <vector>
 #include <list>
+#include <set>
+#include <map>
 
 #include "split_sample_filename.h"
+#include "derive_files.h"
 
 /**
  * store merging options options used to partition samples filename
@@ -85,5 +88,22 @@ private:
 	typedef std::list<filename_set> filename_partition;
 	filename_partition filenames;
 };
+
+
+typedef std::multimap<std::string, split_sample_filename const> image_set;
+
+/**
+ * @param files a set of sample filename to sort
+ * @param merge_lib true if the image name must be derived from lib name
+ * @param alternate_filename alternate filename set to retrieve binary file
+ *  if needed
+ *
+ * return the same set as passed in files but sorted by image name, where
+ * image name will be the bfd file to open. This is to allow caller to avoid
+ * to bfd_open more than one time each binary image
+ */
+image_set sort_by_image(partition_files const & files,
+			alt_filename_t const & alternate_filename);
+
 
 #endif /* !PARTITION_FILES_H */

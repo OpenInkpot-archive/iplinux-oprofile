@@ -37,14 +37,15 @@ public:
 	 * @param add_zero_samples_symbols Must we add to the symbol container
 	 * symbols with zero samples count
 	 *
-	 * @param flags Optimize hint to add samples. The flags is a promise
-	 * of what will be required as information in future. Avoiding the 
-	 * lookup of line number etc. greatly improves performance.
+	 * @param debug_info Optimize hint to add samples. If true line number
+	 * are recorded. This boolean is a promise of what will be required as
+	 * information in future. Avoiding line number lookup greatly improves
+	 * performance.
 	 *
 	 * @param need_details true if we need to record all samples or to
 	 * to record them at symbol level. This is an optimization hint
 	 */
-	profile_container(bool add_zero_samples_symbols, outsymbflag flags,
+	profile_container(bool add_zero_samples_symbols, bool debug_info,
 	                  bool need_details);
 
 	~profile_container();
@@ -166,7 +167,7 @@ private:
 	 * see the explanation in profile_container()	
 	 */
 	//@{
-	outsymbflag flags;
+	bool debug_info;
 	bool add_zero_samples_symbols;
 	bool need_details;
 	//@}
@@ -176,19 +177,17 @@ private:
  * add_samples - populate a samples container with samples
  * @param samples the samples container to populate
  * @param sample_filename samples filename
- * @param binary_name the name of the binary image
+ * @param abfd bfd object
  * @param app_name the owning application of these samples, identical to binary
  *  name if profiling session did not separate samples for shared libs or
  *  if binary name is not a shared libs
- * @param symbol_filter filter to use for symbols to add
  *
- * open a bfd object getting symbols name, then populate samples with the
- * relevant samples
+ * populate samples with the relevant samples getting symbols name and size
+ * from abfd
  */
 bool add_samples(profile_container & samples,
 		 std::string const & sample_filename,
-		 std::string const & binary_name,
-		 std::string const & app_name,
-		 string_filter const & symbol_filter);
+		 op_bfd const & abfd,
+		 std::string const & app_name);
 
 #endif /* !PROFILE_CONTAINER_H */

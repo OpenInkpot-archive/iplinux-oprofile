@@ -95,7 +95,7 @@ bool aligned_samples(profile_container const & samples, int gap)
 
 
 void output_gprof(profile_container const & samples,
-		  string gmon_filename, string image_name)
+		  string gmon_filename, op_bfd const & abfd)
 {
 	static gmon_hdr hdr = { { 'g', 'm', 'o', 'n' }, GMON_VERSION, {0,0,0,},};
 
@@ -110,8 +110,6 @@ void output_gprof(profile_container const & samples,
 		multiplier = 8;
 
 	cverb << "opgrof multiplier: " << multiplier << endl;
-
-	op_bfd abfd(image_name, string_filter());
 
 	get_vma_range(low_pc, high_pc, samples);
 
@@ -173,36 +171,21 @@ void output_gprof(profile_container const & samples,
 }
 
 
-string load_samples(partition_files const & files, profile_container & samples)
+string load_samples(op_bfd const & abfd, image_set const & images,
+		    profile_container & samples)
 {
-	// assert partition_files.nr_set() == 1
-	string image_name;
+	image_set::const_iterator it;
+	for (it = images.begin(); it != images.end(); ) {
+		pair<image_set::const_iterator, image_set::const_iterator>
+			p_it = images.equal_range(it->first);
 
-	partition_files::filename_set const & file_set = files.set(0);
-
-	partition_files::filename_set::const_iterator it;
-	for (it = file_set.begin(); it != file_set.end(); ++it) {
-		image_name = it->lib_image.empty() ? it->image : it->lib_image;
-
-		cverb << "adding to samples container: " << it->image
-		      << " " << it->lib_image << endl;
-
-		// if the image files does not exist try to retrieve it
-		image_name = check_image_name(options::alternate_filename,
-					      image_name, it->sample_filename);
-
-		// no need to warn if image_name is not readable
-		// check_image_name() already do that
-		if (op_file_readable(image_name)) {
-			// FIXME: inefficient since we can have multiple
-			// time the same binary file open bfd opened
-			add_samples(samples, it->sample_filename,
-				    image_name, image_name,
-				    string_filter());
+		for (it = p_it.first;  it != p_it.second; ++it) {
+			add_samples(samples, it->second.sample_filename,
+				    abfd, it->first);
 		}
 	}
 
-	return image_name;
+	return images.begin()->first;
 }
 
 
@@ -210,11 +193,17 @@ int opgprof(vector<string> const & non_options)
 {
 	handle_options(non_options);
 
-	profile_container samples(false, osf_vma, true);
+	profile_container samples(false, false, true);
 
-	string image_name = load_samples(*sample_file_partition, samples);
+	image_set images = sort_by_image(*sample_file_partition,
+					 options::alternate_filename);
 
-	output_gprof(samples, options::gmon_filename, image_name);
+	// FIXME: symbol_filter would be allowed through option
+	op_bfd abfd(images.begin()->first, string_filter());
+
+	load_samples(abfd, images, samples);
+
+	output_gprof(samples, options::gmon_filename, abfd);
 
 	return 0;
 }

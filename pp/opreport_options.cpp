@@ -214,8 +214,8 @@ void handle_options(vector<string> const & non_options)
 	     ostream_iterator<unmergeable_profile>(cverb, "\n"));
 
 	if (unmerged_profile.empty()) {
-		cerr << "no samples files found: try running opcontrol --dump"
-		     << endl;
+		cerr << "No samples files found: profile specification too "
+		     << "strict ?" << endl;
 		exit(EXIT_FAILURE);
 	}
 

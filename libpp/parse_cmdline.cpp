@@ -393,6 +393,8 @@ list<string> select_sample_filename(parse_cmdline const & parser,
 		throw invalid_argument(os.str());
 	}
 
+	bool found_file = false;
+
 	for (size_t i = 0; i < session.size(); ++i) {
 		if (session[i].empty())
 			continue;
@@ -407,12 +409,22 @@ list<string> select_sample_filename(parse_cmdline const & parser,
 		list<string> files;
 		create_file_list(files, base_dir, "*", true);
 
+		if (!files.empty())
+			found_file = true;
+
 		list<string>::const_iterator it;
 		for (it = files.begin(); it != files.end(); ++it) {
 			if (valid_candidate(*it, parser, include_dependent)) {
 				unique_files.insert(*it);
 			}
 		}
+	}
+
+	if (!found_file) {
+		// FIXME: must we throw ?
+		cerr << "No sample file found: try running opcontrol --dump\n"
+		     << "or specify a session containing sample files" << endl;
+		exit(EXIT_FAILURE);
 	}
 
 	list<string> result;

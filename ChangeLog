@@ -1,3 +1,22 @@
+2003-05-02  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/partition_files.h:
+	* libpp/partition_files.cpp: sort_by_image_name() new return a list
+	  of sample filename sorted by bfd image name.
+	* libpp/profile_container.cpp: add_samples() don't build op_bfd object
+	  used here but pass it as parameters
+
+	* pp/opgprof.cpp:
+	* pp/opreport.cpp: use the above change to avoid opening multiple time
+	  a bfd object.
+
+	* pp/opannotate_options.cpp: add --(include|exclude)-symbols
+
+	* libpp/parse_cmdline.cpp:
+	* pp/opgprof_options.cpp:
+	* pp/opreport.cpp: make a distinction in error message between no
+	  sample available and sample file available but no one was selected
+
 2003-05-01  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* pp/opannotate_options.h:

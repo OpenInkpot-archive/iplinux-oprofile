@@ -56,8 +56,8 @@ bool try_partition_file(parse_cmdline const & parser,  bool include_dependent)
 	     ostream_iterator<unmergeable_profile>(cverb, "\n"));
 
 	if (unmerged_profile.empty() && include_dependent == true) {
-		cerr << "no samples files found: try running opcontrol --dump"
-		     << endl;
+		cerr << "No samples files found: profile specification too "
+		     << "strict ?" << endl;
 		exit(EXIT_FAILURE);
 	}
 

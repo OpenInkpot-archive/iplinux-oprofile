@@ -186,47 +186,25 @@ void output_files_count(partition_files const & files)
 
 void output_symbols_count(partition_files const & files)
 {
-	// FIXME: we probably don't want to show application name if
-	// we report samples about only one application
-	outsymbflag flags = outsymbflag(osf_vma | osf_nr_samples | osf_percent | osf_symb_name | osf_app_name);
+	image_set images = sort_by_image(files, options::alternate_filename);
 
-	if (options::include_dependent && !options::merge_by.merge_lib)
-		flags = outsymbflag(flags | osf_image_name);
+	profile_container samples(false, options::debug_info, options::details);
 
-	if (options::debug_info)
-		flags = outsymbflag(flags | osf_linenr_info);
+	image_set::const_iterator it;
+	for (it = images.begin(); it != images.end(); ) {
+		pair<image_set::const_iterator, image_set::const_iterator>
+			p_it = images.equal_range(it->first);
 
-	profile_container samples(false, flags, options::details);
+		op_bfd abfd(p_it.first->first, options::symbol_filter);
 
-	for (size_t i = 0 ; i < files.nr_set(); ++i) {
-		partition_files::filename_set const & file_set = files.set(i);
-
-		partition_files::filename_set::const_iterator it;
-		for (it = file_set.begin(); it != file_set.end(); ++it) {
-			string app_name = it->image;
-			string image_name = it->lib_image.empty() ?
-				it->image : it->lib_image;
-
+		for (it = p_it.first;  it != p_it.second; ++it) {
+			string app_name = it->second.image;
 			if (options::merge_by.merge_lib) {
-				app_name = image_name;
+				app_name = it->first;
 			}
 
-			// if the image files does not exist try to retrieve it
-			image_name =
-				check_image_name(options::alternate_filename,
-						 image_name,
-						 it->sample_filename);
-
-			// no need to warn if image_name is not readable
-			// check_image_name() already do that
-			if (op_file_readable(image_name)) {
-				// FIXME: inneficient since we can have
-				// multiple time the same binary file open bfd
-				// openened
-				add_samples(samples, it->sample_filename,
-					    image_name, app_name,
-					    options::symbol_filter);
-			}
+			add_samples(samples, it->second.sample_filename,
+				    abfd, app_name);
 		}
 	}
 
@@ -243,6 +221,16 @@ void output_symbols_count(partition_files const & files)
 		out.show_short_filename();
 	if (!options::show_header)
 		out.hide_header();
+
+	// FIXME: we probably don't want to show application name if
+	// we report samples about only one application
+	outsymbflag flags = outsymbflag(osf_vma | osf_nr_samples | osf_percent | osf_symb_name | osf_app_name);
+
+	if (options::include_dependent && !options::merge_by.merge_lib)
+		flags = outsymbflag(flags | osf_image_name);
+
+	if (options::debug_info)
+		flags = outsymbflag(flags | osf_linenr_info);
 
 	out.add_format(flags);
 
