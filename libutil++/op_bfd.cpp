@@ -350,11 +350,11 @@ bool op_bfd::get_linenr(symbol_index_t sym_idx, uint offset,
 
 			if (ret && linenr != 0
 				&& syms[sym_idx].name() == string(functionname)) {
-				return true;	// we win
+				return true;
 			}
 		}
 
-		// We lose it's worthwhile to try more.
+		// We lose it's pointless to try more.
 
 		// bfd_find_nearest_line clobber the memory pointed by filename
 		// from a previous call when the filename change across
@@ -434,6 +434,7 @@ size_t op_bfd::symbol_size(op_bfd_symbol const & sym,
 
 	return length;
 }
+
 
 void op_bfd::get_symbol_range(symbol_index_t sym_idx,
 			      u32 & start, u32 & end) const
