@@ -1,5 +1,10 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* pp/opreport_options.cpp: fix --threshold
+	description to match reality
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* libpp/partition_files.h:
 	* libpp/partition_files.cpp:
 	* pp/opannotate_options.cpp:
