@@ -305,6 +305,7 @@ AC_OUTPUT(make.common \
 	libutil/Makefile \
 	libutil++/Makefile \
 	libop/Makefile \
+	libopt++/Makefile \
 	libdb/Makefile \
 	module/Makefile \
 	dae/Makefile \
