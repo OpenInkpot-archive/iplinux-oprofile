@@ -28,7 +28,7 @@ namespace format_output {
 
 formatter::formatter(profile_container const & profile_)
 	:
-	flags(osf_none),
+	flags(ff_none),
 	profile(profile_),
 	first_output(true),
 	vma_64(false),
@@ -42,17 +42,17 @@ formatter::formatter(profile_container const & profile_)
 	cumulated_percent = 0;
 	cumulated_percent_details = 0;
 
-	format_map[osf_vma] = field_description(9, "vma", &formatter::format_vma);
-	format_map[osf_nr_samples] = field_description(9, "samples", &formatter::format_nr_samples);
-	format_map[osf_nr_samples_cumulated] = field_description(14, "cum. samples", &formatter::format_nr_cumulated_samples);
-	format_map[osf_percent] = field_description(12, "%", &formatter::format_percent);
-	format_map[osf_percent_cumulated] = field_description(11, "cum. %", &formatter::format_cumulated_percent);
-	format_map[osf_linenr_info] = field_description(28, "linenr info", &formatter::format_linenr_info);
-	format_map[osf_image_name] = field_description(25, "image name", &formatter::format_image_name);
-	format_map[osf_app_name] = field_description(25, "app name", &formatter::format_app_name);
-	format_map[osf_symb_name] = field_description(30, "symbol name", &formatter::format_symb_name);
-	format_map[osf_percent_details] = field_description(12, "%", &formatter::format_percent_details);
-	format_map[osf_percent_cumulated_details] = field_description(10, "cum. %", &formatter::format_cumulated_percent_details);
+	format_map[ff_vma] = field_description(9, "vma", &formatter::format_vma);
+	format_map[ff_nr_samples] = field_description(9, "samples", &formatter::format_nr_samples);
+	format_map[ff_nr_samples_cumulated] = field_description(14, "cum. samples", &formatter::format_nr_cumulated_samples);
+	format_map[ff_percent] = field_description(12, "%", &formatter::format_percent);
+	format_map[ff_percent_cumulated] = field_description(11, "cum. %", &formatter::format_cumulated_percent);
+	format_map[ff_linenr_info] = field_description(28, "linenr info", &formatter::format_linenr_info);
+	format_map[ff_image_name] = field_description(25, "image name", &formatter::format_image_name);
+	format_map[ff_app_name] = field_description(25, "app name", &formatter::format_app_name);
+	format_map[ff_symb_name] = field_description(30, "symbol name", &formatter::format_symb_name);
+	format_map[ff_percent_details] = field_description(12, "%", &formatter::format_percent_details);
+	format_map[ff_percent_cumulated_details] = field_description(10, "cum. %", &formatter::format_cumulated_percent_details);
 }
 
  
@@ -194,7 +194,7 @@ void formatter::do_output(ostream & out, symbol_entry const & symb,
 	for (size_t i = 1 ; temp_flag != 0 ; i <<= 1) {
 		format_flags fl = static_cast<format_flags>(i);
 		if (flags & fl) {
-			if (hide_immutable_field && (fl & osf_immutable_field)) {
+			if (hide_immutable_field && (fl & ff_immutable_field)) {
 				field_description const & field(format_map[fl]);
 				padding += field.width;
 			} else {

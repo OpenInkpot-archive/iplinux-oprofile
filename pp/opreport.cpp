@@ -313,22 +313,22 @@ void output_symbols(profile_container const & samples, bool show_app_name)
 	if (!options::show_header)
 		out.hide_header();
 
-	format_flags flags = format_flags(osf_vma | osf_nr_samples);
-	flags = format_flags(flags | osf_percent | osf_symb_name);
+	format_flags flags = format_flags(ff_vma | ff_nr_samples);
+	flags = format_flags(flags | ff_percent | ff_symb_name);
 
 	// FIXME: this is not perfect
 	if (show_app_name && !options::merge_by.lib)
-		flags = format_flags(flags | osf_app_name);
+		flags = format_flags(flags | ff_app_name);
 	if (options::debug_info)
-		flags = format_flags(flags | osf_linenr_info);
+		flags = format_flags(flags | ff_linenr_info);
 
 	if (options::accumulated) {
-		flags = format_flags(flags | osf_nr_samples_cumulated);
-		flags = format_flags(flags | osf_percent_cumulated);
+		flags = format_flags(flags | ff_nr_samples_cumulated);
+		flags = format_flags(flags | ff_percent_cumulated);
 	}
 
 	if (!options::exclude_dependent)
-		flags = format_flags(flags | osf_image_name);
+		flags = format_flags(flags | ff_image_name);
 
 
 	out.add_format(flags);
