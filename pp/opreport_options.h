@@ -14,6 +14,7 @@
 
 #include <string>
 #include <vector>
+#include <iosfwd>
 
 #include "common_option.h"
 #include "utility.h"
@@ -38,6 +39,8 @@ namespace options {
 	extern double threshold;
 	extern bool show_header;
 	extern bool accumulated;
+	// I hate C++
+	std::ostream & cout();
 }
 
 /**

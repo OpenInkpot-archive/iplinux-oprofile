@@ -124,7 +124,7 @@ void output_header(partition_files const & files)
 		// See FIXME in opannotate.cpp  for similar code
 		profile_t profile;
 		profile.add_sample_file(file_set.begin()->sample_filename, 0);
-		output_header(cout, profile.get_header());
+		output_header(options::cout(), profile.get_header());
 	}
 }
 
@@ -133,10 +133,10 @@ void output_counter(double total_count, size_t count)
 {
 	// FIXME: left or right, op_time was using left
 	// left io manipulator doesn't exist in 2.95
-//	cout.setf(ios::left, ios::adjustfield);
-	cout << setw(9) << count << " ";
+//	options::cout().setf(ios::left, ios::adjustfield);
+	options::cout() << setw(9) << count << " ";
 	double ratio = op_ratio(count, total_count);
-	cout << format_double(ratio * 100, 3, 4) << " ";
+	options::cout() << format_double(ratio * 100, 3, 4) << " ";
 }
 
 
@@ -151,16 +151,16 @@ void output_sub_count(files_count const & files, double total_count)
 	for (size_t i = 0; i < files.files.size(); ++i) {
 		merged_file_count const & count = files.files[i];
 
-		cout << "\t";
+		options::cout() << "\t";
 		double tot_count = options::global_percent 
 			? total_count : files.count;
 		output_counter(tot_count, count.count);
 
 		if (count.lib_image.empty())
-			cout << " " << get_filename(count.image_name);
+			options::cout() << " " << get_filename(count.image_name);
 		else
-			cout << " " << get_filename(count.lib_image);
-		cout << endl;
+			options::cout() << " " << get_filename(count.lib_image);
+		options::cout() << endl;
 	}
 }
 
@@ -185,14 +185,14 @@ void output_files_count(partition_files const & files)
 	for (it = set_file_count.begin(); it != set_file_count.end(); ++it) {
 		output_counter(total_count, it->count);
 		if (!options::merge_by.merge_lib) {
-			cout << get_filename(it->image_name);
+			options::cout() << get_filename(it->image_name);
 		} else {
 			if (it->lib_image.empty())
-				cout << get_filename(it->image_name);
+				options::cout() << get_filename(it->image_name);
 			else
-				cout << get_filename(it->lib_image);
+				options::cout() << get_filename(it->lib_image);
 		}
-		cout << endl;
+		options::cout() << endl;
 		if (options::include_dependent && !options::hide_dependent &&
 		    !options::merge_by.merge_lib) {
 			output_sub_count(*it, total_count);
@@ -285,7 +285,7 @@ void output_symbols_count(partition_files const & files)
 
 	out.add_format(flags);
 
-	out.output(cout, symbols, options::reverse_sort, need_vma64);
+	out.output(options::cout(), symbols, options::reverse_sort, need_vma64);
 }
 
 

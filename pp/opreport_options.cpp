@@ -14,6 +14,7 @@
 #include <iostream>
 #include <algorithm>
 #include <iterator>
+#include <fstream>
 
 #include "profile_spec.h"
 #include "opreport_options.h"
@@ -53,10 +54,29 @@ namespace options {
 namespace {
 
 string threshold;
-vector<string> merge;
+string outfile;
+vector<string> mergespec;
 vector<string> sort_by;
 vector<string> exclude_symbols;
 vector<string> include_symbols;
+
+}
+
+
+std::ostream & options::cout()
+{
+	if (!outfile.empty()) {
+		static ofstream stream(outfile.c_str());
+		if (!stream) {
+			cerr << "Could not open output file \""
+			     << outfile << "\" for writing." << endl;
+			exit(EXIT_FAILURE);
+		}
+		return stream;
+	}
+	return std::cout;
+}
+
 
 popt::option options_array[] = {
 	popt::option(options::demangle, "demangle", 'd',
@@ -65,6 +85,8 @@ popt::option options_array[] = {
 		     "don't demangle GNU C++ symbol names"),
 	popt::option(options::smart_demangle, "smart-demangle", 'D',
 		     "demangle GNU C++ symbol names and shrink them"),
+	popt::option(outfile, "output-file", 'o',
+	             "output to the given filename", "file"),
 	// PP:5
 	popt::option(options::symbols, "symbols", 'l',
 		     "list all symbols"),
@@ -85,7 +107,7 @@ popt::option options_array[] = {
 		     "exclude these comma separated symbols", "symbols"),
 	popt::option(include_symbols, "include-symbols", 'i',
 		     "include these comma separated symbols", "symbols"),
-	popt::option(merge, "merge", 'm',
+	popt::option(mergespec, "merge", 'm',
 		     "comma separated list", "cpu,pid,lib"),
 	popt::option(options::show_header, "no-header", '\0',
 		     "remove all header from output"),
@@ -99,6 +121,7 @@ popt::option options_array[] = {
 		     "percentage are not relative to symbol count or image "
 		     "count but total sample count"),
 };
+
 
 // FIXME: separate file if reused
 void handle_threshold()
@@ -132,19 +155,22 @@ void handle_sort_option()
 		sort_by.push_back("sample");
 	}
 
-	for (size_t i = 0; i < sort_by.size(); ++i) {
-		if (sort_by[i] == "vma") {
+	vector<string>::const_iterator cit = sort_by.begin();
+	vector<string>::const_iterator end = sort_by.end();
+
+	for (; cit != end; ++cit) {
+		if (*cit == "vma") {
 			options::sort_by_vma = true;
-		} else if (sort_by[i] == "sample") {
+		} else if (*cit == "sample") {
 			options::sort_by_sample = true;
-		} else if (sort_by[i] == "symbol") {
+		} else if (*cit == "symbol") {
 			options::sort_by_symbol = true;
-		} else if (sort_by[i] == "debug") {
+		} else if (*cit == "debug") {
 			options::sort_by_debug = true;
-		} else if (sort_by[i] == "image") {
+		} else if (*cit == "image") {
 			options::sort_by_image = true;
 		} else {
-			cerr << "unknown sort option: " << sort_by[i] << endl;
+			cerr << "unknown sort option: " << *cit << endl;
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -153,33 +179,34 @@ void handle_sort_option()
 // FIXME: separate file if reused
 void handle_merge_option()
 {
-	for (size_t i = 0; i < merge.size(); ++i) {
-		if (merge[i] == "cpu") {
+	vector<string>::const_iterator cit = mergespec.begin();
+	vector<string>::const_iterator end = mergespec.end();
+
+	for (; cit != end; ++cit) {
+		if (*cit == "cpu") {
 			options::merge_by.merge_cpu = true;
-		} else if (merge[i] == "tid") {
+		} else if (*cit == "tid") {
 			options::merge_by.merge_tid = true;
-		} else if (merge[i] == "tgid") {
+		} else if (*cit == "tgid") {
 			// PP:5.21 tgid merge imply tid merging.
 			options::merge_by.merge_tgid = true;
 			options::merge_by.merge_tid = true;
-		} else if (merge[i] == "lib") {
+		} else if (*cit == "lib") {
 			options::merge_by.merge_lib = true;
-		} else if (merge[i] == "unitmask") {
+		} else if (*cit == "unitmask") {
 			options::merge_by.merge_unitmask = true;
-		} else if (merge[i] == "all") {
+		} else if (*cit == "all") {
 			options::merge_by.merge_cpu = true;
 			options::merge_by.merge_lib = true;
 			options::merge_by.merge_tid = true;
 			options::merge_by.merge_tgid = true;
 			options::merge_by.merge_unitmask = true;
 		} else {
-			cerr << "unknown merge option: " << merge[i] << endl;
+			cerr << "unknown merge option: " << *cit << endl;
 			exit(EXIT_FAILURE);
 		}
 	}
 }
-
-}  // anonymous namespace
 
 
 void handle_options(vector<string> const & non_options)
@@ -190,9 +217,7 @@ void handle_options(vector<string> const & non_options)
 		options::symbols = true;
 
 	handle_threshold();
-
 	handle_sort_option();
-
 	handle_merge_option();
 
 	options::symbol_filter = string_filter(include_symbols, exclude_symbols);
