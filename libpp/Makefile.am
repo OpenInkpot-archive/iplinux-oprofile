@@ -9,8 +9,6 @@ AM_CPPFLAGS = \
 
 noinst_LIBRARIES = libpp.a
 libpp_a_SOURCES = \
-	counter_util.cpp \
-	counter_util.h \
 	derive_files.cpp \
 	derive_files.h \
 	filename_spec.cpp \

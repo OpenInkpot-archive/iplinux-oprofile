@@ -34,21 +34,23 @@ int run_pp_tool(int argc, char const * argv[], pp_fct_run_t fct)
 		return fct(argc, argv);
 	}
 	catch (op_runtime_error const & e) {
-		cerr << "op_runtime_error:" << e.what() << endl;
-		return 1;
+		cerr << "op_runtime_error:\n" << e.what();
 	}
 	catch (op_fatal_error const & e) {
-		cerr << "op_fatal_error:" << e.what() << endl;
+		cerr << "op_fatal_error:\n" << e.what();
 	}
 	catch (op_exception const & e) {
-		cerr << "op_exception:" << e.what() << endl;
+		cerr << "op_exception:\n" << e.what();
+	}
+	catch (invalid_argument const & e) {
+		cerr << "invalid_argument:\n" << e.what();
 	}
 	catch (exception const & e) {
-		cerr << "exception:" << e.what() << endl;
+		cerr << "exception:\n" << e.what() << endl;
 	}
 	catch (...) {
 		cerr << "unknown exception" << endl;
 	}
 
-	return EXIT_SUCCESS;
+	return EXIT_FAILURE;
 }

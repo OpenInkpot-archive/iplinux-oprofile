@@ -10,6 +10,7 @@
 
 #include <algorithm>
 #include <set>
+#include <sstream>
 
 #include "file_manip.h"
 #include "op_config.h"
@@ -373,8 +374,23 @@ list<string> select_sample_filename(parse_cmdline const & parser,
 {
 	set<string> unique_files;
 
-	vector<string> session = filter_session(parser.get_session(),
-						parser.get_session_exclude());
+	vector<string> session_include = parser.get_session();
+	vector<string> session_exclude = parser.get_session_exclude();
+
+	vector<string> session = filter_session(session_include,
+						session_exclude);
+
+	if (session.empty()) {
+		ostringstream os;
+		os << "No session given" << endl;
+		os << "included session was:" << endl;
+		copy(session_include.begin(), session_include.end(),
+		     ostream_iterator<string>(os, "\n"));
+		os << "excluded session was:" << endl;
+		copy(session_exclude.begin(), session_exclude.end(),
+		     ostream_iterator<string>(os, "\n"));
+		throw invalid_argument(os.str());
+	}
 
 	for (size_t i = 0; i < session.size(); ++i) {
 		if (session[i].empty())

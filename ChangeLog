@@ -1,6 +1,16 @@
 2003-05-01  Philippe Elie  <phil.el@wanadoo.fr>
 
-	* libpp/derive_files.cpp: typo
+	* libpp/counter_util.h:
+	* libpp/counter_util.cpp: remove these files from cvs
+
+	* libpp/derive_files.h:
+	* libpp/derive_files.cpp: remove dead code derive_files() + typo
+
+	* libpp/parse_cmdline.cpp: select_sample_filename() throw if empty
+	  session after filtering
+
+	* pp/common_option.cpp: catch invalid_argument, return failure on
+	  catched excepton
 
 2003-05-01  Philippe Elie  <phil.el@wanadoo.fr>
 
