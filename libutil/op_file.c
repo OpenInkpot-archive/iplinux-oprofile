@@ -254,7 +254,7 @@ char * op_relative_to_absolute_path(char const * path, char const * base_dir)
 int create_dir(char const * dir)
 {
 	if (access(dir, F_OK)) {
-		if (mkdir(dir, 0700))
+		if (mkdir(dir, 0755))
 			return 1;
 	}
 	return 0;

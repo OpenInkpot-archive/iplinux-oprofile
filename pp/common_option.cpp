@@ -25,10 +25,14 @@ namespace options {
 
 namespace {
 popt::option options_array[] = {
-	popt::option(options::verbose, "verbose", 'V', "verbose output"),
-	popt::option(options::demangle, "demangle", 'd', "demangle GNU C++ symbol names (default on)"),
-	popt::option(options::demangle, "no-demangle", '\0', "don't demangle GNU C++ symbol names"),
-	popt::option(options::smart_demangle, "smart-demangle", 'D', "demangle GNU C++ symbol names then pass them through regular expression to shrink them")
+	popt::option(options::verbose, "verbose", 'V',
+		     "verbose output"),
+	popt::option(options::demangle, "demangle", 'd',
+		     "demangle GNU C++ symbol names (default on)"),
+	popt::option(options::demangle, "no-demangle", '\0',
+		     "don't demangle GNU C++ symbol names"),
+	popt::option(options::smart_demangle, "smart-demangle", 'D',
+		     "demangle GNU C++ symbol names and shrink them")
 };
 }
 

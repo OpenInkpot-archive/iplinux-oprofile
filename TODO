@@ -17,6 +17,15 @@ Before merging with trunk
   mention in the xxx option help string than the --no-xxx is allowed. Not
   really usefull if we have a little number of --no.
  o inhibit build of opdiff in pp/Makefile.am
+ o consider to do the symbol (details too ?) sort at output, format_output receive
+  a vector of symbol to consider, we can perhaps sort in format_output
+ o fix John movement on 2.5: odb_insert failure (and message error corrupted ?)
+
+After merging with trunk
+------------------------
+
+ o look if we must remove help_str support from libopt++
+
 
 Before 1.0 big stuff
 --------------------
@@ -35,6 +44,8 @@ Before 1.0 big stuff
 Before 1.0 little stuff
 -----------------------
 
+ o configure.in: OP_DATADIR=`eval echo "$datadir/$PACKAGE/"`
+     AC_DEFINE_UNQUOTED(OP_DATADIR, "$OP_DATADIR", "foo path") seems to work
  o improve the *non* verbose daemon log to be a bit more informative
  o daemon: opd_put_kernel_samples vs. setup_kernel_sample vs. handle_. Rename, way too confusing
  o --buffer-size is useless on 2.5 without tuning of watershed

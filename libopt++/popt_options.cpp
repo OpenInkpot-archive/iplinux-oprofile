@@ -69,6 +69,7 @@ static void help_callback(poptContext con,  enum poptCallbackReason reason,
 
 	if (!strcmp(opt->longName, "help")) {
 		poptPrintHelp(con, stdout, 0);
+		cout << user_help_str;
 	} else if (!strcmp(opt->longName, "usage")) {
 		poptPrintUsage(con, stdout, 0);
 	} else {
@@ -78,8 +79,6 @@ static void help_callback(poptContext con,  enum poptCallbackReason reason,
 		exit(EXIT_FAILURE);
 	}
 
-	cout << user_help_str;
-	
 	exit(EXIT_SUCCESS);
 }
 

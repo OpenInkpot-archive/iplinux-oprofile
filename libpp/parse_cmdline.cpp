@@ -282,3 +282,24 @@ bool parse_cmdline::is_empty() const
 {
 	return !set_p;
 }
+
+
+/* TODO */
+static bool substitute_alias(parse_cmdline & /*parser*/,
+			     string const & /*arg*/)
+{
+	return false;
+}
+
+
+void handle_non_options(parse_cmdline & parser, 
+			vector<string> const & args)
+{
+	for (size_t i = 0 ; i < args.size() ; ++i) {
+		if (parser.is_valid_tag(args[i])) {
+			parser.set(args[i]);
+		} else if (!substitute_alias(parser, args[i])) {
+			parser.set("image:" + args[i]);
+		}
+	}
+}

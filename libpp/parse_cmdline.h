@@ -137,4 +137,16 @@ private:
 };
 
 
+/**
+ * @param parser  the command line parser to fill with tag:value
+ * @param args  a vector of non options strings
+ *
+ * fill parser with all valid tag:value contained in args vector doing
+ * also alias substitution, non valid tag:value options are considered as
+ * image:value
+ *
+ */
+void handle_non_options(parse_cmdline & parser, 
+			vector<string> const & args);
+
 #endif /* !PARSE_CMDLINE_H */

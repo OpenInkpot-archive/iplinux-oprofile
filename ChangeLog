@@ -1,3 +1,19 @@
+2003-04-19  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libopt++/popt_options.cpp: don't show help_str with --usage
+	* libpp/format_output.cpp: typo
+	* libutil/op_file.c: create dir with 755 not 700
+	* pp/common_option.cpp: source formating
+
+	* libpp/parse_cmdline.h:
+	* libpp/parse_cmdline.cpp: handle_non_options() new
+	* pp/opreport_options.cpp: handle more options
+
+	* pp/opsummary.cpp:
+	* pp/opsummary_options.h:
+	* pp/opsummary_options.cpp: remove, opreport should do its job.
+	* pp/Makefile.am: update
+
 2003-04-18  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libopt++/popt_options.cpp: allow "no-" prefix to long option name
@@ -16,7 +32,7 @@
 	* pp/opreport_options.h:
 	* pp/opreport_options.cpp:
 	* pp/opsummary_options.h:
-	* pp/opsummary_options.cpp: new squeleton file
+	* pp/opsummary_options.cpp: new skeleton file
 
 	* pp/opannotate.cpp:
 	* pp/opdiff.cpp:
