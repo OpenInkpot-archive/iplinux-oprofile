@@ -34,8 +34,9 @@
 
 #include "compat.h"
  
-/* userspace/module interface */
-#include "../op_user.h"
+#include "op_config.h"
+#include "op_hw_config.h"
+#include "op_interface.h"
 
 #undef min
 #undef max

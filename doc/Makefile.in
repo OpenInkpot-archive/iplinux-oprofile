@@ -1,5 +1,3 @@
-# $Id$
-
 RM=rm
 CP=cp
 prefix=$(DESTDIR)@prefix@
