@@ -32,8 +32,9 @@ struct split_sample_filename
 	std::string sample_filename;
 };
 
+
 /// debugging helper
-ostream & operator<<(ostream &, split_sample_filename const&);
+std::ostream & operator<<(std::ostream &, split_sample_filename const &);
 
 
 /**

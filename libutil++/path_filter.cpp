@@ -75,5 +75,5 @@ bool path_filter::match(std::string const & str) const
 		compi = dirname(compi);
 	}
 
-	return false;
+	return include_pattern.empty();
 }

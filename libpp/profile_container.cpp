@@ -15,9 +15,11 @@
 #include <iostream>
 #include <algorithm>
 
+#include "string_filter.h"
+
+#include "profile.h"
 #include "symbol_functors.h"
 #include "profile_container.h"
-#include "profile.h"
 #include "sample_container.h"
 #include "symbol_container.h"
 
@@ -302,12 +304,11 @@ bool add_samples(profile_container & samples,
 		 string const & sample_filename,
 		 string const & image_name,
 		 string const & app_name,
-		 vector<string> const & excluded_symbols,
-		 std::vector<std::string> const & included_symbols)
+		 string_filter const & symbol_filter)
 {
 	profile_t profile(sample_filename);
 
-	op_bfd abfd(image_name, excluded_symbols, included_symbols);
+	op_bfd abfd(image_name, symbol_filter);
 
 	profile.check_mtime(image_name);
 	profile.set_start_offset(abfd.get_start_offset());

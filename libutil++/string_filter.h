@@ -25,6 +25,8 @@
  */
 class string_filter {
 public:
+	string_filter() {}
+
 	/**
 	 * Initialise the filter with the include and exclude list, comma-separated.
 	 * Whitespace in each pattern is stripped.

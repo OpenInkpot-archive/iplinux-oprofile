@@ -65,7 +65,7 @@ public:
 	 *
 	 * complexity: f(N*log(N)) N: files.size()
 	 */
-	partition_files(list<string> const & files,
+	partition_files(std::list<std::string> const & files,
 			merge_option const & merge_by);
 
 

@@ -23,13 +23,13 @@
 #include <cstdlib>
 
 #include "op_bfd.h"
+#include "string_filter.h"
 
 using namespace std;
 
 extern ostream cverb;
  
-op_bfd::op_bfd(string const & filename, vector<string> const & exclude_symbols,
-	       vector<string> const & included_symbols)
+op_bfd::op_bfd(string const & filename, string_filter const & symbol_filter)
 	:
 	file_size(0),
 	ibfd(0),
@@ -63,7 +63,7 @@ op_bfd::op_bfd(string const & filename, vector<string> const & exclude_symbols,
 		cverb << ".text filepos " << hex << text_offset << endl;
 	}
 
-	get_symbols(exclude_symbols, included_symbols);
+	get_symbols(symbol_filter);
 
 	if (syms.size() == 0) {
 		bfd_vma start, end;
@@ -136,6 +136,20 @@ static bool interesting_symbol(asymbol *sym)
 	return 1;
 }
 
+
+/// function object for filtering symbols to remove
+struct remove_filter {
+	remove_filter(string_filter const & filter)
+		: filter_(filter) {}
+
+	bool operator()(op_bfd_symbol const & symbol) {
+		return !filter_.match(symbol.name());
+	}
+
+	string_filter filter_;
+};
+
+
 } // namespace anon
 
 /**
@@ -148,8 +162,7 @@ static bool interesting_symbol(asymbol *sym)
  * the interesting_symbol() predicate and sorted
  * with the symcomp() comparator.
  */
-bool op_bfd::get_symbols(vector<string> const & excluded,
-			 vector<string> const & included)
+bool op_bfd::get_symbols(string_filter const & symbol_filter)
 {
 	uint nr_all_syms;
 	size_t size;
@@ -221,38 +234,13 @@ bool op_bfd::get_symbols(vector<string> const & excluded,
 		it->size(symbol_size(*it, next));
 	}
 
-	cverb << "number of symbols before excluding " << dec << symbols.size() << endl;
+	cverb << "number of symbols before filtering " << dec << symbols.size() << endl;
 
-	// it's time to remove the excluded symbols
-	for (it = symbols.begin() ; it != symbols.end(); ) {
-		vector<string>::const_iterator v_it =
-			find(excluded.begin(), excluded.end(), it->name());
-		if (v_it != excluded.end()) {
-			cverb << "excluding symbol " << it->name() << endl;
-			it = symbols.erase(it);
-		} else {
-			++it;
-		}
-	}
+	it = remove_if(symbols.begin(), symbols.end(), remove_filter(symbol_filter));
+	symbols.erase(it, symbols.end());
 
-	// it's time to remove all symbol except the included symbol
-	if (included.size()) {
-		for (it = symbols.begin() ; it != symbols.end(); ) {
-			vector<string>::const_iterator v_it =
-				find(included.begin(), included.end(),
-				     it->name());
-			if (v_it == included.end()) {
-				cverb << "excluding symbol " << it->name() << endl;
-				it = symbols.erase(it);
-			} else {
-				++it;
-			}
-		}
-	}
-
-	for (it = symbols.begin() ; it != symbols.end(); ++it) {
+	for (it = symbols.begin() ; it != symbols.end(); ++it)
 		syms.push_back(*it);
-	}
 
 	cverb << "number of symbols now " << dec << syms.size() << endl;
 

@@ -41,8 +41,7 @@ namespace options {
 	bool sort_by_symbol;
 	bool sort_by_debug;
 	bool sort_by_image;
-	vector<string> exclude_symbols;
-	vector<string> include_symbols;
+	string_filter symbol_filter;
 	vector<string> image_path;
 	merge_option merge_by;
 	bool no_header;
@@ -58,6 +57,8 @@ namespace {
 string threshold;
 vector<string> merge;
 vector<string> sort_by;
+vector<string> exclude_symbols;
+vector<string> include_symbols;
 
 popt::option options_array[] = {
 	// PP:5
@@ -76,9 +77,9 @@ popt::option options_array[] = {
 		     "include libs, modules in %-age count but hide them in output"),
 	popt::option(sort_by, "sort", 's',
 		     "sort by", "vma,sample,symbol,debug,image"),
-	popt::option(options::exclude_symbols, "exclude-symbols", 'e',
+	popt::option(exclude_symbols, "exclude-symbols", 'e',
 		     "exclude these comma separated symbols", "symbols"),
-	popt::option(options::include_symbols, "include-symbols", 'i',
+	popt::option(include_symbols, "include-symbols", 'i',
 		     "include these comma separated symbols", "symbols"),
 	popt::option(options::image_path, "image-path", 'p',
 		     "comma separated path to search missing binaries","path"),
@@ -270,6 +271,8 @@ void get_options(int argc, char const * argv[])
 	handle_sort_option();
 
 	handle_merge_option();
+
+	options::symbol_filter = string_filter(include_symbols, exclude_symbols);
 
 	parse_cmdline parser = handle_non_options(non_option_args);
 

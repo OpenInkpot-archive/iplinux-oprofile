@@ -16,6 +16,7 @@
 
 #include "common_option.h"
 #include "utility.h"
+#include "string_filter.h"
 
 class partition_files;
 class merge_option;
@@ -30,8 +31,7 @@ namespace options {
 	extern merge_option merge_by;
 	extern bool global_percent;
 	extern bool short_filename;
-	extern std::vector<std::string> exclude_symbols;
-	extern std::vector<std::string> include_symbols;
+	extern string_filter symbol_filter;
 	extern std::vector<std::string> image_path;
 	extern double threshold;
 }

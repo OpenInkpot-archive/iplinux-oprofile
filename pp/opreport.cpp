@@ -220,8 +220,7 @@ void output_symbols_count(partition_files const & files)
 				// openened
 				add_samples(samples, it->sample_filename,
 					    image_name, app_name,
-					    options::exclude_symbols,
-					    options::include_symbols);
+					    options::symbol_filter);
 			}
 		}
 	}

@@ -22,6 +22,7 @@
 #include "sample_container.h"
 
 class symbol_container;
+class string_filter;
 class profile_t;
 
 /** store multiple samples files belonging to the same profiling session.
@@ -174,8 +175,7 @@ private:
  * @param app_name the owning application of these samples, identical to binary
  *  name if profiling session did not separate samples for shared libs or
  *  if binary name is not a shared libs
- * @param excluded_symbols a vector of symbol name to ignore
- * @param symbol if non empty record only samples for this symbol
+ * @param symbol_filter filter to use for symbols to add
  *
  * open a bfd object getting symbols name, then populate samples with the
  * relevant samples
@@ -184,9 +184,6 @@ bool add_samples(profile_container & samples,
 		 std::string const & sample_filename,
 		 std::string const & binary_name,
 		 std::string const & app_name,
-		 std::vector<std::string> const & excluded_symbols =
-		 	std::vector<std::string>(),
-		 std::vector<std::string> const & included_symbols =
-		 	std::vector<std::string>());
+		 string_filter const & symbol_filter);
 
 #endif /* !PROFILE_CONTAINER_H */

@@ -1,5 +1,22 @@
 2003-04-28  John Levon  <levon@movementarian.org>
 
+	* libutil++/string_filter.cpp:
+	* libutil++/glob_filter.cpp:
+	* libutil++/path_filter.cpp: match as true if
+	include_list is empty and not excluded
+
+	* libutil++/op_bfd.h:
+	* libutil++/op_bfd.cpp: use string_filter to
+	filter symbols
+
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp:
+	* pp/opreport_options.h:
+	* pp/opreport_options.cpp:
+	* pp/opreport.cpp: changes from using string_filter
+
+2003-04-28  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* pp/opreport.cpp: finish to remove use of split_sample_filename
 
 2003-04-28  John Levon  <levon@movementarian.org>

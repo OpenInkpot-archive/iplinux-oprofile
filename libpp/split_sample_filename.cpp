@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <vector>
 #include <string>
+#include <iostream>
 
 #include "split_sample_filename.h"
 #include "string_manip.h"
@@ -152,6 +153,7 @@ split_sample_filename split_sample_file(string const & filename)
 
 	return result;
 }
+
 
 ostream & operator<<(ostream & out, split_sample_filename const & data)
 {

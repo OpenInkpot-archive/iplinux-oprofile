@@ -49,12 +49,13 @@ string_filter::string_filter(vector<string> const & include_patterns,
 }
 
 
+// FIXME: PP reference
 bool string_filter::match(std::string const & str) const
 {
 	if (do_match(exclude_pattern, str))
 		return false;
 
-	if (do_match(include_pattern, str))
+	if (include_pattern.empty() || do_match(include_pattern, str))
 		return true;
 
 	return false;
