@@ -20,6 +20,8 @@
 #include "op_popt.h"
 #include "op_cpufreq.h"
 #include "op_hw_config.h"
+#include "op_string.h"
+#include "op_alloc_counter.h"
 
 static char const ** chosen_events;
 
@@ -27,12 +29,12 @@ struct parsed_event {
 	char * name;
 	int count;
 	int unit_mask;
-	int counter;
-	struct op_event * event;
 } parsed_events[OP_MAX_COUNTERS];
 
 
 static op_cpu cpu_type = CPU_NO_GOOD;
+
+static poptContext optcon;
 
 /**
  * help_for_event - output event name and description
@@ -49,21 +51,15 @@ static void help_for_event(struct op_event * event)
 
 	printf(": (counter: ");
 
-	/* FIXME, reintroduce
-	if (event->counter_mask == CTR_ALL) {
-		printf("all");
-	} else {
-	*/
-		mask = event->counter_mask;
-		for (i = 0; i < CHAR_BIT * sizeof(event->counter_mask); ++i) {
-			if (mask & (1 << i)) {
-				printf("%d", i);
-				mask &= ~(1 << i);
-				if (mask)
-					printf(", ");
-			}
+	mask = event->counter_mask;
+	for (i = 0; i < CHAR_BIT * sizeof(event->counter_mask); ++i) {
+		if (mask & (1 << i)) {
+			printf("%d", i);
+			mask &= ~(1 << i);
+			if (mask)
+				printf(", ");
 		}
-	/*}*/
+	}
 
 	printf(")\n\t%s (min count: %d)\n", event->desc, event->min_count);
 
@@ -100,7 +96,7 @@ static char * next_part(char const ** str)
 	if (c == *str)
 		return NULL;
 
-	ret = strndup(*str, c - *str);
+	ret = op_xstrndup(*str, c - *str);
 	*str += c - *str;
 	return ret;
 }
@@ -125,9 +121,6 @@ static int parse_events(void)
 			fprintf(stderr, "Invalid event %s\n", cp);
 			exit(EXIT_FAILURE);
 		}
-
-		/* initial guess */
-		parsed_events[i].counter = i;
 
 		parsed_events[i].name = part;
 
@@ -157,9 +150,9 @@ static int parse_events(void)
 }
 
 
-static void check_event(struct parsed_event * pev)
+static void check_event(struct parsed_event * pev,
+			struct op_event const * event)
 {
-	struct op_event * event = pev->event;
 	int ret;
 
 	if (!event) {
@@ -185,54 +178,40 @@ static void check_event(struct parsed_event * pev)
 }
 
 
-static void allocate_counter(struct parsed_event * pev, int * alloced)
-{
-	int c = 0;
-
-	for (; c < op_get_nr_counters(cpu_type); ++c) {
-		int mask = 1 << c;
-		if (!(*alloced & mask) && (pev->event->counter_mask & mask)) {
-			pev->counter = c;
-			*alloced |= mask;
-			return;
-		}
-	}
-
-	fprintf(stderr, "Couldn't allocate a hardware counter for "
-	        "event %s: check op_help output\n", pev->name);
-	exit(EXIT_FAILURE);
-}
-
-
-static void resolve_events(struct list_head * events)
+static void resolve_events()
 {
 	int count = parse_events();
 	int i;
-	int alloced = 0;
+	size_t * counter_map;
+	int nr_counters = op_get_nr_counters(cpu_type);
+	struct op_event const * selected_events[OP_MAX_COUNTERS];
+
+	if (count > nr_counters) {
+		fprintf(stderr, "Not enough hardware counters.\n");
+		exit(EXIT_FAILURE);
+	}
 
 	for (i = 0; i < count; ++i) {
-		struct list_head * pos;
 		struct parsed_event * pev = &parsed_events[i];
 
-		list_for_each(pos, events) {
-			struct op_event * ev =
-				list_entry(pos, struct op_event, event_next);
+		selected_events[i] = find_event_by_name(pev->name);
 
-			if (strcmp(ev->name, pev->name) == 0) {
-				pev->event = ev;
-			}
+		check_event(pev, selected_events[i]);
+	}
 
-		}
+	counter_map = map_event_to_counter(selected_events, count, cpu_type);
 
-		check_event(pev);
-
-		allocate_counter(pev, &alloced);
+	if (!counter_map) {
+		fprintf(stderr, "Couldn't allocate hardware counters for the selected events.\n");
+		exit(EXIT_FAILURE);
 	}
 
 	for (i = 0; i < count; ++i) {
-		printf("%d ", parsed_events[i].counter);
+		printf("%d ", counter_map[i]);
 	}
 	printf("\n");
+
+	free(counter_map);
 }
 
 
@@ -278,18 +257,30 @@ static struct poptOption options[] = {
  */
 static void get_options(int argc, char const * argv[])
 {
-	poptContext optcon;
-
 	optcon = op_poptGetContext(NULL, argc, argv, options, 0);
 
 	if (show_vers) {
 		show_version(argv[0]);
 	}
 
-	/* non-option, must be a valid event name or event specs*/
+	/* non-option, must be a valid event name or event specs */
 	chosen_events = poptGetArgs(optcon);
 
-	// don't free the context, we need chosen_events
+	/* don't free the context now, we need chosen_events */
+}
+
+
+/** make valgrind happy */
+static void cleanup()
+{
+	int i;
+	for (i = 0; i < op_get_nr_counters(cpu_type); ++i) {
+		if (parsed_events[i].name)
+			free(parsed_events[i].name);
+	}
+	op_free_events();
+	if (optcon)
+		poptFreeContext(optcon);
 }
 
 
@@ -299,9 +290,14 @@ int main(int argc, char const *argv[])
 	struct list_head * pos;
 	char const * pretty;
 
-	cpu_type = op_get_cpu_type();
+	atexit(cleanup);
 
 	get_options(argc, argv);
+
+	/* usefull for testing purpose to allow to force the cpu type
+	 * with --cpu-type */
+	if (cpu_type == CPU_NO_GOOD)
+		cpu_type = op_get_cpu_type();
 
 	if (cpu_type < 0 || cpu_type >= MAX_CPU_TYPE) {
 		fprintf(stderr, "cpu_type '%d' is not valid\n", cpu_type);
@@ -333,7 +329,7 @@ int main(int argc, char const *argv[])
 			fprintf(stderr, "No events given.\n");
 			exit(EXIT_FAILURE);
 		}
-		resolve_events(events);
+		resolve_events();
 		exit(EXIT_SUCCESS);
 	}
 

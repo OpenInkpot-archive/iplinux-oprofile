@@ -12,7 +12,7 @@
 AC_PREREQ(2.13)
 
 AC_INIT(libop/op_config.h)
-AM_INIT_AUTOMAKE(oprofile, 0.6cvs)
+AM_INIT_AUTOMAKE(oprofile, 0.7cvs)
 AM_CONFIG_HEADER(config.h)
 
 AC_PROG_RANLIB
@@ -113,9 +113,6 @@ AC_SUBST(POPT_LIBS)
 # do NOT put tests here, they will fail in the case X is not installed !
  
 AM_CONDITIONAL(have_qt, test -n "$QT_LIB")
-
-# inihibited for now
-AM_CONDITIONAL(build_oprof_report, false)
 
 AX_CFLAGS_OPTION(OP_CFLAGS,[-W])
 AX_CXXFLAGS_OPTION(OP_CXXFLAGS,[-W])

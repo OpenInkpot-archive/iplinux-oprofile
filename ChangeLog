@@ -1,3 +1,180 @@
+2003-08-03  John Levon  <levon@movementarian.org>
+
+	* utils/opcontrol: avoid using ps, it's very slow with kallsyms
+
+2003-08-03  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libutil++/op_bfd.cpp: c++ static function doesn't get a mangled name
+	  in debug info (see gcc #11774). Try to recover through a not
+	  completely reliable mechanism but better than ignoring the problem
+
+2003-08-02  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* pp/opreport.cpp: minor: more consistency about function ordering
+
+2003-08-02  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/profile.h:
+	* libpp/profile.cpp: profile::sample_count() new to allow raw access
+	  to samples count
+	* pp/opreport.cpp: use above function to implement opreport (w/o -l
+	  or --details options). opreport is roughly twice faster.
+
+2003-08-02  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* pp/opreport.cpp: clarify multiple counter support
+
+2003-08-01  John Levon  <levon@movementarian.org>
+
+	* libregex/stl.pat.in: fix _List_iterator regex
+	(from Phil)
+
+2003-07-31  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* pp/opannotate.cpp: output cpu type and cpu speed.
+
+2003-07-30  John Levon  <levon@movementarian.org>
+
+	* libpp/partition_files.cpp: remove some apparently
+	dead code
+
+2003-07-30  John Levon  <levon@movementarian.org>
+
+	* events/i386.p4.unit_masks: make flame_uops value
+	mandatory, Yuan.Lu@rrze.uni-erlangen.de does not
+	see any events without setting the unit mask
+
+2003-07-30  John Levon  <levon@movementarian.org>
+
+	* libutil++/op_bfd.h:
+	* libutil++/op_bfd.cpp: bfd_openr() keeps a copy of
+	the passed in char * around, sickenly enough. Ensure lifetimes
+	will always be correct by adding a filename data member to
+	op_bfd
+
+2003-07-29  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/op_header.h:
+	* libpp/op_header.cpp: separate output of cpu_type, cpu_speed
+	  and counter setup
+
+	* libpp/partition_files.h:
+	* libpp/partition_files.cpp: unmergeable_profile() split profile
+	  by the unmergeable.
+
+	* pp/opreport_options.h:
+	* pp/opreport_options.cpp:
+	* pp/opreport.cpp: initial multiple counter output, multiple counter
+	  with -l is not yet available.
+
+2003-07-29  John Levon  <levon@movementarian.org>
+
+	* doc/opcontrol.1.in: update for --event
+
+2003-07-29  John Levon  <levon@movementarian.org>
+
+	* configure.in:
+	* doc/srcdoc/Doxyfile.in:
+	* oprof_report/: remove badly out of date oprof_report
+
+2003-07-28  John Levon  <levon@movementarian.org>
+
+	* configure.in: bump to 0.7cvs
+
+2003-07-26  John Levon  <levon@movementarian.org>
+
+	* configure.in: bump to 0.6
+
+2003-07-26  John Levon  <levon@movementarian.org>
+
+	* utils/opcontrol: fix call of op_help
+
+2003-07-26  John Levon  <levon@movementarian.org>
+
+	* gui/oprof_start.cpp: replace folder icons with clearer
+	red/green circles
+
+2003-07-26  John Levon  <levon@movementarian.org>
+
+	* gui/oprof_start.cpp: actually select and show the default
+	event
+
+2003-07-26  John Levon  <levon@movementarian.org>
+
+	* gui/oprof_start.cpp: small string tweak, show "conflicts"
+	message consistently
+
+2003-07-26  John Levon  <levon@movementarian.org>
+
+	* gui/oprof_start.cpp: don't use invalidated iterator
+
+2003-07-26  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* gui/oprof_start.cpp: fix for 2.91.66
+
+	* libpp/profile.cpp: typo invoking an undefined behavior revealed
+	  by gcc stl debug mode
+	* libpp/profile.h: ensure we provide the right typedef to std::
+	  for profile::const_iterator revealed by gcc stl debug mode at compile
+	  time. The implementation is a bit tricky to work with old compiler
+	* libpp/symbol_sort.cpp: compare must define a weak ordered relation
+	  order, revealed by gcc stl debug mode.
+
+2003-07-26  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* gui/ui/oprof_start.base.ui:
+	* gui/oprof_start.h:
+	* gui/oprof_start.cpp: change UI to use the new counter allocation
+	  API
+
+	* libop/op_alloc_counter.h:
+	* libop/op_alloc_counter.c:
+	* utils/op_help.c: minor const-ness api change
+
+2003-07-25  Will Cohen  <wcohen@redhat.com>
+
+	* utils/opcontrol: Restrict the search path.
+
+2003-07-25  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libop/op_alloc_counter.c: use tabulation
+
+	* libop/op_events.c:
+	* libop/op_events.h: find_event_by_name() new
+	* utils/op_help.c: use find_event_by_name()
+
+2003-07-24  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* utils/op_help.c: make valgrind happy + minor cleanup
+
+2003-07-24  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libop/op_alloc_counter.h:
+	* libop/op_alloc_counter.c: new file providing mapping from an event 
+	  list to hardware counter number
+	* utils/op_help.c: use the above api
+
+2003-07-24  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* utils/op_help.c: fix hardware counter allocation order
+
+2003-07-23  John Levon  <levon@movementarian.org>
+
+	* doc/oprofile.xml: comment out --base-dir mention
+
+2003-07-23  John Levon  <levon@movementarian.org>
+
+	* doc/oprofile.xml: remove mention of oprof_start_event
+
+2003-07-23  John Levon  <levon@movementarian.org>
+
+	* dae/oprofiled.c:
+	* daemon/oprofiled.c: don't uselessly try to unlink
+	non-existent lockfile
+
+	* daemon/opd_image.c:
+	* daemon/oprofiled.c: clean up buffer read messages
+
 2003-07-23  John Levon  <levon@movementarian.org>
 
 	* utils/opcontrol: error out at --setup time if vmlinux is not

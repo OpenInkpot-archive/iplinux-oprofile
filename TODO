@@ -3,14 +3,10 @@ This is an (incomplete) list of some of the stuff we want to look at doing.
 If you're interested in hacking on any of these, please contact the list first
 for some pointers and/or read HACKING and doc/CodingStyle.
 
-0.6 release
------------
-
- o gui: fix counter allocation stuff.
-
 0.7 release
 -----------
 
+ o sample-file: / binary: don't work in any useful way
  o separate debug info stuff
  o debian build stuff
  o side-by-side opreport output (--compare - needs UI spec)
@@ -21,6 +17,7 @@ for some pointers and/or read HACKING and doc/CodingStyle.
   opreport "lib-image:*libc*" --merge=lib works but not
   opreport "image:*libc*" --merge=lib whilst the behavior is reversed if
   --separate==none. Must we take care ?
+ o document the maening of op_bfd.cpp warning: "some functions compiled without debug information may have incorrect source line attributions"
 
 0.8 release
 -----------
@@ -37,6 +34,9 @@ Before 1.0 big stuff
 Before 1.0 little stuff
 -----------------------
 
+ o oprof_start dialog size is too small initially
+ o oprof_start key movement through events doesn't change help text
+ o add -Wdeclaration-after-statement for $CC
  o GUI still has a physical-counter interface, should have a general one
    like opcontrol --event
  o test opannotate -s -a on an application containing relative path debug
@@ -118,14 +118,3 @@ vma      samples  cum. samples  %           cum. %     symbol name             i
 o profile the NMI handler code
  
 o merge sample files into one big report (like vtune can do repeated runs)
-
-oprof_report:
-
-IMHO this app isn't near what we really want. There's no point doing this
-GUI until we can give it some real power. Let's concentrate on making the
-command-line tools as good as possible first. 
-- folderview of sample files + sessions in the gui itself (later ?)
-- disassembly. form "+0x8b" for intra-symbol samples optionally, on by default?
-- tune and test hotspot
-- source (later ?)
- 

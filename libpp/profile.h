@@ -15,6 +15,7 @@
 
 #include <string>
 #include <map>
+#include <iterator>
 
 #include "odb_hash.h"
 #include "op_types.h"
@@ -43,6 +44,16 @@ public:
 	}
 
 	/**
+	 * count samples count w/o recording them
+	 * @param filename sample filename
+	 *
+	 * convenience interface for raw access to sample count w/o recording
+	 * them. It's placed here so all access to samples files go through
+	 * profile_t static or non static member.
+	 */
+	static unsigned int sample_count(string const & filename);
+
+	/**
 	 * cumulate sample file to our container of samples
 	 * @param filename  sample file name
 	 * @param offset the offset for kernel files, \sa start_offset
@@ -69,6 +80,9 @@ public:
 	iterator_pair samples_range() const;
 
 private:
+	/// helper for sample_count() and add_sample_file(). All error launch
+	/// an exception.
+	static void open_sample_file(string const & filename, samples_odb_t &);
 
 	/// copy of the samples file header
 	scoped_ptr<opd_header> file_header;
@@ -97,7 +111,25 @@ private:
 	u32 start_offset;
 };
 
-class profile_t::const_iterator {
+
+// It will be easier to derive profile_t::const_iterator from
+// std::iterator<std::input_iterator_tag, unsigned int> but this doesn't
+// work for gcc <= 2.95 so we provide the neccessary typedef in the hard way.
+// See ISO C++ 17.4.3.1 § 1 and 14.7.3 § 9.
+namespace std {
+	template <>
+		struct iterator_traits<profile_t::const_iterator> {
+			typedef ptrdiff_t difference_type;
+			typedef unsigned int value_type;
+			typedef unsigned int* pointer;
+			typedef unsigned int& reference;
+			typedef input_iterator_tag iterator_category;
+		};
+}
+
+
+class profile_t::const_iterator
+{
 	typedef ordered_samples_t::const_iterator iterator_t;
 public:
 	const_iterator() : start_offset(0) {}

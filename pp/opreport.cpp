@@ -31,16 +31,98 @@ using namespace std;
 namespace {
 
 
-void output_header(partition_files const & files)
+/**
+ * Used to sort parellel vector of data upon one of the vector. Sorting
+ * is done by first building a bijection map[i] = i then sort this array.
+ * Later all array access are done using the sorted indexer. After sorting
+ * the bijection ensure than:
+ *  for i in [1, size) 
+ *    compare(data[index_mapper[i]], data[index_mapper[i-1]]) == true
+ */
+typedef vector<size_t> index_mapper_t;
+
+
+/// storage for a merged file summary
+struct summary {
+	summary(string const & image_name_, string const & lib_image_)
+		: count(0), image_name(image_name_), lib_image(lib_image_) {}
+	size_t count;
+	string image_name;
+	string lib_image;
+
+	bool operator<(summary const & rhs) const {
+		return options::reverse_sort
+			? count < rhs.count : rhs.count < count;
+	}
+};
+
+
+/**
+ * Summary of a group. A group is a set of image summaries
+ * for one application, i.e. an application image and all
+ * dependent images such as libraries.
+ */
+struct group_summary {
+	group_summary(string const & image_name_, string const & lib_image_) 
+		: count(0), image_name(image_name_), lib_image(lib_image_) {}
+	group_summary() : count(0) {}
+
+	size_t count;
+	string image_name;
+	string lib_image;
+	vector<summary> files;
+	index_mapper_t index_mapper;
+
+	summary const & file(size_t index) const {
+		return files[index_mapper[index]];
+	}
+
+	bool operator<(group_summary const & rhs) const {
+		return options::reverse_sort 
+			? count < rhs.count : rhs.count < count;
+	}
+
+	/// return true if the deps should not be output
+	bool should_hide_deps() const;
+};
+
+
+/// all group_summary belonging to a counter
+struct event_group_summary {
+	event_group_summary() : total_count(0.0) {}
+
+	group_summary const & group(size_t index) const {
+		return groups[index_mapper[index]];
+	}
+
+	vector<group_summary> groups;
+	/// total count of samples for this counter
+	double total_count;
+
+	index_mapper_t index_mapper;
+};
+
+
+void output_header()
 {
 	if (!options::show_header)
 		return;
 
-	if (files.nr_set()) {
-		partition_files::filename_set const & file_set = files.set(0);
-		opd_header header =
-			read_header(file_set.begin()->sample_filename);
-		cout << header;
+	bool first_output = true;
+	for (vector<partition_files const *>::size_type i = 0;
+	     i < sample_file_partition.size(); ++i) {
+		if (sample_file_partition[i].nr_set()) {
+			partition_files::filename_set const & file_set =
+				sample_file_partition[i].set(0);
+			opd_header header =
+				read_header(file_set.begin()->sample_filename);
+
+			if (first_output) {
+				output_cpu_info(cout, header);
+				first_output = false;
+			}
+			cout << header;
+		}
 	}
 }
 
@@ -61,79 +143,14 @@ void output_counter(double total_count, size_t count)
 }
 
 
-/// storage for a merged file summary
-struct summary {
-	summary() : count(0) {}
-	size_t count;
-	string image_name;
-	string lib_image;
-
-	struct compare {
-		bool operator()(summary const & lhs,
-		                summary const & rhs) const {
-			return options::reverse_sort 
-				? lhs.count < rhs.count
-				: rhs.count < lhs.count;
-		}
-	};
-};
-
-
-/**
- * Summary of a group. A group is a set of image summaries
- * for one application, i.e. an application image and all
- * dependent images such as libraries.
- */
-struct group_summary {
-	group_summary() : count(0) {}
-	size_t count;
-	string image_name;
-	string lib_image;
-	vector<summary> files;
-
-	struct compare {
-		bool operator()(group_summary const & lhs,
-		                group_summary const & rhs) const {
-			return options::reverse_sort 
-				? lhs.count < rhs.count
-				: rhs.count < lhs.count;
-		}
-	};
-
-	/// return true if the deps should not be output
-	bool should_hide_deps() const;
-	/// output this summary
-	void output(double total) const;
-	/// show an image summary for the dependent images
-	void output_deps(double total) const;
-};
-
-
-void group_summary::output_deps(double total) const
-{
-	if (should_hide_deps())
-		return;
-
-	vector<summary>::const_iterator cit = files.begin();
-	vector<summary>::const_iterator const end = files.end();
-
-	for (; cit != end; ++cit) {
-		cout << "\t";
-		double tot_count = options::global_percent 
-			? total : count;
-		output_counter(tot_count, cit->count);
-
-		if (cit->lib_image.empty())
-			cout << " " << get_filename(cit->image_name);
-		else
-			cout << " " << get_filename(cit->lib_image);
-		cout << '\n';
-	}
-}
-
-
 bool group_summary::should_hide_deps() const
 {
+	if (files.size() == 0)
+		return true;
+
+	if (count == 0)
+		return true;
+
 	string image = image_name;
 	if (options::merge_by.lib && !lib_image.empty())
 		image = lib_image;
@@ -154,17 +171,38 @@ bool group_summary::should_hide_deps() const
 }
 
 
-void group_summary::output(double total) const
+void
+output_deps(vector<event_group_summary> const & summaries,
+	    vector<group_summary> const & event_group)
 {
-	output_counter(total, count);
+	bool should_hide_deps = true;
+	for (size_t i = 0 ; i < event_group.size(); ++i) {
+		if (!event_group[i].should_hide_deps())
+			should_hide_deps = false;
+	}
 
-	string image = image_name;
-	if (options::merge_by.lib && !lib_image.empty())
-		image = lib_image;
+	if (should_hide_deps)
+		return;
 
-	cout << get_filename(image) << '\n';
+	for (size_t j = 0 ; j < event_group[0].files.size(); ++j) {
+		cout << "\t";
+		for (size_t i = 0; i < event_group.size(); ++i) {
+			group_summary const & group = event_group[i];
+			summary const & file = group.file(j);
 
-	output_deps(total);
+			double tot_count = options::global_percent
+				? summaries[i].total_count : group.count;
+
+			output_counter(tot_count, file.count);
+		}
+
+		summary const & file = event_group[0].file(j);
+		if (file.lib_image.empty())
+			cout << " " << get_filename(file.image_name);
+		else
+			cout << " " << get_filename(file.lib_image);
+		cout << '\n';
+	}
 }
 
 
@@ -174,76 +212,293 @@ void group_summary::output(double total) const
  */
 group_summary summarize(partition_files::filename_set const & files)
 {
-	group_summary group;
-
-	group.image_name = files.begin()->image;
-	group.lib_image = files.begin()->lib_image;
+	group_summary group(files.begin()->image, files.begin()->lib_image);
 
 	partition_files::filename_set::const_iterator it;
 	for (it = files.begin(); it != files.end(); ++it) {
-		profile_t samples;
-		// THere's another FIXME on this elsewhere. Note
-		// that the use of profile_t for this means we
-		// pass in an offset of "0" instead of the real
-		// abfd offset. This is perhaps a bit dubious...
-		samples.add_sample_file(it->sample_filename, 0);
+		summary dep_summary(it->image, it->lib_image);
 
-		summary dep_summary;
-		dep_summary.image_name = it->image;
-		dep_summary.lib_image  = it->lib_image;
-
-		profile_t::iterator_pair p_it = samples.samples_range();
-		dep_summary.count = accumulate(p_it.first, p_it.second, 0);
+		dep_summary.count =
+			profile_t::sample_count(it->sample_filename);
 
 		group.count += dep_summary.count;
 		group.files.push_back(dep_summary);
 	}
 
-	sort(group.files.begin(), group.files.end(),
-	     summary::compare());
-
 	return group;
 }
 
 
+/// comparator used to sort a vector<summary> through a mapping index
+class build_summary_index {
+public:
+	build_summary_index(vector<summary> const & files_)
+		: files(files_) {}
+	bool operator()(size_t lhs, size_t rhs) const {
+		return files[lhs] < files[rhs];
+	}
+private:
+	vector<summary> const & files;
+};
+
+
 /**
- * Create summary data for each of the given files
+ * create the index to sorted group_summary, summaries[0] is used to create
+ * the sort order. Data themself remains at fixed address, we just fill an
+ * index mapper.
  */
-double populate_summaries(partition_files const & files,
-                          vector<group_summary> & summaries)
+index_mapper_t create_index_mapper(vector<group_summary> const & summaries)
 {
-	double total_count = 0;
+	index_mapper_t result(summaries[0].files.size());
 
-	for (size_t i = 0 ; i < files.nr_set(); ++i) {
-		partition_files::filename_set const & file_set = files.set(i);
-
-		summaries.push_back(summarize(file_set));
-
-		total_count += summaries.back().count;
+	for (size_t i = 0; i < result.size(); ++i) {
+		result[i] = i;
 	}
 
-	sort(summaries.begin(), summaries.end(),
-	     group_summary::compare());
+	sort(result.begin(), result.end(), 
+	     build_summary_index(summaries[0].files));
 
-	return total_count;
+	return result;
+}
+
+
+/**
+ * build each group_summary::vector<summary> in synched way
+ * populating a vector<group_summary> w/o any gap between each entry
+ * i.e post condition are:
+ * for i in [1 result.size)
+ *       result[i].groups.size() == result[i-1].groups.size()
+ * for i in [1 result.size)
+ *       result[i].groups.image_name == result[i-1].groups.image_name
+ *
+ * ascii art for 3 events:
+ *
+ * sample_file_partition array:
+ * -- AA -------  BC --- CD --- EF -----------
+ * -------- BA --------- CD ------------------
+ * -------------- BC ----------------- FG ----
+ *
+ * result:
+ * -- AA -- BA -- BC --- CD --- EF --- FG ----
+ * -- AA -- BA -- BC --- CD --- EF --- FG ----
+ * -- AA -- BA -- BC --- CD --- EF --- FG ----
+ *
+ * the added items contain zero samples.
+ *
+ * @internal a multimap<name, <data, vector entry index>> is used to partition
+ * the input data (coming from all counter). Then we iterate over equivalence
+ * class, each class contain item for an unique name and associated info
+ * contains the counter nr for this data.
+ */
+vector<group_summary>
+populate_summaries(vector<event_group_summary> const & unfilled, size_t index)
+{
+	typedef pair<summary const *, int> value_t;
+	typedef multimap<string, value_t> map_t;
+	map_t map;
+
+	// Partition the files set at index.
+	for (size_t i = 0; i < unfilled.size(); ++i) {
+		vector<summary> const & groups = unfilled[i].group(index).files;
+		for (size_t j = 0; j < groups.size(); ++j) {
+			string image = groups[j].image_name;
+			if (!groups[j].lib_image.empty())
+				image = groups[j].lib_image;
+			value_t value(&groups[j], i);
+			map.insert(map_t::value_type(image, value));
+		}
+	}
+
+	vector<group_summary> result(unfilled.size());
+
+	for (size_t i = 0; i < unfilled.size(); ++i) {
+		group_summary const & group = unfilled[i].group(index);
+		result[i].count = group.count;
+		result[i].image_name = group.image_name;
+		result[i].lib_image = group.lib_image;
+	}
+
+	// for each equivalance class.
+	for (map_t::const_iterator it = map.begin(); it != map.end(); ) {
+		// Populate entries summary with empty summary, it->second
+		// is a representant of the current equivalence class.
+		for (size_t i = 0 ; i < unfilled.size() ; ++i) {
+			string image_name = it->second.first->image_name;
+			string lib_image  = it->second.first->lib_image;
+			summary summary(image_name, lib_image);
+
+			result[i].files.push_back(summary);
+		}
+
+		// Overwrite empty summary create above by the existing one.
+		pair<map_t::const_iterator, map_t::const_iterator> p_it =
+			p_it = map.equal_range(it->first);
+		for (; it != p_it.second; ++it) {
+			result[it->second.second].files.back() =
+				*it->second.first;
+		}
+	}
+
+	index_mapper_t index_mapper = create_index_mapper(result);
+	for (size_t i = 0; i < result.size(); ++i)
+		result[i].index_mapper = index_mapper;
+
+	return result;
 }
 
 
 /**
  * Display all the given summary information
  */
-void
-output_summaries(vector<group_summary> const & summaries, double total_count)
+void output_summaries(vector<event_group_summary> const & summaries)
 {
-	vector<group_summary>::const_iterator it = summaries.begin();
-	vector<group_summary>::const_iterator end = summaries.end();
+	for (size_t i = 0 ; i < summaries[0].groups.size(); ++i) {
+		group_summary const & group = summaries[0].group(i);
 
-	for (; it != end; ++it) {
-		if ((it->count * 100.0) / total_count < options::threshold)
+		if ((group.count * 100.0) / summaries[0].total_count <
+		    options::threshold) {
 			continue;
+		}
 
-		it->output(total_count);
+		for (size_t j = 0; j < summaries.size(); ++j) {
+			group_summary const & group = summaries[j].group(i);
+			output_counter(summaries[j].total_count, group.count);
+		}
+
+		string image = group.image_name;
+		if (options::merge_by.lib && !group.lib_image.empty())
+			image = group.lib_image;
+
+		cout << get_filename(image) << '\n';
+
+		vector<group_summary> filled_summaries =
+			populate_summaries(summaries, i);
+
+		output_deps(summaries, filled_summaries);
 	}
+}
+
+
+/// comparator used to sort a vector<group_summary> through a mapping index
+class build_group_summary_index {
+public:
+	build_group_summary_index(vector<group_summary> const & group_)
+		: group(group_) {}
+	bool operator()(size_t lhs, size_t rhs) const {
+		return group[lhs] < group[rhs];
+	}
+private:
+	vector<group_summary> const & group;
+};
+
+
+/**
+ * create the index to sorted group_summary, summaries[0] is used to create
+ * the sort order. Data remains at fixed address, we just fill an index mapper
+ */
+index_mapper_t
+create_index_mapper(vector<event_group_summary> const & summaries)
+{
+	index_mapper_t result(summaries[0].groups.size());
+
+	// no stl-ish way to generate [0 - size()) range
+	for (size_t i = 0; i < result.size(); ++i) {
+		result[i] = i;
+	}
+
+	sort(result.begin(), result.end(),
+	     build_group_summary_index(summaries[0].groups));
+
+	return result;
+}
+
+
+/**
+ * build each event_group_summary::vector<group_summary> in synched way
+ * populating a vector<event_group_summary> w/o any gap between each entry
+ * i.e post condition are:
+ * for i in [1 result.size)
+ *       result[i].groups.size() == result[i-1].groups.size()
+ * for i in [1 result.size)
+ *       result[i].groups.image_name == result[i-1].groups.image_name
+ *
+ * ascii art for 3 events:
+ *
+ * sample_file_partition array:
+ * -- AA -------  BC --- CD --- EF -----------
+ * -------- BA --------- CD ------------------
+ * -------------- BC ----------------- FG ----
+ *
+ * result:
+ * -- AA -- BA -- BC --- CD --- EF --- FG ----
+ * -- AA -- BA -- BC --- CD --- EF --- FG ----
+ * -- AA -- BA -- BC --- CD --- EF --- FG ----
+ *
+ * the added items contain zero samples.
+ *
+ * @internal a multimap<name, <data, vector entry index>> is used to partition
+ * the input data (coming from all counter). Then we iterate over equivalence
+ * class, each class contain item for an unique name and associated info
+ * contains the counter nr for this data.
+ */
+vector<event_group_summary> populate_group_summaries()
+{
+	typedef pair<group_summary, int> value_t;
+	typedef multimap<string, value_t> map_t;
+	map_t map;
+
+	size_t const nr_events = sample_file_partition.size();
+
+	vector<event_group_summary> result(nr_events);
+
+	// partition the files set.
+	for (size_t event = 0; event < nr_events; ++event) {
+		partition_files const & files = sample_file_partition[event];
+
+		for (size_t j = 0; j < files.nr_set(); ++j) {
+			partition_files::filename_set const & file_set
+				= files.set(j);
+
+			group_summary group(summarize(file_set));
+			result[event].total_count += group.count;
+
+			string image = group.image_name;
+			if (options::merge_by.lib && !group.lib_image.empty())
+				image = group.lib_image;
+
+			value_t value(group, event);
+			map.insert(map_t::value_type(image, value));
+		}
+	}
+
+	// for each equivalence class
+	for (map_t::const_iterator it = map.begin(); it != map.end(); ) {
+		// populate entries with empty group_summary, it->second is a
+		// representant of the current equivalence class
+		for (size_t i = 0 ; i < nr_events; ++i) {
+			string image_name = it->second.first.image_name;
+			string lib_image  = it->second.first.lib_image;
+			group_summary group(image_name, lib_image);
+
+			result[i].groups.push_back(group);
+		}
+
+		// overwrite the empty group_summary create above by existing
+		// group_summary
+		pair<map_t::const_iterator, map_t::const_iterator> p_it =
+			map.equal_range(it->first);
+		for ( ; it != p_it.second; ++it) {
+			result[it->second.second].groups.back() =
+				it->second.first;
+		}
+	}
+
+	index_mapper_t index_mapper = create_index_mapper(result);
+	for (size_t i = 0; i < nr_events; ++i) {
+		result[i].index_mapper = index_mapper;
+	}
+
+	return result;
 }
 
 
@@ -349,19 +604,19 @@ int opreport(vector<string> const & non_options)
 {
 	handle_options(non_options);
 
-	output_header(*sample_file_partition);
+	output_header();
 
 	if (!options::symbols) {
-		vector<group_summary> summaries;
-		double const total =
-			populate_summaries(*sample_file_partition, summaries);
-		output_summaries(summaries, total);
+		vector<event_group_summary> filled_summaries =
+			populate_group_summaries();
+
+		output_summaries(filled_summaries);
 		return 0;
 	}
 
 	profile_container samples(false,
 		options::debug_info, options::details);
-	populate_profiles(*sample_file_partition, samples);
+	populate_profiles(sample_file_partition[0], samples);
 	output_symbols(samples);
 	return 0;
 }
