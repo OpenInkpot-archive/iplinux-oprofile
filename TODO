@@ -14,13 +14,6 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
 
  o we show a header but not column headers for image report
  o write the man page and xml doc (i'll do this right at the end - john)
- o I think we should have the ability to have *fixed* width headers, e.g. :
-
-vma      samples  cum. samples  %           cum. %     symbol name             image name              app name
-0804c350 64582    64582         35.0757     35.0757    odb_insert              /usr/loc...in/oprofiled /usr/local/oprofile-pp/bin/oprofiled
-
-  Note the ellipsis
-
  o We don't use abfd.have_debug_info() any more, gives crap reports:
 [moz@lambent oprofile-pp]$ pp/opreport -l /usr/bin/which
 Cpu type: PIII
@@ -34,14 +27,10 @@ vma      samples  %           symbol name             app name
   can objdump retrieve the source file and if no can we work-around ?
  o opannotate unhandled option (probably not exhaustive) 
    --base-dir
- o move oprofiled.log to OP_SAMPLE_DIR/current ?
  o opd_mangle_filename() in dae/ daemon/ use create_path blindly and try to
   recreate from /var.
  o at least add some FIXME in dae/daemon (see opd_mangle_file(),
   op_mangle_file() and caller)
- o option xxx and negated option --no-xxx: we can hide them in --help and
-  mention in the xxx option help string than the --no-xxx is allowed. Not
-  really usefull if we have a little number of --no.
  o inhibit build of opdiff in pp/Makefile.am
  o consider to do the symbol (details too ?) sort at output, format_output receive
   a vector of symbol to consider, we can perhaps sort in format_output
@@ -127,6 +116,17 @@ Before 1.0 big stuff
  
 Before 1.0 little stuff
 -----------------------
+
+ o option xxx and negated option --no-xxx: we can hide them in --help and
+  mention in the xxx option help string than the --no-xxx is allowed. Not
+  really usefull if we have a little number of --no.
+ o move oprofiled.log to OP_SAMPLE_DIR/current ?
+ o I think we should have the ability to have *fixed* width headers, e.g. :
+
+vma      samples  cum. samples  %           cum. %     symbol name             image name              app name
+0804c350 64582    64582         35.0757     35.0757    odb_insert              /usr/loc...in/oprofiled /usr/local/oprofile-pp/bin/oprofiled
+
+  Note the ellipsis
 
  o OPD_MAX_MODULES is stupid, use a list instead
  o configure.in: OP_DATADIR=`eval echo "$datadir/$PACKAGE/"`
