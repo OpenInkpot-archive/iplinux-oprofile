@@ -150,11 +150,11 @@ bool interesting_symbol(asymbol * sym)
 	if (sym->name[0] == '.' && sym->name[1] == 'L')
 		return false;
 
-	// This is still necessary because the symbol
-	// sits at the same VMA as a real function,
-	// so we can end up dropping the real function
-	// symbol when we remove duplicate VMAs in our
-	// caller.
+	/* This case cannot be moved to boring_symbol(),
+	 * because that's only used for duplicate VMAs,
+	 * and sometimes this symbol appears at an address
+	 * different from all other symbols.
+	 */
 	if (!strcmp("gcc2_compiled.", sym->name))
 		return false;
 
@@ -237,8 +237,6 @@ void op_bfd::get_symbols(op_bfd::symbols_found_t & symbols)
 
 	// we need to ensure than for a given vma only one symbol exist else
 	// we read more than one time some samples. Fix #526098
-	// ELF symbols size : potential bogosity here because when using
-	// elf symbol size we need to check than two symbols does not overlap.
 	for (; it != symbols.end();) {
 		symbols_found_t::iterator temp = it;
 		++temp;
@@ -433,63 +431,13 @@ bool op_bfd::get_linenr(symbol_index_t sym_idx, unsigned int offset,
 }
 
 
-// #define USE_ELF_INTERNAL
-
-#ifdef USE_ELF_INTERNAL
-struct elf_internal_sym {
-  bfd_vma	st_value;		/* Value of the symbol */
-  bfd_vma	st_size;		/* Associated symbol size */
-  unsigned long	st_name;		/* Symbol name, index in string tbl */
-  unsigned char	st_info;		/* Type and binding attributes */
-  unsigned char	st_other;		/* No defined meaning, 0 */
-  unsigned short st_shndx;		/* Associated section index */
-};
-
-typedef struct elf_internal_sym Elf_Internal_Sym;
-
-typedef struct
-{
-  /* The BFD symbol.  */
-  asymbol symbol;
-  /* ELF symbol information.  */
-  Elf_Internal_Sym internal_elf_sym;
-} elf_symbol_type;
-
-#endif /* USE_ELF_INTERNAL */
-
 size_t op_bfd::symbol_size(op_bfd_symbol const & sym,
 			   op_bfd_symbol const * next) const
 {
 	u32 start = sym.filepos();
-	size_t length;
+	u32 end = next ? next->filepos() : file_size;
 
-#ifndef USE_ELF_INTERNAL
-	u32 end;
-	if (next) {
-		end = next->filepos();
-	} else
-		end = file_size;
-
-	length = end - start;
-#else /* !USE_ELF_INTERNAL */
-	size_t length =
-		((elf_symbol_type *)sym)->internal_elf_sym.st_size;
-
-	// some asm symbol can have a zero length such system_call
-	// entry point in vmlinux. Calculate the length from the next
-	// symbol vma
-	if (length == 0) {
-		u32 next_offset = start;
-		if (next) {
-			next_offset = next->filepos();
-		} else {
-			next_offset = file_size;
-		}
-		length = next_offset - start;
-	}
-#endif /* USE_ELF_INTERNAL */
-
-	return length;
+	return end - start;
 }
 
 

@@ -49,14 +49,11 @@ struct filename_by_samples {
 }
 
 
-profile_container::profile_container(bool add_zero_samples_symbols_,
-                                     bool debug_info_,
-                                     bool need_details_)
+profile_container::profile_container(bool debug_info_, bool need_details_)
 	:
 	symbols(new symbol_container),
 	samples(new sample_container),
 	debug_info(debug_info_),
-	add_zero_samples_symbols(add_zero_samples_symbols_),
 	need_details(need_details_)
 {
 }
@@ -88,7 +85,9 @@ void profile_container::add(profile_t const & profile,
 			profile.samples_range(start, end);
 
 		u32 count = accumulate(p_it.first, p_it.second, 0);
-		if (count == 0 && !add_zero_samples_symbols)
+
+		// skip entries with no samples
+		if (count == 0)
 			continue;
 
 		symb_entry.sample.counts[count_group] = count;
@@ -118,7 +117,7 @@ void profile_container::add(profile_t const & profile,
 		symbol_entry const * symbol = symbols->insert(symb_entry);
 
 		if (need_details) {
-			add_samples(abfd, i, p_it, base_vma, symbol, count_group);
+			add_samples(abfd, i, p_it, symbol, count_group);
 		}
 	}
 }
@@ -127,9 +126,10 @@ void profile_container::add(profile_t const & profile,
 void
 profile_container::add_samples(op_bfd const & abfd, symbol_index_t sym_index,
                                profile_t::iterator_pair const & p_it,
-			       bfd_vma base_vma, symbol_entry const * symbol,
-			       size_t count_group)
+                               symbol_entry const * symbol, size_t count_group)
 {
+	bfd_vma base_vma = abfd.syms[sym_index].vma();
+
 	profile_t::const_iterator it;
 	for (it = p_it.first; it != p_it.second ; ++it) {
 		sample_entry sample;
@@ -137,7 +137,7 @@ profile_container::add_samples(op_bfd const & abfd, symbol_index_t sym_index,
 		sample.counts[count_group] = it.count();
 
 		sample.file_loc.linenr = 0;
-		if (debug_info && sym_index != nil_symbol_index) {
+		if (debug_info) {
 			string filename;
 			if (abfd.get_linenr(sym_index, it.vma(), filename,
 					    sample.file_loc.linenr)) {
@@ -146,9 +146,7 @@ profile_container::add_samples(op_bfd const & abfd, symbol_index_t sym_index,
 			}
 		}
 
-		sample.vma = (sym_index != nil_symbol_index)
-			? abfd.sym_offset(sym_index, it.vma()) + base_vma
-			: it.vma();
+		sample.vma = abfd.sym_offset(sym_index, it.vma()) + base_vma;
 
 		samples->insert(symbol, sample);
 	}
@@ -236,7 +234,8 @@ profile_container::select_filename(double threshold) const
 		// FIXME: is samples_count() the right interface now ?
 		count_array_t counts = samples_count(*it);
 
-		filename_by_samples f(*it, op_ratio(counts[0], total_count[0]));
+		double const ratio = op_ratio(counts[0], total_count[0]);
+		filename_by_samples const f(*it, ratio);
 
 		file_by_samples.push_back(f);
 	}
