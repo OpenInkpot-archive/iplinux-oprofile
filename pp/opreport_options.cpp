@@ -16,7 +16,6 @@
 #include <iterator>
 
 #include "profile_spec.h"
-//#include "split_sample_filename.h"
 #include "opreport_options.h"
 #include "popt_options.h"
 #include "file_manip.h"
