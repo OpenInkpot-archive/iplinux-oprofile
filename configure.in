@@ -49,12 +49,7 @@ CFLAGS=$SAVE_CFLAGS
 OPROFILE_DIR=`pwd`
 AC_SUBST(OPROFILE_DIR)
  
-# FIXME - fucking autoconf ! how do I override the cached value ??? 
-AC_ARG_WITH(cc,    [  --with-cc=<kgcc>             C compiler used to compiler kernel], CC=$withval)
-AC_SUBST(CC)
-
 AC_PROG_CC
-test "$GCC" || AC_ERROR(You would not have much luck compiling kernel code with non-gcc...)
 AC_PROG_CPP
 AC_PROG_CXX
 AC_CHECK_PROG(LD,ld,ld,)
