@@ -6,6 +6,13 @@ for some pointers and/or read HACKING and doc/CodingStyle.
 Before merging with trunk
 -------------------------
 
+[moz@lambent oprofile-pp]$ pp/opreport --include-dependent | more
+
+odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/cat/CPU_CLK_UNHALTED.50000.0.all.all.all to 2208 length, cause : Invalid argument
+
+   - race with opcontrol --shutdown on odb_open() ?
+
+ o -EPERM on the binary is not reported to the user
  o "no samples files found". Make that check if there were some, but they
    didn't match, and if so, give a different message w/o mentioning --dump
  o move oprofiled.log to OP_SAMPLE_DIR/current ?

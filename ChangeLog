@@ -1,5 +1,11 @@
 2003-04-28  John Levon  <levon@movementarian.org>
 
+	* libutil++/op_bfd.h:
+	* libutil++/op_bfd.cpp: make symbol filtering
+	happen *after* adding of artificial symbol
+
+2003-04-28  John Levon  <levon@movementarian.org>
+
 	* libutil++/string_filter.cpp:
 	* libutil++/glob_filter.cpp:
 	* libutil++/path_filter.cpp: match as true if

@@ -64,12 +64,6 @@ op_bfd::op_bfd(string const & filename, string_filter const & symbol_filter)
 	}
 
 	get_symbols(symbol_filter);
-
-	if (syms.size() == 0) {
-		bfd_vma start, end;
-		get_vma_range(start, end);
-		create_artificial_symbol(start, end);
-	}
 }
 
 
@@ -108,7 +102,7 @@ static size_t const nr_boring_symbols =
 /**
  * Return true if the symbol is worth looking at
  */
-static bool interesting_symbol(asymbol *sym)
+static bool interesting_symbol(asymbol * sym)
 {
 	// #717720 some binutils are miscompiled by gcc 2.95, one of the
 	// typical symptom can be catched here.
@@ -157,34 +151,37 @@ struct remove_filter {
  *
  * Parse and sort in ascending order all symbols
  * in the file pointed to by abfd that reside in
- * a %SEC_CODE section. Returns true if symbol(s)
- * are found. The symbols are filtered through
+ * a %SEC_CODE section.
+ *
+ * The symbols are filtered through
  * the interesting_symbol() predicate and sorted
  * with the symcomp() comparator.
  */
-bool op_bfd::get_symbols(string_filter const & symbol_filter)
+void op_bfd::get_symbols(string_filter const & symbol_filter)
 {
 	uint nr_all_syms;
 	size_t size;
 
-	if (!(bfd_get_file_flags(ibfd) & HAS_SYMS))
-		return false;
-
-	size = bfd_get_symtab_upper_bound(ibfd);
-
-	/* HAS_SYMS can be set with no symbols */
-	if (size < 1)
-		return false;
-
-	bfd_syms.reset(new asymbol*[size]);
-	nr_all_syms = bfd_canonicalize_symtab(ibfd, bfd_syms.get());
-	if (nr_all_syms < 1)
-		return false;
+	list<op_bfd_symbol>::iterator it;
 
 	// after creating all symbol it's convenient for user code to access
 	// symbols through a vector. We use an intermediate list to avoid a
 	// O(N²) behavior when we will filter vector element below
 	list<op_bfd_symbol> symbols;
+
+	if (!(bfd_get_file_flags(ibfd) & HAS_SYMS))
+		goto out;
+
+	size = bfd_get_symtab_upper_bound(ibfd);
+
+	/* HAS_SYMS can be set with no symbols */
+	if (size < 1)
+		goto out;
+
+	bfd_syms.reset(new asymbol*[size]);
+	nr_all_syms = bfd_canonicalize_symtab(ibfd, bfd_syms.get());
+	if (nr_all_syms < 1)
+		goto out;
 
 	for (symbol_index_t i = 0; i < nr_all_syms; i++) {
 		if (interesting_symbol(bfd_syms[i])) {
@@ -208,7 +205,6 @@ bool op_bfd::get_symbols(string_filter const & symbol_filter)
 	// we read more than one time some samples. Fix #526098
 	// ELF symbols size : potential bogosity here because when using
 	// elf symbol size we need to check than two symbols does not overlap.
-	list<op_bfd_symbol>::iterator it;
 	for (it = symbols.begin() ; it != symbols.end(); ) {
 		list<op_bfd_symbol>::iterator temp = it;
 		++temp;
@@ -234,6 +230,11 @@ bool op_bfd::get_symbols(string_filter const & symbol_filter)
 		it->size(symbol_size(*it, next));
 	}
 
+out:
+	// images with no symbols debug info available get a placeholder symbol
+	if (symbols.empty())
+		symbols.push_back(create_artificial_symbol());
+
 	cverb << "number of symbols before filtering " << dec << symbols.size() << endl;
 
 	it = remove_if(symbols.begin(), symbols.end(), remove_filter(symbol_filter));
@@ -243,8 +244,6 @@ bool op_bfd::get_symbols(string_filter const & symbol_filter)
 		syms.push_back(*it);
 
 	cverb << "number of symbols now " << dec << syms.size() << endl;
-
-	return !syms.empty();
 }
 
 
@@ -253,6 +252,7 @@ u32 op_bfd::sym_offset(symbol_index_t sym_index, u32 num) const
 	/* take off section offset and symb value */
 	return num - syms[sym_index].filepos();
 }
+
 
 bool op_bfd::have_debug_info() const
 {
@@ -263,6 +263,7 @@ bool op_bfd::have_debug_info() const
 
 	return section != NULL;
 }
+
 
 bool op_bfd::get_linenr(symbol_index_t sym_idx, uint offset,
 			string & filename, unsigned int & linenr) const
@@ -355,6 +356,7 @@ bool op_bfd::get_linenr(symbol_index_t sym_idx, uint offset,
 
 	return ret;
 }
+
 
 // #define USE_ELF_INTERNAL
 
@@ -450,9 +452,10 @@ void op_bfd::get_symbol_range(symbol_index_t sym_idx,
 	}
 }
 
+
 void op_bfd::get_vma_range(bfd_vma & start, bfd_vma & end) const
 {
-	if (syms.size()) {
+	if (!syms.empty()) {
 		// syms are sorted by vma so vma of the first symbol and vma +
 		// size of the last symbol give the vma range for gprof output
 		op_bfd_symbol const & last_symb = syms[syms.size() - 1];
@@ -465,22 +468,25 @@ void op_bfd::get_vma_range(bfd_vma & start, bfd_vma & end) const
 	}
 }
 
-void op_bfd::create_artificial_symbol(bfd_vma start, bfd_vma end)
+
+op_bfd_symbol const op_bfd::create_artificial_symbol()
 {
 	// FIXME: prefer a bool artificial; to this ??
 	string symname = "?";
 
 	symname += get_filename();
 
-	op_bfd_symbol symbol(0, 0, start, 0, end - start, symname);
-
-	syms.push_back(symbol);
+	bfd_vma start, end;
+	get_vma_range(start, end);
+	return op_bfd_symbol(0, 0, start, 0, end - start, symname);
 }
+
 
 string op_bfd::get_filename() const
 {
 	return bfd_get_filename(ibfd);
 }
+
 
 size_t op_bfd::bfd_arch_bits_per_address() const
 {

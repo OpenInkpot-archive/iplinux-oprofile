@@ -56,7 +56,7 @@ public:
 	void size(size_t s) { symb_size = s; }
 
 	/// compare two symbols by their filepos()
-	bool operator<(op_bfd_symbol const& lhs) const;
+	bool operator<(op_bfd_symbol const & lhs) const;
 
 private:
 	/// the original bfd symbol, this can be null if the symbol is an
@@ -173,8 +173,13 @@ private:
 	// by this value.
 	u32 text_offset;
 
-	/// collect the symbols excluding any in the given vector
-	bool get_symbols(string_filter const & symbol_filter);
+	/**
+	 * Collect the symbols excluding any in the given vector.
+	 *
+	 * Returns false if there were no symbols in the binary
+	 * before filtering.
+	 */
+	void get_symbols(string_filter const & symbol_filter);
 
 	/**
 	 * symbol_size - return the size of a symbol
@@ -183,10 +188,8 @@ private:
 	size_t symbol_size(op_bfd_symbol const & sym,
 			   op_bfd_symbol const * next) const;
 
-	/**
-	 * create an artificial symbol which cover the vma range start, end
-	 */
-	void create_artificial_symbol(bfd_vma start, bfd_vma end);
+	/// create an artificial symbol for a symbolless binary
+	op_bfd_symbol const create_artificial_symbol();
 };
 
 #endif /* !OP_BFD_H*/
