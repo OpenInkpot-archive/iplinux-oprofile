@@ -28,7 +28,7 @@
 class symbol_container {
 public:
 	/// container type
-	typedef std::vector<symbol_entry> symbols_t;
+	typedef std::set<symbol_entry, less_symbol> symbols_t;
 
 	typedef symbols_t::size_type size_type;
 
@@ -36,11 +36,14 @@ public:
 	size_type size() const;
 
 	/**
-	 * Add a symbol. Can only be done before any file-location
-	 * based lookups, since the two lookup methods are not
-	 * synchronised.
+	 * Insert a new symbol. If the symbol already exist cumulate count
+	 * Return the newly created symbol or the existing one. This pointer
+	 * remains valid during the whole life time of a symbol_container
+	 * object and is warranted unique according to less_symbol comparator.
+	 * Can only be done before any file-location based lookups, since the
+	 * two lookup methods are not synchronised.
 	 */
-	void push_back(symbol_entry const &);
+	symbol_entry const * insert(symbol_entry const &);
 
 	/// find the symbol at the given filename and line number, if any
 	symbol_entry const * find(std::string filename, size_t linenr) const;

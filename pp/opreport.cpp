@@ -227,6 +227,9 @@ void output_symbols_count(partition_files const & files)
 	bool need_vma64 = vma64_p(symbols.begin(), symbols.end());
 
 	format_output::formatter out(samples);
+	if (options::details) {
+		out.show_details();
+	}
 	out.add_format(flags);
 	out.output(cout, symbols, options::reverse_sort, need_vma64);
 }

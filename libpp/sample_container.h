@@ -12,8 +12,12 @@
 #ifndef SAMPLE_CONTAINER_H
 #define SAMPLE_CONTAINER_H
 
-#include <vector>
+#include <map>
+#include <set>
 #include <string>
+
+#include "opp_symbol.h"
+#include "symbol_functors.h"
 
 /**
  * Arbitrary container of sample entries. Can return
@@ -21,19 +25,14 @@
  * return the particular sample information for a VMA.
  */
 class sample_container {
+	typedef std::pair<symbol_entry const *, bfd_vma> sample_index_t;
 public:
-	/// container type
-	typedef std::vector<sample_entry> samples_t;
+	typedef std::map<sample_index_t, sample_entry> samples_storage;
+	typedef samples_storage::const_iterator samples_iterator;
 
-	typedef samples_t::size_type size_type;
-
-	sample_entry const & operator[](size_type index) const;
-
-	/// return the number of separate sample entries stored
-	size_type size() const;
-
-	/// add a sample entry. Can only be done before any lookups
-	void push_back(sample_entry const &);
+	/// insert a sample entry by creating a new entry or by cumulating
+	/// samples into an existing once. Can only be done before any lookups
+	void insert(symbol_entry const * symbol, sample_entry const &);
 
 	/// return nr of samples in the given filename
 	unsigned int accumulate_samples(std::string const & filename) const;
@@ -45,17 +44,28 @@ public:
 	/// return the sample entry for the given VMA if any
 	sample_entry const * find_by_vma(bfd_vma vma) const;
 
+	/// return iterator to the first samples for this symbol
+	samples_iterator begin(symbol_entry const *) const;
+	/// return iterator to the last samples for this symbol
+	samples_iterator end(symbol_entry const *) const;
+
+	/// return iterator to the first samples
+	samples_iterator begin() const;
+	/// return iterator to the last samples
+	samples_iterator end() const;
+
 private:
 	/// build the symbol by file-location cache
 	void build_by_loc() const;
 
 	/// main sample entry container
-	samples_t samples;
+	samples_storage samples;
 
 	typedef std::multiset<sample_entry const *, less_by_file_loc>
 		samples_by_loc_t;
 
-	// must be declared after the vector to ensure a correct life-time.
+	// must be declared after the samples_storage to ensure a
+	// correct life-time.
 
 	/**
 	 * Sample entries by file location. Lazily built when necessary,

@@ -19,8 +19,8 @@
 #include "outsymbflag.h"
 #include "utility.h"
 #include "op_bfd.h"
+#include "sample_container.h"
 
-class sample_container;
 class symbol_container;
 class profile_t;
 
@@ -81,9 +81,6 @@ public:
 	/// Find a sample by its vma, return zero if no sample at this vma
 	sample_entry const * find_sample(bfd_vma vma) const;
 
-	/// Return a sample_entry by its index, index must be valid
-	sample_entry const & get_samples(sample_index_t index) const;
-
 	/// a collection of sorted symbols
 	typedef std::vector<symbol_entry const *> symbol_collection;
 
@@ -119,13 +116,19 @@ public:
 	/// 0 if no samples found.
 	unsigned int samples_count(std::string const & filename,
 			   size_t linenr) const;
+
+	/// return iterator to the first samples for this symbol
+	sample_container::samples_iterator begin(symbol_entry const *) const;
+	/// return iterator to the last samples for this symbol
+	sample_container::samples_iterator end(symbol_entry const *) const;
 private:
 	/// helper for do_add()
 	void add_samples(profile_t const & profile,
 			 op_bfd const & abfd, symbol_index_t sym_index,
 			 u32 start, u32 end, bfd_vma base_vma,
 			 std::string const & image_name,
-			 std::string const & app_name);
+			 std::string const & app_name,
+			 symbol_entry const * symbol);
 
 	/**
 	 * create an unique artificial symbol for an offset range. The range

@@ -33,6 +33,7 @@ libpp_a_SOURCES = \
 	split_sample_filename.h \
 	symbol_container.cpp \
 	symbol_container.h \
+	symbol_functors.cpp \
+	symbol_functors.h \
 	outsymbflag.h \
-	opp_symbol.h \
-	symbol_functors.h
+	opp_symbol.h

@@ -17,6 +17,7 @@
 #include "opp_symbol.h"
 #include "format_output.h"
 #include "profile_container.h"
+#include "sample_container.h"
 #include "demangle_symbol.h"
 
 using namespace std;
@@ -232,11 +233,11 @@ void formatter::output_details(ostream & out, symbol_entry const * symb)
 	cumulated_samples = 0;
 	cumulated_percent = 0;
 
-	for (sample_index_t cur = symb->first ; cur != symb->last ; ++cur) {
+	sample_container::samples_iterator cur;
+	for (cur = profile.begin(symb); cur != profile.end(symb); ++cur) {
 		out << ' ';
 
-		do_output(out, symb->name, profile.get_samples(cur),
-			 true);
+		do_output(out, symb->name, cur->second, true);
 	}
 
 	total_count = temp_total_count;

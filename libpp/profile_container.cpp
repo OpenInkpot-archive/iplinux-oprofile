@@ -49,6 +49,7 @@ profile_container::profile_container(bool add_zero_samples_symbols_,
 	:
 	symbols(new symbol_container),
 	samples(new sample_container),
+	total_count(0),
 	add_zero_samples_symbols(add_zero_samples_symbols_),
 	flags(flags_),
 	need_details(need_details_)
@@ -108,16 +109,12 @@ add(profile_t const & profile, op_bfd const & abfd,
 
 		symb_entry.sample.vma = abfd.sym_offset(i, start) + base_vma;
 
-		symb_entry.first = samples->size();
+		symbol_entry const * symbol = symbols->insert(symb_entry);
 
 		if (need_details) {
 			add_samples(profile, abfd, i, start, end,
-				    base_vma, image_name, app_name);
+				    base_vma, image_name, app_name, symbol);
 		}
-
-		symb_entry.last = samples->size();
-
-		symbols->push_back(symb_entry);
 	}
 }
 
@@ -126,7 +123,8 @@ void profile_container::add_samples(profile_t const & profile,
 				      symbol_index_t sym_index,
 				      u32 start, u32 end, bfd_vma base_vma,
 				      string const & image_name,
-				      string const & app_name)
+				      string const & app_name,
+				    symbol_entry const * symbol)
 {
 	bool const need_linenr = (flags & (osf_linenr_info | osf_short_linenr_info));
 
@@ -154,7 +152,7 @@ void profile_container::add_samples(profile_t const & profile,
 			? abfd.sym_offset(sym_index, pos) + base_vma
 			: pos;
 
-		samples->push_back(sample);
+		samples->insert(symbol, sample);
 	}
 }
 
@@ -175,15 +173,14 @@ profile_container::select_symbols(double threshold,
 			op_ratio((*it)->sample.count, samples_count());
 
 		if (until_threshold || percent >= threshold)
-			result.push_back((*it));
+			result.push_back(*it);
 
 		if (until_threshold)
 			threshold -= percent;
 	}
 
 	if (sort_by_vma) {
-		sort(result.begin(), result.end(),
-			less_sample_entry_by_vma());
+		sort(result.begin(), result.end(), less_sample_entry_by_vma());
 	}
 
 	return result;
@@ -200,8 +197,9 @@ vector<string> const profile_container::select_filename(
 	// contain sample does not work: a symbol can contain samples and this
 	// symbol is in a source file that contain zero sample because only
 	// inline function in this source file contains samples.
-	for (sample_container::size_type i = 0; i < samples->size(); ++i) {
-		filename_set.insert((*samples)[i].file_loc.filename);
+	sample_container::samples_iterator sit;
+	for (sit = samples->begin(); sit != samples->end(); ++sit) {
+		filename_set.insert(sit->second.file_loc.filename);
 	}
 
 	// Give a sort order on filename for the selected counter.
@@ -274,11 +272,18 @@ unsigned int profile_container::samples_count(string const & filename,
 	return samples->accumulate_samples(filename, linenr);
 }
 
-sample_entry const & profile_container::get_samples(sample_index_t index) const
+
+sample_container::samples_iterator
+profile_container::begin(symbol_entry const * symbol) const
 {
-	sample_container::size_type i =
-		static_cast<sample_container::size_type>(index);
-	return (*samples)[i];
+	return samples->begin(symbol);
+}
+
+
+sample_container::samples_iterator
+profile_container::end(symbol_entry const * symbol) const
+{
+	return samples->end(symbol);
 }
 
 bool add_samples(profile_container & samples,

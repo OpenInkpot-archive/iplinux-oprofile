@@ -15,12 +15,9 @@
 #include "config.h"
 
 #include <string>
-#include <vector>
 #include <iostream>
 
 #include <bfd.h>
-
-typedef size_t sample_index_t;
 
 /// A simple container for a fileno:linenr location.
 struct file_location {
@@ -59,9 +56,6 @@ struct symbol_entry {
 	sample_entry sample;
 	/// name of symbol
 	std::string name;
-	/// [first, last[ gives the range of sample_entry.
-	sample_index_t first;
-	sample_index_t last;
 	/// symbol size as calculated by op_bfd, start of symbol is sample.vma
 	size_t size;
 };

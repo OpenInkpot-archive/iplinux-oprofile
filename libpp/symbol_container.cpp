@@ -26,9 +26,16 @@ symbol_container::size_type symbol_container::size() const
 }
 
 
-void symbol_container::push_back(symbol_entry const & symbol)
+symbol_entry const * symbol_container::insert(symbol_entry const & symb)
 {
-	symbols.push_back(symbol);
+	pair<symbols_t::iterator, bool> p = symbols.insert(symb);
+	if (!p.second) {
+		// safe: count is not used by sorting criteria
+		symbol_entry * symbol = const_cast<symbol_entry*>(&*p.first);
+		symbol->sample.count += symb.sample.count;
+	}
+
+	return &*p.first;
 }
 
 
@@ -79,18 +86,25 @@ void symbol_container::build_by_loc() const
 }
 
 
-symbol_entry const * symbol_container::find_by_vma(bfd_vma vma) const
+symbol_entry const * symbol_container::find_by_vma(bfd_vma /*vma*/) const
 {
+	// can't work, symbol are no longer sorted by vma, anyway the interface
+	// is no longer sufficient
+#if 0
 	symbol_entry value;
 
 	value.sample.vma = vma;
 
-	vector<symbol_entry>::const_iterator it =
+	symbols_t::const_iterator it =
 		lower_bound(symbols.begin(), symbols.end(),
 			    value, less_sample_entry_by_vma());
 
 	if (it != symbols.end() && it->sample.vma == vma)
 		return &(*it);
+#else
+	cerr << "FIXME: symbol_container::find_by_vma()" << endl;
+	exit(EXIT_FAILURE);
+#endif
 
 	return 0;
 }

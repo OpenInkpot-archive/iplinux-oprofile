@@ -6,6 +6,7 @@ for some pointers and/or read HACKING and doc/CodingStyle.
 Before merging with trunk
 -------------------------
 
+ o <movement> percent of opreport -l /usr/bin/make is relative to all dependent samples not just /usr/bin/make FIXME: exact command line used ?
  o move oprofiled.log to OP_SAMPLE_DIR/current ?
  o mtime checking in dae is in the wrong place: we must check at each
   samples files open not at image opening

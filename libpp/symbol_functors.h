@@ -52,4 +52,11 @@ struct less_by_file_loc {
 	}
 };
 
+
+/// compare based on symbol contents
+struct less_symbol {
+	bool operator()(symbol_entry const & lhs,
+			symbol_entry const & rhs) const;
+};
+
 #endif /* SYMBOL_FUNCTORS_H */

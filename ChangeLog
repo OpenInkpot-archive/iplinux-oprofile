@@ -1,3 +1,24 @@
+2003-04-27  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/symbol_functors.h: add less_symbol predicate
+	* libpp/symbol_functors.cpp: new file, less_symbol implementation
+	* libpp/Makefile.am: symbol_functors.cpp
+
+	* libpp/symbol_container.h:
+	* libpp/symbol_container.cpp: use a node based container for symbols
+	  ensuring validity of symbol pointer over a symbol_container life time
+	* libpp/sample_container.h:
+	* libpp/sample_container.cpp: ditto as above for samples
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp: use this new api to merge symbols
+	  and sample.
+
+	* libpp/format_output.h:
+	* libpp/format_output.cpp: use new api to iterate over sample by symbol
+
+	* pp/opreport.cpp: detailed output
+	
+
 2003-04-27  John Levon  <levon@movementarian.org>
 
 	* pp/opreport.cpp: make opreport -l put largest results

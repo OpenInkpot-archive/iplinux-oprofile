@@ -30,21 +30,46 @@ inline unsigned int add_counts(unsigned int count, sample_entry const * s)
 } // namespace anon
 
 
-sample_entry const & sample_container::operator[](sample_container::size_type index) const
+sample_container::samples_iterator sample_container::begin() const
 {
-	return samples[index];
+	return samples.begin();
 }
 
 
-sample_container::size_type sample_container::size() const
+sample_container::samples_iterator sample_container::end() const
 {
-	return samples.size();
+	return samples.end();
+}
+
+sample_container::samples_iterator
+sample_container::begin(symbol_entry const * symbol) const
+{
+	samples_storage::key_type key(symbol, 0);
+
+	return samples.lower_bound(key);
 }
 
 
-void sample_container::push_back(sample_entry const & sample)
+sample_container::samples_iterator 
+sample_container::end(symbol_entry const * symbol) const
 {
-	samples.push_back(sample);
+	samples_storage::key_type key(symbol, ~(bfd_vma)0);
+
+	return samples.upper_bound(key);
+}
+
+
+void sample_container::insert(symbol_entry const * symbol,
+			      sample_entry const & sample)
+{
+	samples_storage::key_type key(symbol, sample.vma);
+
+	samples_storage::iterator it = samples.find(key);
+	if (it != samples.end()) {
+		it->second.count += sample.count;
+	} else {
+		samples[key] = sample;
+	}
 }
 
 
@@ -70,16 +95,23 @@ sample_container::accumulate_samples(string const & filename) const
 
 sample_entry const * sample_container::find_by_vma(bfd_vma vma) const
 {
+	// can't work, no big deal, will be used by opannotate but the inteface
+	// is no longer sufficient, I need a find_by_vma(symbol*, vma);
+#if 0
 	sample_entry value;
 
 	value.vma = vma;
 
-	samples_t::const_iterator it =
+	samples_iterator it =
 		lower_bound(samples.begin(), samples.end(), value,
 			    less_sample_entry_by_vma());
 
-	if (it != samples.end() && it->vma == vma)
-		return &(*it);
+	if (it != samples.end() && it->second.vma == vma)
+		return &it->second;
+#else
+	cerr << "FIXME: sample_container::find_by_vma() " << vma << endl;
+	exit(EXIT_FAILURE);
+#endif
 
 	return 0;
 }
@@ -110,8 +142,8 @@ void sample_container::build_by_loc() const
 	if (!samples_by_loc.empty())
 		return;
 
-	samples_t::const_iterator cit = samples.begin();
-	samples_t::const_iterator end = samples.end();
+	samples_iterator cit = samples.begin();
+	samples_iterator end = samples.end();
 	for (; cit != end; ++cit)
-		samples_by_loc.insert(&*cit);
+		samples_by_loc.insert(&cit->second);
 }
