@@ -3,6 +3,33 @@ This is an (incomplete) list of some of the stuff we want to look at doing.
 If you're interested in hacking on any of these, please contact the list first
 for some pointers and/or read HACKING and doc/CodingStyle.
 
+0.6 release
+-----------
+
+ o gui: show default event if none selected, fix counter allocation stuff.
+ We must allow to de-select a counter (via "No event" entry in listbox)
+
+ o autoconf 2.13 is broken
+
+0.7 release
+-----------
+
+ o separate debug info stuff
+ o debian build stuff
+ o side-by-side opreport output (--compare - needs UI spec)
+ o thread profiling (Ka is on this)
+ o per-cpu profiling
+ o we show a header but not column headers for image report
+ o lib-image: and image: behavior depend on --separate=, if --separate=library
+  opreport "lib-image:*libc*" --merge=lib works but not
+  opreport "image:*libc*" --merge=lib whilst the behavior is reversed if
+  --separate==none. Must we take care ?
+
+0.8 release
+-----------
+
+ o merge BRANCH_CALLGRAPH
+
 Before 1.0 big stuff
 --------------------
 
