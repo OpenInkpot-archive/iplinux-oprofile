@@ -53,10 +53,6 @@ libop/
 
 	C language oprofile-specific helper stuff
 
-libop++/
-
-	C++ oprofile-specific helper stuff
-
 libopt++/
 
 	A simple C++ library for parsing command lines

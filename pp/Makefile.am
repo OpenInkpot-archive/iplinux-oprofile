@@ -4,7 +4,6 @@ AM_CPPFLAGS = \
 	-I ${top_srcdir}/libdb \
 	-I ${top_srcdir}/libopt++ \
 	-I ${top_srcdir}/libutil++ \
-	-I ${top_srcdir}/libop++ \
 	-I ${top_srcdir}/libregex \
 	-I ${top_srcdir}/libpp
 
@@ -17,7 +16,6 @@ pp_commons = common_option.cpp
 common_libs =  \
 	../libpp/libpp.a \
 	../libopt++/libopt++.a \
-	../libop++/libop++.a \
 	../libregex/libop_regex.a \
 	../libutil++/libutil++.a \
 	../libop/libop.a \

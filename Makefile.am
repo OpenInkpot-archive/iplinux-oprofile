@@ -4,7 +4,6 @@ SUBDIRS = \
 	libop \
 	libutil++ \
 	libopt++ \
-	libop++ \
 	libdb \
 	libabi \
 	libregex \

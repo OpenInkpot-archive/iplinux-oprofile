@@ -15,6 +15,8 @@ libpp_a_SOURCES = \
 	format_output.h \
 	locate_images.cpp \
 	locate_images.h \
+	op_header.cpp \
+	op_header.h \
 	partition_files.h \
 	partition_files.cpp \
 	profile.cpp \

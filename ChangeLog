@@ -1,5 +1,16 @@
 2003-05-10  John Levon  <levon@movementarian.org>
 
+	* Makefile.am:
+	* HACKING:
+	* libop++/:
+	* pp/Makefile.am:
+	* libpp/Makefile.am:
+	* libpp/op_header.h:
+	* libpp/op_header.cpp: remove libop++ after
+	moving op_header into libpp
+
+2003-05-10  John Levon  <levon@movementarian.org>
+
 	* libop++/op_header.cpp: make CPU info take up
 	one line not two
 
