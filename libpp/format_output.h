@@ -38,7 +38,7 @@ public:
 	/** output a vector of symbols to out according to the output format
 	 * specifier previously set by call(s) to add_format() */
 	void output(std::ostream & out,
-		    std::vector<symbol_entry const *> const & v);
+	            std::vector<symbol_entry const *> const & v);
 
 	/// set the output_details boolean
 	void show_details();

@@ -56,32 +56,6 @@ formatter::formatter(profile_container const & profile_)
 }
 
  
-void formatter::add_format(format_flags flag)
-{
-	flags = static_cast<format_flags>(flags | flag);
-}
-
-
-void formatter::output(ostream & out, symbol_entry const * symb)
-{
-	do_output(out, *symb, symb->sample, false);
-
-	if (need_details) {
-		output_details(out, symb);
-	}
-}
-
-
-void formatter::output(ostream & out,
-                       vector<symbol_entry const *> const & symbols)
-{
-	vector<symbol_entry const *>::const_iterator it;
-	for (it = symbols.begin(); it != symbols.end(); ++it) {
-		output(out, *it);
-	}
-}
-
-
 void formatter::show_details()
 {
 	need_details = true;
@@ -106,8 +80,34 @@ void formatter::vma_format_64bit()
 }
 
 
+void formatter::add_format(format_flags flag)
+{
+	flags = static_cast<format_flags>(flags | flag);
+}
+
+
+void formatter::output(ostream & out, symbol_entry const * symb)
+{
+	do_output(out, *symb, symb->sample, false);
+
+	if (need_details) {
+		output_details(out, symb);
+	}
+}
+
+
+void formatter::output(ostream & out,
+                       vector<symbol_entry const *> const & symbols)
+{
+	vector<symbol_entry const *>::const_iterator it = symbols.begin();
+	vector<symbol_entry const *>::const_iterator end = symbols.end();
+	for (; it != end; ++it) {
+		output(out, *it);
+	}
+}
+
+
 /// describe each possible field of colummned output.
-// FIXME: some field have header_name too long (> field_description::width)
 // FIXME: use % of the screen width here. sum of % equal to 100, then calculate
 // ratio between 100 and the selected % to grow non fixed field use also
 // lib[n?]curses to get the console width (look info source) (so on add a fixed
@@ -165,11 +165,11 @@ void formatter::output_details(ostream & out, symbol_entry const * symb)
 	cumulated_samples = 0;
 	cumulated_percent = 0;
 
-	sample_container::samples_iterator cur;
-	for (cur = profile.begin(symb); cur != profile.end(symb); ++cur) {
+	sample_container::samples_iterator it = profile.begin(symb);
+	sample_container::samples_iterator end = profile.end(symb);
+	for (; it != end; ++it) {
 		out << ' ';
-
-		do_output(out, *symb, cur->second, true);
+		do_output(out, *symb, it->second, true);
 	}
 
 	total_count = temp_total_count;
@@ -179,9 +179,9 @@ void formatter::output_details(ostream & out, symbol_entry const * symb)
 
  
 void formatter::do_output(ostream & out, symbol_entry const & symb,
-			  sample_entry const & sample,
-			  bool hide_immutable_field)
+			  sample_entry const & sample, bool hide_immutable)
 {
+	// FIXME: weird place to put this
 	output_header(out);
 
 	size_t padding = 0;
@@ -190,11 +190,12 @@ void formatter::do_output(ostream & out, symbol_entry const & symb,
 	for (size_t i = 1 ; temp_flag != 0 ; i <<= 1) {
 		format_flags fl = static_cast<format_flags>(i);
 		if (flags & fl) {
-			if (hide_immutable_field && (fl & ff_immutable_field)) {
+			if (hide_immutable && (fl & ff_immutable_field)) {
 				field_description const & field(format_map[fl]);
 				padding += field.width;
 			} else {
-				padding = output_field(out, symb, sample, fl, padding);
+				padding = output_field(out, symb, sample,
+				                       fl, padding);
 			}
 			temp_flag &= ~i;
 		}
