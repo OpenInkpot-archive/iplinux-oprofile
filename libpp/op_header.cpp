@@ -21,7 +21,6 @@
 #include "op_file.h"
 #include "op_header.h"
 #include "op_events.h"
-//#include "stream_util.h"
 #include "string_manip.h"
 
 using namespace std;
@@ -147,7 +146,7 @@ string const op_print_event(op_cpu cpu_type, u8 type, u16 um, u32 count)
 		str += ")";
 	}
 
-	str += " count " + tostr(count);
+	str += " count " + op_lexical_cast<string>(count);
 	return str;
 }
 

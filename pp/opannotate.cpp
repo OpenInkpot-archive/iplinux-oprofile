@@ -150,7 +150,7 @@ string count_str(count_array_t const & count,
 	for (size_t i = 0; i < nr_events; ++i) {
 		os << setw(count_width) << count[i] << ' ';
 
-		os << format_double(op_ratio(count[i], total[i]) * 100.0,
+		os << format_percent(op_ratio(count[i], total[i]) * 100.0,
 				    percent_int_width, percent_fract_width);
 	}
 	return os.str();
@@ -503,7 +503,7 @@ void output_one_file(istream & in, debug_name_id filename,
 
 	if (create_path(out_file.c_str())) {
 		cerr << "unable to create directory: "
-		     << '"' << dirname(out_file) << '"' << endl;
+		     << '"' << op_dirname(out_file) << '"' << endl;
 		return;
 	}
 
@@ -664,9 +664,16 @@ int opannotate(vector<string> const & non_options)
 	list<inverted_profile>::iterator it = iprofiles.begin();
 	list<inverted_profile>::iterator const end = iprofiles.end();
 
+	bool debug_info = false;
 	for (; it != end; ++it) {
-		populate_for_image(*samples, *it);
+		debug_info |= populate_for_image(*samples, *it);
 		images.push_back(it->image);
+	}
+
+	if (!debug_info && !options::assembly) {
+		cerr << "no debug information available for any binary "
+		     << "selected and --assembly not requested\n";
+		exit(EXIT_FAILURE);
 	}
 
 	annotate_source(images);

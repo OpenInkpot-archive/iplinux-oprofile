@@ -23,22 +23,21 @@ bool path_filter::match(std::string const & str) const
 {
 	vector<string>::const_iterator cit;
 
-	string const & base = basename(str);
-
 	// first, if any component of the dir is listed in exclude -> no
-	string comp = dirname(str);
+	string comp = op_dirname(str);
 	while (!comp.empty() && comp != "/") {
 		cit = find_if(exclude.begin(), exclude.end(),
-			fnmatcher(basename(comp)));
+			fnmatcher(op_basename(comp)));
 		if (cit != exclude.end())
 			return false;
 
-		// FIXME: test uneccessary, wait a decent testsuite before
-		// removing
-		if (comp == dirname(comp))
+		// dirname("foo") == "foo"
+		if (comp == op_dirname(comp))
 			break;
-		comp = dirname(comp);
+		comp = op_dirname(comp);
 	}
+
+	string const base = op_basename(str);
 
 	// now if the file name is specifically excluded -> no
 	cit = find_if(exclude.begin(), exclude.end(), fnmatcher(base));
@@ -52,16 +51,17 @@ bool path_filter::match(std::string const & str) const
 
 	// now if any component of the path is included -> yes
 	// note that the include pattern defaults to '*'
-	string compi = dirname(str);
+	string compi = op_dirname(str);
 	while (!compi.empty() && compi != "/") {
 		cit = find_if(include.begin(), include.end(),
-			fnmatcher(basename(compi)));
+			fnmatcher(op_basename(compi)));
 		if (cit != include.end())
 			return true;
-		// FIXME see above.
-		if (compi == dirname(compi))
+
+		// dirname("foo") == "foo"
+		if (compi == op_dirname(compi))
 			break;
-		compi = dirname(compi);
+		compi = op_dirname(compi);
 	}
 
 	return include.empty();

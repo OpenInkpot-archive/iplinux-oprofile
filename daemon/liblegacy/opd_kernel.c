@@ -1,5 +1,5 @@
 /**
- * @file dae/opd_kernel.c
+ * @file daemon/liblegacy/opd_kernel.c
  * Dealing with the kernel and kernel module samples
  *
  * @remark Copyright 2002 OProfile authors
@@ -14,8 +14,8 @@
 #include "opd_image.h"
 #include "opd_mapping.h"
 #include "opd_printf.h"
-#include "opd_stats.h"
-#include "opd_util.h"
+#include "opd_24_stats.h"
+#include "oprofiled.h"
 
 #include "op_fileio.h"
 #include "op_config_24.h"
@@ -43,9 +43,6 @@ static unsigned long kernel_end;
 static struct list_head opd_modules = { &opd_modules, &opd_modules };
 static unsigned int nr_modules=0;
 
-/**
- * opd_init_kernel_image - initialise the kernel image
- */
 void opd_init_kernel_image(void)
 {
 	/* for no vmlinux */
@@ -56,9 +53,6 @@ void opd_init_kernel_image(void)
 }
 
 
-/**
- * opd_parse_kernel_range - parse the kernel range values
- */
 void opd_parse_kernel_range(char const * arg)
 {
 	sscanf(arg, "%lx,%lx", &kernel_start, &kernel_end);
@@ -66,7 +60,7 @@ void opd_parse_kernel_range(char const * arg)
 	verbprintf("OPD_PARSE_KERNEL_RANGE: kernel_start = %lx, kernel_end = %lx\n",
 		   kernel_start, kernel_end);
 
-	if (kernel_start == 0x0 || kernel_end == 0x0) {
+	if (!kernel_start && !kernel_end) {
 		fprintf(stderr,
 			"Warning: mis-parsed kernel range: %lx-%lx\n",
 			kernel_start, kernel_end);
@@ -115,12 +109,7 @@ static struct opd_module * opd_find_module_by_name(char * name)
 	return opd_create_module(name, 0, 0);
 }
 
-/**
- * opd_clear_module_info - clear kernel module information
- *
- * Clear and free all kernel module information and reset
- * values.
- */
+
 void opd_clear_module_info(void)
 {
 	struct list_head * pos;
@@ -190,7 +179,7 @@ static void opd_get_module_info(void)
 
 		if (strlen(line) < 9) {
 			printf("oprofiled: corrupt /proc/ksyms line \"%s\"\n", line);
-			goto failure;
+			break;
 		}
 
 		if (strncmp("__insmod_", line + 9, 9)) {
@@ -205,7 +194,7 @@ static void opd_get_module_info(void)
 
 		if (!*cp2) {
 			printf("oprofiled: corrupt /proc/ksyms line \"%s\"\n", line);
-			goto failure;
+			break;
 		}
 
 		cp2++;
@@ -260,7 +249,6 @@ static void opd_get_module_info(void)
 		free(line);
 	}
 
-failure:
 	if (line)
 		free(line);
 	op_close_file(fp);
@@ -289,7 +277,7 @@ static void opd_drop_module_sample(unsigned long eip)
 	uint nr_mods;
 	uint mod = 0;
 
-	opd_stats[OPD_LOST_MODULE]++;
+	opd_24_stats[OPD_LOST_MODULE]++;
 
 	module_names = xmalloc(size);
 	while (query_module(NULL, QM_MODULES, module_names, size, &ret)) {
@@ -310,13 +298,13 @@ static void opd_drop_module_sample(unsigned long eip)
 			if (eip >= info.addr && eip < info.addr + info.size) {
 				verbprintf("Sample from unprofilable module %s\n", name);
 				opd_create_module(name, info.addr, info.addr + info.size);
-				goto out;
+				break;
 			}
 		}
 		mod++;
 		name += strlen(name) + 1;
 	}
-out:
+
 	if (module_names)
 		free(module_names);
 }
@@ -337,8 +325,7 @@ static struct opd_module * opd_find_module_by_eip(unsigned long eip)
 
 	list_for_each(pos, &opd_modules) {
 		module = list_entry(pos, struct opd_module, module_list);
-		if (module->start && module->end &&
-		    module->start <= eip && module->end > eip)
+		if (module->start <= eip && module->end > eip)
 			return module;
 	}
 
@@ -377,11 +364,11 @@ static void opd_handle_module_sample(unsigned long eip, u32 counter)
 
 	if (module) {
 		if (module->image != NULL) {
-			opd_stats[OPD_MODULE]++;
+			opd_24_stats[OPD_MODULE]++;
 			opd_put_image_sample(module->image,
 					     eip - module->start, counter);
 		} else {
-			opd_stats[OPD_LOST_MODULE]++;
+			opd_24_stats[OPD_LOST_MODULE]++;
 			verbprintf("No image for sampled module %s\n",
 				   module->name);
 		}
@@ -391,18 +378,10 @@ static void opd_handle_module_sample(unsigned long eip, u32 counter)
 }
 
 
-/**
- * opd_handle_kernel_sample - process a kernel sample
- * @param eip  EIP value of sample
- * @param counter  counter number
- *
- * Handle a sample in kernel address space or in a module. The sample is
- * output to the relevant image file.
- */
 void opd_handle_kernel_sample(unsigned long eip, u32 counter)
 {
 	if (no_vmlinux || eip < kernel_end) {
-		opd_stats[OPD_KERNEL]++;
+		opd_24_stats[OPD_KERNEL]++;
 		opd_put_image_sample(kernel_image, eip - kernel_start, counter);
 		return;
 	}
@@ -412,13 +391,6 @@ void opd_handle_kernel_sample(unsigned long eip, u32 counter)
 }
  
 
-/**
- * opd_eip_is_kernel - is the sample from kernel/module space
- * @param eip  EIP value
- *
- * Returns %1 if eip is in the address space starting at
- * kernel_start, %0 otherwise.
- */
 int opd_eip_is_kernel(unsigned long eip)
 {
 	/* kernel_start == 0 when vm_nolinux != 0 */
@@ -426,15 +398,6 @@ int opd_eip_is_kernel(unsigned long eip)
 }
 
 
-/**
- * opd_add_kernel_map - add a module or kernel maps to a proc struct
- *
- * @param proc owning proc of the new mapping
- * @param eip eip inside the new mapping
- *
- * We assume than eip >= kernel_start
- *
- */
 void opd_add_kernel_map(struct opd_proc * proc, unsigned long eip)
 {
 	struct opd_module * module;

@@ -48,16 +48,6 @@ int op_get_fsize(char const * file, off_t * size);
 time_t op_get_mtime(char const * file);
 
 /**
- * Follow exactly one level of symbolic link.
- * Returns NULL if it's not a symlink or on error,
- * or a string that caller must free.
- *
- * This does not re-seat any returned relative
- * symbolic links.
- */
-char * op_get_link(char const * filename);
-
-/**
  * op_relative_to_absolute_path - translate relative path to absolute path.
  * @param path  path name
  * @param base_dir  optional base directory, if %NULL getcwd() is used
@@ -92,6 +82,34 @@ int create_dir(char const * dir);
  * Returns 0 on success.
  */
 int create_path(char const * path);
+
+/**
+ * op_is_directory - check if a name is directory
+ * @param path  directory name to check
+ *
+ * return non-zero if name is a directory
+ */
+int op_is_directory(char const * path);
+
+/**
+ * op_c_dirname - get the path component of a filename
+ * @param file_name  filename
+ *
+ * Returns the path name of a filename with trailing '/' removed.
+ * caller must free() the returned string.
+ */
+char * op_c_dirname(char const * file_name);
+
+/**
+ * op_follow_link - follow a symbolic link
+ * @param name the file name
+ *
+ * Resolve a symbolic link as far as possible.
+ * caller must free() the returned string.
+ * Duplicates and returns the original string on failure.
+ */
+char * op_follow_link(char const * name);
+
 
 #ifdef __cplusplus
 }

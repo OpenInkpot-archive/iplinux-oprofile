@@ -19,7 +19,6 @@
 
 #include "odb_hash.h"
 #include "op_types.h"
-#include "op_hw_config.h"
 #include "utility.h"
 
 class opd_header;
@@ -35,8 +34,6 @@ public:
 	 * profile_t - construct an empty  profile_t object
 	 */
 	profile_t();
-
-	~profile_t();
  
 	/// return the header of the last opened samples file
 	opd_header const & get_header() const {

@@ -14,7 +14,6 @@
 #include <iterator>
 #include <iostream>
 
-#include "op_fileio.h"
 #include "file_manip.h"
 #include "op_config.h"
 #include "profile_spec.h"
@@ -138,21 +137,21 @@ void profile_spec::parse_binary(string const & str)
 void profile_spec::parse_session(string const & str)
 {
 	normal_tag_set = true;
-	separate_token(session, str, ',');
+	session = separate_token(str, ',');
 }
 
 
 void profile_spec::parse_session_exclude(string const & str)
 {
 	normal_tag_set = true;
-	separate_token(session_exclude, str, ',');
+	session_exclude = separate_token(str, ',');
 }
 
 
 void profile_spec::parse_image(string const & str)
 {
 	normal_tag_set = true;
-	separate_token(image, str, ',');
+	image = separate_token(str, ',');
 	fixup_image_spec(image, extra);
 }
 
@@ -160,14 +159,14 @@ void profile_spec::parse_image(string const & str)
 void profile_spec::parse_image_exclude(string const & str)
 {
 	normal_tag_set = true;
-	separate_token(image_exclude, str, ',');
+	image_exclude = separate_token(str, ',');
 }
 
 
 void profile_spec::parse_lib_image(string const & str)
 {
 	normal_tag_set = true;
-	separate_token(lib_image, str, ',');
+	lib_image = separate_token(str, ',');
 	fixup_image_spec(image, extra);
 }
 
@@ -175,42 +174,42 @@ void profile_spec::parse_lib_image(string const & str)
 void profile_spec::parse_event(string const & str)
 {
 	normal_tag_set = true;
-	event.set(str, false);
+	event.set(str);
 }
 
 
 void profile_spec::parse_count(string const & str)
 {
 	normal_tag_set = true;
-	count.set(str, false);
+	count.set(str);
 }
 
 
 void profile_spec::parse_unitmask(string const & str)
 {
 	normal_tag_set = true;
-	unitmask.set(str, false);
+	unitmask.set(str);
 }
 
 
 void profile_spec::parse_tid(string const & str)
 {
 	normal_tag_set = true;
-	tid.set(str, false);
+	tid.set(str);
 }
 
 
 void profile_spec::parse_tgid(string const & str)
 {
 	normal_tag_set = true;
-	tgid.set(str, false);
+	tgid.set(str);
 }
 
 
 void profile_spec::parse_cpu(string const & str)
 {
 	normal_tag_set = true;
-	cpu.set(str, false);
+	cpu.set(str);
 }
 
 
@@ -231,6 +230,29 @@ profile_spec::get_handler(string const & tag_value, string & value)
 	}
 
 	return it->second;
+}
+
+
+namespace {
+
+/// return true if the value from the profile spec may match the comma
+/// list
+template<typename T>
+bool comma_match(comma_list<T> const & cl, generic_spec<T> const & value)
+{
+	// if the profile spec is "all" we match the sample file
+	if (!cl.is_set())
+		return true;
+	
+	// an "all" sample file should never match specified profile
+	// spec values
+	if (!value.is_set())
+		return false;
+
+	// now match each profile spec value against the sample file
+	return cl.match(value.value());
+}
+
 }
 
 
@@ -298,39 +320,25 @@ bool profile_spec::match(string const & filename) const
 		}
 	}
 
-	if (!event.match(spec.event)) {
+	if (!event.match(spec.event))
 		return false;
-	}
 
-	if (!count.match(spec.count)) {
+	if (!count.match(spec.count))
 		return false;
-	}
 
-	if (!unitmask.match(spec.unitmask)) {
+	if (!unitmask.match(spec.unitmask))
 		return false;
-	}
 
-	if (!cpu.match(spec.cpu)) {
+	if (!comma_match(cpu, spec.cpu))
 		return false;
-	}
 
-	if (!tid.match(spec.tid)) {
+	if (!comma_match(tid, spec.tid))
 		return false;
-	}
 
-	if (!tgid.match(spec.tgid)) {
+	if (!comma_match(tgid, spec.tgid))
 		return false;
-	}
 
 	return true;
-}
-
-
-/* TODO */
-static bool substitute_alias(profile_spec & /*parser*/,
-			     string const & /*arg*/)
-{
-	return false;
 }
 
 
@@ -338,12 +346,18 @@ profile_spec profile_spec::create(vector<string> const & args,
                                   extra_images const & extra)
 {
 	profile_spec spec(extra);
+	set<string> tag_seen;
 
 	for (size_t i = 0 ; i < args.size() ; ++i) {
 		if (spec.is_valid_tag(args[i])) {
+			if (tag_seen.find(args[i]) != tag_seen.end()) {
+				throw op_runtime_error("tag specified "
+				       "more than once: " + args[i]);
+			}
+			tag_seen.insert(args[i]);
 			spec.parse(args[i]);
-		} else if (!substitute_alias(spec, args[i])) {
-			string file = op_follow_link(args[i]);
+		} else {
+			string file = follow_link(args[i]);
 			file = relative_to_absolute_path(file);
 			spec.set_image_or_lib_name(file);
 		}
@@ -405,11 +419,11 @@ list<string> profile_spec::generate_file_list(bool exclude_dependent) const
 
 	if (sessions.empty()) {
 		ostringstream os;
-		os << "No session given" << endl;
-		os << "included session was:" << endl;
+		os << "No session given\n"
+		   << "included session was:\n";
 		copy(session.begin(), session.end(),
 		     ostream_iterator<string>(os, "\n"));
-		os << "excluded session was:" << endl;
+		os << "excluded session was:\n";
 		copy(session_exclude.begin(), session_exclude.end(),
 		     ostream_iterator<string>(os, "\n"));
 		throw invalid_argument(os.str());

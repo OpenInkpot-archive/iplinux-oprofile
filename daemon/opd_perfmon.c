@@ -10,9 +10,11 @@
 
 #ifdef __ia64__
 
-#include "opd_util.h"
+#include "oprofiled.h"
 #include "opd_perfmon.h"
+#include "opd_events.h"
 
+#include "op_cpu_type.h"
 #include "op_libiberty.h"
 #include "op_hw_config.h"
 
@@ -26,14 +28,19 @@
 #include <string.h>
 #include <errno.h>
 
+extern op_cpu cpu_type;
+
+/* FIXME: should autoconf these */
+
 /* many glibc's are not yet up to date */
 #ifndef __NR_sched_setaffinity
 #define __NR_sched_setaffinity 1231
+#endif
+
 static int sched_setaffinity(pid_t pid, unsigned int len, unsigned long * mask)
 {
 	return syscall(__NR_sched_setaffinity, pid, len, mask);
 }
-#endif
 
 
 #ifndef __NR_perfmonctl
@@ -252,7 +259,7 @@ static void load_context(struct child * self)
 	pfarg_load_t load_args;
 	int err;
 
-	memset(load_args, 0, sizeof(load_args));
+	memset(&load_args, 0, sizeof(load_args));
 	load_args.load_pid = self->pid;
 
 	err = perfmonctl(self->ctx_fd, PFM_LOAD_CONTEXT, &load_args, 1);
@@ -353,6 +360,9 @@ void perfmon_init(void)
 	size_t i;
 	long nr;
 
+	if (cpu_type == CPU_TIMER_INT)
+		return;
+
 	nr = sysconf(_SC_NPROCESSORS_ONLN);
 	if (nr == -1) {
 		fprintf(stderr, "Couldn't determine number of CPUs.\n");
@@ -392,6 +402,9 @@ void perfmon_exit(void)
 {
 	size_t i;
 
+	if (cpu_type == CPU_TIMER_INT)
+		return;
+
 	for (i = 0; i < nr_cpus; ++i) {
 		kill(children[i].pid, SIGKILL);
 		waitpid(children[i].pid, NULL, 0);
@@ -403,6 +416,9 @@ void perfmon_start(void)
 {
 	size_t i;
 
+	if (cpu_type == CPU_TIMER_INT)
+		return;
+
 	for (i = 0; i < nr_cpus; ++i)
 		kill(children[i].pid, SIGUSR1);
 }
@@ -411,6 +427,9 @@ void perfmon_start(void)
 void perfmon_stop(void)
 {
 	size_t i;
+
+	if (cpu_type == CPU_TIMER_INT)
+		return;
 
 	for (i = 0; i < nr_cpus; ++i)
 		kill(children[i].pid, SIGUSR2);

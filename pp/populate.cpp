@@ -14,7 +14,6 @@
 #include "arrange_profiles.h"
 #include "op_bfd.h"
 #include "op_header.h"
-#include "op_exception.h"
 
 #include "image_errors.h"
 
@@ -41,8 +40,7 @@ populate_from_files(profile_t & profile, list<string> const & files, u32 offset)
 }  // anon namespace
 
 
-void
-populate_for_image(profile_container & samples, inverted_profile & ip)
+bool populate_for_image(profile_container & samples, inverted_profile & ip)
 {
 	bool ok = ip.error == image_ok;
 	op_bfd abfd(ip.image, options::symbol_filter, ok);
@@ -76,4 +74,6 @@ populate_for_image(profile_container & samples, inverted_profile & ip)
 
 	if (ip.error == image_ok)
 		check_mtime(abfd.get_filename(), header);
+
+	return abfd.has_debug_info();
 }

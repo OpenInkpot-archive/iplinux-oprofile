@@ -1,294 +1,397 @@
 /**
  * @file daemon/oprofiled.c
- * Daemon set up and main loop
+ * Initialisation and setup
  *
- * @remark Copyright 2002 OProfile authors
+ * @remark Copyright 2002, 2003 OProfile authors
  * @remark Read the file COPYING
  *
  * @author John Levon
  * @author Philippe Elie
  */
 
-#include <config.h>
+#include "config.h"
  
-#include "opd_stats.h"
-#include "opd_sfile.h"
-#include "opd_util.h"
-#include "opd_kernel.h"
-#include "opd_trans.h"
-#include "opd_perfmon.h"
+#include "oprofiled.h"
 #include "opd_printf.h"
+#include "opd_events.h"
 
-#include "op_version.h"
 #include "op_config.h"
-#include "op_file.h"
-#include "op_fileio.h"
-#include "op_string.h"
-#include "op_deviceio.h"
-#include "op_lockfile.h"
-#include "op_get_time.h"
+#include "op_version.h"
+#include "op_hw_config.h"
 #include "op_libiberty.h"
-#include "op_events.h"
-#ifdef OPROF_ABI
+#include "op_file.h"
 #include "op_abi.h"
-#endif
+#include "op_string.h"
+#include "op_cpu_type.h"
+#include "op_popt.h"
+#include "op_lockfile.h"
+#include "op_list.h"
 
 #include <sys/types.h>
-#include <sys/stat.h>
-#include <sys/time.h>
 #include <sys/resource.h>
-#include <unistd.h>
-#include <signal.h>
-#include <dirent.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h>
 #include <stdlib.h>
-#include <limits.h>
+#include <fcntl.h>
+#include <stdio.h>
+#include <string.h>
+#include <unistd.h>
+#include <errno.h>
+#include <assert.h>
 
-size_t kernel_pointer_size;
+sig_atomic_t signal_alarm;
+sig_atomic_t signal_hup;
+sig_atomic_t signal_term;
+sig_atomic_t signal_usr1;
+sig_atomic_t signal_usr2;
 
-static fd_t devfd;
+uint op_nr_counters;
+int verbose;
+op_cpu cpu_type;
+int separate_lib;
+int separate_kernel;
+int separate_thread;
+int separate_cpu;
+int no_vmlinux;
+char * vmlinux;
+char * kernel_range;
+static char * binary_name_filter;
+static char * events;
+static int showvers;
+static struct oprofiled_ops * opd_ops;
+extern struct oprofiled_ops opd_24_ops;
+extern struct oprofiled_ops opd_26_ops;
 
-static void opd_sighup(void);
-static void opd_alarm(void);
-static void opd_sigterm(void);
+#define OPD_IMAGE_FILTER_HASH_SIZE 32
+static struct list_head images_filter[OPD_IMAGE_FILTER_HASH_SIZE];
 
-/**
- * opd_open_files - open necessary files
- *
- * Open the device files and the log file,
- * and mmap() the hash map.
- */
-static void opd_open_files(void)
+static struct poptOption options[] = {
+	{ "kernel-range", 'r', POPT_ARG_STRING, &kernel_range, 0, "Kernel VMA range", "start-end", },
+	{ "vmlinux", 'k', POPT_ARG_STRING, &vmlinux, 0, "vmlinux kernel image", "file", },
+	{ "no-vmlinux", 0, POPT_ARG_NONE, &no_vmlinux, 0, "vmlinux kernel image file not available", NULL, },
+	{ "image", 0, POPT_ARG_STRING, &binary_name_filter, 0, "image name filter", "profile these comma separated image" },
+	{ "separate-lib", 0, POPT_ARG_INT, &separate_lib, 0, "separate library samples for each distinct application", "[0|1]", },
+	{ "separate-kernel", 0, POPT_ARG_INT, &separate_kernel, 0, "separate kernel samples for each distinct application", "[0|1]", },
+	{ "separate-thread", 0, POPT_ARG_INT, &separate_thread, 0, "thread-profiling mode", "[0|1]" },
+	{ "separate-cpu", 0, POPT_ARG_INT, &separate_cpu, 0, "separate samples for each CPU", "[0|1]" },
+	{ "events", 'e', POPT_ARG_STRING, &events, 0, "events list", "[events]" },
+	{ "version", 'v', POPT_ARG_NONE, &showvers, 0, "show version", NULL, },
+	{ "verbose", 'V', POPT_ARG_NONE, &verbose, 0, "be verbose in log file", NULL, },
+	POPT_AUTOHELP
+	{ NULL, 0, 0, NULL, 0, NULL, NULL, },
+};
+ 
+
+void opd_open_logfile(void)
 {
-	devfd = op_open_device("/dev/oprofile/buffer");
-	if (devfd == -1) {
-		if (errno == EINVAL)
-			fprintf(stderr, "Failed to open device. Possibly you have passed incorrect\n"
-				"parameters. Check /var/log/messages.");
-		else
-			perror("Failed to open profile device");
+	if (open(OP_LOG_FILE, O_WRONLY|O_CREAT|O_NOCTTY|O_APPEND, 0755) == -1) {
+		perror("oprofiled: couldn't re-open stdout: ");
 		exit(EXIT_FAILURE);
 	}
 
-	/* give output before re-opening stdout as the logfile */
-	printf("Using log file " OP_LOG_FILE "\n");
-
-	/* set up logfile */
-	close(0);
-	close(1);
-
-	if (open("/dev/null", O_RDONLY) == -1) {
-		perror("oprofiled: couldn't re-open stdin as /dev/null: ");
+	if (dup2(1, 2) == -1) {
+		perror("oprofiled: couldn't dup stdout to stderr: ");
 		exit(EXIT_FAILURE);
 	}
-
-	opd_open_logfile();
-
-	printf("oprofiled started %s", op_get_time());
-	printf("kernel pointer size: %lu\n",
-		(unsigned long)kernel_pointer_size);
-	fflush(stdout);
 }
  
 
-/** return the int in the given oprofilefs file */
-static int opd_read_fs_int(char const * name)
+/**
+ * opd_fork - fork and return as child
+ *
+ * fork() and exit the parent with _exit().
+ * Failure is fatal.
+ */
+static void opd_fork(void)
 {
-	char filename[PATH_MAX + 1];
-	snprintf(filename, PATH_MAX, "/dev/oprofile/%s", name);
-	return op_read_int_from_file(filename);
+	switch (fork()) {
+		case -1:
+			perror("oprofiled: fork() failed: ");
+			exit(EXIT_FAILURE);
+			break;
+		case 0:
+			break;
+		default:
+			/* parent */
+			_exit(EXIT_SUCCESS);
+			break;
+	}
+}
+
+ 
+static void opd_go_daemon(void)
+{
+	opd_fork();
+
+	if (chdir(OP_BASE_DIR)) {
+		fprintf(stderr,"oprofiled: opd_go_daemon: couldn't chdir to "
+			OP_BASE_DIR ": %s", strerror(errno));
+		exit(EXIT_FAILURE);
+	}
+
+	if (setsid() < 0) {
+		perror("oprofiled: opd_go_daemon: couldn't setsid: ");
+		exit(EXIT_FAILURE);
+	}
+
+	opd_fork();
 }
 
 
-/** Done writing out the samples, indicate with complete_dump file */
-static void complete_dump(void)
+static void opd_write_abi(void)
 {
-	FILE * status_file;
+#ifdef OPROF_ABI
+	char * cbuf;
+ 
+	cbuf = xmalloc(strlen(OP_BASE_DIR) + 5);
+	strcpy(cbuf, OP_BASE_DIR);
+	strcat(cbuf, "/abi");
+	op_write_abi_to_file(cbuf);
+	free(cbuf);
+#endif
+}
 
-retry:
-       	status_file = fopen(OP_DUMP_STATUS, "w");
 
-	if (!status_file && errno == EMFILE) {
-		if (sfile_lru_clear()) {
-			printf("LRU cleared but file open fails for %s.\n",
-			       OP_DUMP_STATUS);
-			abort();
-		}
-		goto retry;
+/**
+ * opd_alarm - sync files and report stats
+ */
+static void opd_alarm(int val __attribute__((unused)))
+{
+	signal_alarm = 1;
+}
+ 
+
+/* re-open logfile for logrotate */
+static void opd_sighup(int val __attribute__((unused)))
+{
+	signal_hup = 1;
+}
+
+
+static void opd_sigterm(int val __attribute__((unused)))
+{
+	signal_term = 1;
+}
+ 
+
+static void opd_sigusr1(int val __attribute__((unused)))
+{
+	signal_usr1 = 1;
+}
+
+ 
+static void opd_sigusr2(int val __attribute__((unused)))
+{
+	signal_usr2 = 1;
+}
+
+
+static void opd_setup_signals(void)
+{
+	struct sigaction act;
+ 
+	act.sa_handler = opd_alarm;
+	act.sa_flags = 0;
+	sigemptyset(&act.sa_mask);
+
+	if (sigaction(SIGALRM, &act, NULL)) {
+		perror("oprofiled: install of SIGALRM handler failed: ");
+		exit(EXIT_FAILURE);
 	}
 
-	if (!status_file) {
-		perror("warning: couldn't set complete_dump: ");
+	act.sa_handler = opd_sighup;
+	act.sa_flags = 0;
+	sigemptyset(&act.sa_mask);
+	sigaddset(&act.sa_mask, SIGALRM);
+
+	if (sigaction(SIGHUP, &act, NULL)) {
+		perror("oprofiled: install of SIGHUP handler failed: ");
+		exit(EXIT_FAILURE);
+	}
+
+	act.sa_handler = opd_sigterm;
+	act.sa_flags = 0;
+	sigemptyset(&act.sa_mask);
+	sigaddset(&act.sa_mask, SIGTERM);
+
+	if (sigaction(SIGTERM, &act, NULL)) {
+		perror("oprofiled: install of SIGTERM handler failed: ");
+		exit(EXIT_FAILURE);
+	}
+
+	act.sa_handler = opd_sigusr1;
+	act.sa_flags = 0;
+	sigemptyset(&act.sa_mask);
+	sigaddset(&act.sa_mask, SIGTERM);
+
+	if (sigaction(SIGUSR1, &act, NULL)) {
+		perror("oprofiled: install of SIGUSR1 handler failed: ");
+		exit(EXIT_FAILURE);
+	}
+
+	act.sa_handler = opd_sigusr2;
+	act.sa_flags = 0;
+	sigemptyset(&act.sa_mask);
+	sigaddset(&act.sa_mask, SIGTERM);
+
+	if (sigaction(SIGUSR2, &act, NULL)) {
+		perror("oprofiled: install of SIGUSR1 handler failed: ");
+		exit(EXIT_FAILURE);
+	}
+
+	/* clean up every 10 minutes */
+	alarm(60 * 10);
+}
+
+
+size_t opd_hash_name(char const * name)
+{
+	size_t hash = 0;
+	for (; *name; ++name)
+		hash ^= (hash << 16) ^ (hash >> 8) ^ *name;
+	return hash;
+}
+
+
+struct opd_hashed_name {
+	char * name;
+	struct list_head next;
+};
+
+static void add_image_filter(char const * name)
+{
+	size_t hash;
+	struct opd_hashed_name * elt = xmalloc(sizeof(struct opd_hashed_name));
+	elt->name = op_follow_link(name);
+	hash = opd_hash_name(elt->name);
+	verbprintf("Adding to image filter: \"%s\"\n", elt->name);
+	list_add(&elt->next,&images_filter[hash % OPD_IMAGE_FILTER_HASH_SIZE]);
+}
+
+static void opd_parse_image_filter(void)
+{
+	size_t i;
+	char const * last = binary_name_filter;
+	char const * cur = binary_name_filter;
+
+	if (!binary_name_filter)
 		return;
+
+	for (i = 0; i < OPD_IMAGE_FILTER_HASH_SIZE; ++i)
+		list_init(&images_filter[i]);
+
+	while ((cur = strchr(last, ',')) != NULL) {
+		char * tmp = op_xstrndup(last, cur - last);
+		add_image_filter(tmp);
+		free(tmp);
+		last = cur + 1;
+	}
+	add_image_filter(last);
+}
+
+
+int is_image_ignored(char const * name)
+{
+	size_t hash;
+	struct list_head * pos;
+
+	if (!binary_name_filter)
+		return 0;
+	
+	hash = opd_hash_name(name);
+
+	list_for_each(pos, &images_filter[hash % OPD_IMAGE_FILTER_HASH_SIZE]) {
+		struct opd_hashed_name * hashed_name =
+		     list_entry(pos, struct opd_hashed_name, next);
+		if (!strcmp(hashed_name->name, name))
+			return 0;
 	}
 
-        fprintf(status_file, "1\n");
-        fclose(status_file);
+	return 1;
 }
 
- 
-/**
- * opd_do_samples - process a sample buffer
- * @param opd_buf  buffer to process
- *
- * Process a buffer of samples.
- *
- * If the sample could be processed correctly, it is written
- * to the relevant sample file.
- */
-static void opd_do_samples(char const * opd_buf, ssize_t count)
+
+static void opd_options(int argc, char const * argv[])
 {
-	size_t num = count / kernel_pointer_size;
- 
-	opd_stats[OPD_DUMP_COUNT]++;
+	poptContext optcon;
 
-	printf("Read buffer of %d entries.\n", (unsigned int)num);
- 
-	opd_process_samples(opd_buf, num);
+	optcon = op_poptGetContext(NULL, argc, argv, options, 0);
 
-	complete_dump();
-}
- 
+	if (showvers)
+		show_version(argv[0]);
 
-/**
- * opd_do_read - enter processing loop
- * @param buf  buffer to read into
- * @param size  size of buffer
- *
- * Read some of a buffer from the device and process
- * the contents.
- */
-static void opd_do_read(char * buf, size_t size)
-{
-	while (1) {
-		ssize_t count = -1;
+	if (separate_kernel)
+		separate_lib = 1;
 
-		/* loop to handle EINTR */
-		while (count < 0) {
-			count = op_read_device(devfd, buf, size);
+	cpu_type = op_get_cpu_type();
+	op_nr_counters = op_get_nr_counters(cpu_type);
 
-			/* we can lose an alarm or a hup but
-			 * we don't care.
-			 */
-			if (signal_alarm) {
-				signal_alarm = 0;
-				opd_alarm();
-			}
-
-			if (signal_hup) {
-				signal_hup = 0;
-				opd_sighup();
-			}
-
-			if (signal_term)
-				opd_sigterm();
-
-			if (signal_usr1) {
-				signal_usr1 = 0;
-				if (cpu_type != CPU_TIMER_INT)
-					perfmon_start();
-			}
-
-			if (signal_usr2) {
-				signal_usr2 = 0;
-				if (cpu_type != CPU_TIMER_INT)
-					perfmon_stop();
-			}
+	if (!no_vmlinux) {
+		if (!vmlinux || !strcmp("", vmlinux)) {
+			fprintf(stderr, "oprofiled: no vmlinux specified.\n");
+			poptPrintHelp(optcon, stderr, 0);
+			exit(EXIT_FAILURE);
 		}
 
-		opd_do_samples(buf, count);
+		/* canonicalise vmlinux filename. fix #637805 */
+		vmlinux = op_relative_to_absolute_path(vmlinux, NULL);
+
+		if (!kernel_range || !strcmp("", kernel_range)) {
+			fprintf(stderr, "oprofiled: no kernel VMA range specified.\n");
+			poptPrintHelp(optcon, stderr, 0);
+			exit(EXIT_FAILURE);
+		}
 	}
+
+	opd_parse_events(events);
+
+	opd_parse_image_filter();
+
+	poptFreeContext(optcon);
 }
 
 
-/** opd_alarm - sync files and report stats */
-static void opd_alarm(void)
+/* determine what kernel we're running and which daemon
+ * to use
+ */
+static struct oprofiled_ops * get_ops(void)
 {
-	sfile_sync_files();
-	opd_print_stats();
-	alarm(60*10);
-}
- 
+	switch (op_get_interface()) {
+		case OP_INTERFACE_24:
+			printf("Using 2.4 OProfile kernel interface.\n");
+			return &opd_24_ops;
+		case OP_INTERFACE_26:
+			printf("Using 2.6+ OProfile kernel interface.\n");
+			return &opd_26_ops;
+		default:
+			break;
+	}
 
-/** re-open files for logrotate/opcontrol --reset */
-static void opd_sighup(void)
-{
-	printf("Received SIGHUP.\n");
-	/* We just close them, and re-open them lazily as usual. */
-	sfile_close_files();
-	close(1);
-	close(2);
-	opd_open_logfile();
-}
-
-
-static void clean_exit(void)
-{
-	if (cpu_type != CPU_TIMER_INT)
-		perfmon_exit();
-	unlink(OP_LOCK_FILE);
-}
-
-
-static void opd_sigterm(void)
-{
-	opd_print_stats();
-	printf("oprofiled stopped %s", op_get_time());
+	fprintf(stderr, "Couldn't determine kernel version.\n");
 	exit(EXIT_FAILURE);
+	return NULL;
 }
- 
+
 
 int main(int argc, char const * argv[])
 {
-	char * sbuf;
-	size_t s_buf_bytesize;
-	int opd_buf_size;
-	int i;
 	int err;
 	struct rlimit rlim = { 2048, 2048 };
 
-	opd_options(argc, argv);
-
-	opd_create_vmlinux(vmlinux, kernel_range);
-
-	opd_buf_size = opd_read_fs_int("buffer_size");
-	kernel_pointer_size = opd_read_fs_int("pointer_size");
-
-	s_buf_bytesize = opd_buf_size * kernel_pointer_size;
-
- 	sbuf = xmalloc(s_buf_bytesize);
-
-	opd_reread_module_info();
-
-	opd_write_abi();
-
-	opd_go_daemon();
-
-	opd_open_files();
-
-	for (i = 0; i < OPD_MAX_STATS; i++)
-		opd_stats[i] = 0;
-
-	if (cpu_type != CPU_TIMER_INT)
-		perfmon_init();
-
-	cookie_init();
-	sfile_init();
-
-	opd_setup_signals();
- 
 	err = setrlimit(RLIMIT_NOFILE, &rlim);
 	if (err) {
 		perror("warning: could not set RLIMIT_NOFILE to 2048: ");
 	}
 
-	/* must be /after/ perfmon_init() at least */
-	if (atexit(clean_exit)) {
-		perror("oprofiled: couldn't set exit cleanup: ");
-		exit(EXIT_FAILURE);
-	}
+	opd_setup_signals();
+
+	opd_ops = get_ops();
+
+	opd_options(argc, argv);
+
+	opd_write_abi();
+
+	opd_ops->init();
+
+	opd_go_daemon();
 
 	if (op_write_lock_file(OP_LOCK_FILE)) {
 		fprintf(stderr, "oprofiled: could not create lock file "
@@ -296,15 +399,9 @@ int main(int argc, char const * argv[])
 		exit(EXIT_FAILURE);
 	}
 
-	/* simple sleep-then-process loop */
-	opd_do_read(sbuf, s_buf_bytesize);
+	opd_ops->start();
 
-	opd_print_stats();
-	printf("oprofiled stopped %s", op_get_time());
-
-	free(sbuf);
-	free(vmlinux);
-	/* FIXME: free kernel images, sfiles etc. */
+	opd_ops->exit();
 
 	return 0;
 }

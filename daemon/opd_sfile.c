@@ -16,7 +16,7 @@
 #include "opd_mangling.h"
 #include "opd_printf.h"
 #include "opd_stats.h"
-#include "opd_util.h"
+#include "oprofiled.h"
 
 #include "op_libiberty.h"
 
@@ -137,6 +137,15 @@ create_sfile(struct transient const * trans, struct kernel_image * ki)
 	if (separate_kernel || (separate_lib && !ki))
 		sf->app_cookie = trans->app_cookie;
 
+	if (!ki)
+		sf->ignored = is_cookie_ignored(sf->cookie);
+	else
+		sf->ignored = is_image_ignored(ki->name);
+
+	/* give a dependent sfile a chance to redeem itself */
+	if (sf->ignored && sf->app_cookie != INVALID_COOKIE)
+		sf->ignored = is_cookie_ignored(sf->app_cookie);
+
 	return sf;
 }
 
@@ -171,18 +180,17 @@ struct sfile * sfile_find(struct transient const * trans)
 	hash = sfile_hash(trans, ki);
 	list_for_each(pos, &hashes[hash]) {
 		sf = list_entry(pos, struct sfile, hash);
-		if (sfile_match(trans, sf, ki))
+		if (sfile_match(trans, sf, ki)) {
+			sfile_get(sf);
 			goto lru;
+		}
 	}
 
 	sf = create_sfile(trans, ki);
-
 	list_add(&sf->hash, &hashes[hash]);
-	list_add(&sf->lru, &lru_list);
 
 lru:
-	list_del(&sf->lru);
-	list_add_tail(&sf->lru, &lru_list);
+	sfile_put(sf);
 	return sf;
 }
 

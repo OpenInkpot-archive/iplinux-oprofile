@@ -5,11 +5,9 @@
  * @remark Copyright 2003 OProfile authors
  * @remark Read the file COPYING
  *
- * @author Philippe Elie <phil_el@wanadoo.fr>
- * @author John Levon <moz@compsoc.man.ac.uk>
+ * @author Philippe Elie
+ * @author John Levon
  */
-
-#include <iostream>
 
 #include "stream_util.h"
 

@@ -9,7 +9,7 @@
  */
 
 #include "opd_cookie.h"
-
+#include "oprofiled.h"
 #include "op_list.h"
 #include "op_libiberty.h"
 
@@ -44,7 +44,7 @@
 #endif /* __NR_lookup_dcookie */
 
 #if (defined(__powerpc__) && !defined(__powerpc64__)) || defined(__hppa__)\
-	|| defined(__s390__) || defined(__s390x__)
+	|| (defined(__s390__) && !defined(__s390x__))
 static inline int lookup_dcookie(cookie_t cookie, char * buf, size_t size)
 {
 	return syscall(__NR_lookup_dcookie, (unsigned long)(cookie >> 32),
@@ -61,11 +61,12 @@ static inline int lookup_dcookie(cookie_t cookie, char * buf, size_t size)
 struct cookie_entry {
 	cookie_t value;
 	char * name;
+	int ignored;
 	struct list_head list;
 };
 
 
-#define HASH_SIZE 2048
+#define HASH_SIZE 512
 #define HASH_BITS (HASH_SIZE - 1)
 
 static struct list_head hashes[HASH_SIZE];
@@ -85,6 +86,9 @@ static struct cookie_entry * create_cookie(cookie_t cookie)
 		       cookie, errno); 
 		free(entry->name);
 		entry->name = NULL;
+		entry->ignored = 0;
+	} else {
+		entry->ignored = is_image_ignored(entry->name);
 	}
 
 	return entry;
@@ -113,10 +117,30 @@ char const * find_cookie(cookie_t cookie)
 			goto out;
 	}
 
+	/* not sure this can ever happen due to is_cookie_ignored */
 	entry = create_cookie(cookie);
 	list_add(&entry->list, &hashes[hash]);
 out:
 	return entry->name;
+}
+
+
+int is_cookie_ignored(cookie_t cookie)
+{
+	unsigned long hash = hash_cookie(cookie);
+	struct list_head * pos;
+	struct cookie_entry * entry;
+
+	list_for_each(pos, &hashes[hash]) {
+		entry = list_entry(pos, struct cookie_entry, list);
+		if (entry->value == cookie)
+			goto out;
+	}
+
+	entry = create_cookie(cookie);
+	list_add(&entry->list, &hashes[hash]);
+out:
+	return entry->ignored;
 }
 
 

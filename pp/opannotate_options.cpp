@@ -25,11 +25,11 @@ using namespace std;
 profile_classes classes;
 
 namespace options {
-	bool demangle = true;
-	bool smart_demangle;
+	demangle_type demangle = dmt_normal;
 	string output_dir;
 	vector<string> search_dirs;
 	vector<string> base_dirs;
+	merge_option merge_by;
 	path_filter file_filter;
 	string_filter symbol_filter;
 	bool source;
@@ -45,14 +45,13 @@ string include_symbols;
 string exclude_symbols;
 string include_file;
 string exclude_file;
+string demangle_option = "normal";
+vector<string> mergespec;
 
 popt::option options_array[] = {
-	popt::option(options::demangle, "demangle", '\0',
-		     "demangle GNU C++ symbol names (default on)"),
-	popt::option(options::demangle, "no-demangle", '\0',
-		     "don't demangle GNU C++ symbol names"),
-	popt::option(options::smart_demangle, "smart-demangle", 'D',
-		     "demangle GNU C++ symbol names and shrink them"),
+	popt::option(demangle_option, "demangle", '\0',
+		     "demangle GNU C++ symbol names (default normal)",
+	             "none|normal|smart"),
 	popt::option(options::output_dir, "output-dir", 'o',
 		     "output directory", "directory name"),
 	popt::option(options::search_dirs, "search-dirs", 'd',
@@ -71,6 +70,8 @@ popt::option options_array[] = {
 		     "additionnal params to pass to objdump", "parameters"),
 	popt::option(options::exclude_dependent, "exclude-dependent", 'x',
 		     "exclude libs, kernel, and module samples for applications"),
+	popt::option(mergespec, "merge", 'm',
+		     "comma separated list", "cpu,tid,tgid,unitmask,all"),
 	popt::option(options::source, "source", 's', "output source"),
 	popt::option(options::assembly, "assembly", 'a', "output assembly"),
 };
@@ -112,14 +113,11 @@ void handle_options(vector<string> const & non_options)
 	copy(sample_files.begin(), sample_files.end(),
 	     ostream_iterator<string>(cverb, "\n"));
 
+	demangle = handle_demangle_option(demangle_option);
+
 	// we always merge but this have no effect on output since at source
 	// or assembly point of view the result will be merged anyway
-	merge_option merge_by;
-	merge_by.cpu = true;
-	merge_by.lib = true;
-	merge_by.tid = true;
-	merge_by.tgid = true;
-	merge_by.unitmask = true;
+	merge_by = handle_merge_option(mergespec, false, exclude_dependent);
 
 	classes = arrange_profiles(sample_files, merge_by);
 

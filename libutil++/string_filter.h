@@ -28,8 +28,8 @@ public:
 	string_filter() {}
 
 	/**
-	 * Initialise the filter with the include and exclude list, comma-separated.
-	 * Whitespace in each pattern is stripped.
+	 * Initialise the filter with the include and exclude list,
+	 * comma-separated.
 	 */
 	string_filter(std::string const & include_patterns,
 	              std::string const & exclude_patterns);

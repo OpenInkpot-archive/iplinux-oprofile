@@ -89,6 +89,9 @@ static void opd_put_sample(struct transient * trans, unsigned long long pc)
 	if (!trans->current)
 		return;
 
+	if (trans->current->ignored)
+		return;
+
 	sfile_log_sample(trans->current, trans->pc, event);
 }
 

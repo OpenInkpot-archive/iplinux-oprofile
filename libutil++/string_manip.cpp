@@ -30,29 +30,6 @@ string erase_to_last_of(string const & str, char ch)
 }
 
 
-string tostr(unsigned int i)
-{
-	ostringstream ss;
-	ss << i;
-	return ss.str();
-}
-
-
-unsigned int touint(string const & s)
-{
-	unsigned int i = 0;
-	istringstream ss(s);
-	ss >> i;
-	return i;
-}
-
-
-bool tobool(string const & s)
-{
-	return touint(s);
-}
-
-
 string split(string & s, char c)
 {
 	string::size_type i = s.find_first_of(c);
@@ -73,18 +50,20 @@ bool is_prefix(string const & s, string const & prefix)
 }
 
 
-void separate_token(vector<string> & result, const string & str, char sep)
+vector<string> separate_token(const string & str, char sep)
 {
-	char last_ch = '\0';
+	vector<string> result;
 	string next;
 
 	for (size_t pos = 0 ; pos != str.length() ; ++pos) {
 		char ch = str[pos];
-		if (last_ch == '\\') {
-			if (ch != sep)
-				// '\' not followed by ',' are taken as it
-				next += last_ch;
-			next += ch;
+		if (ch == '\\') {
+			if (pos < str.length() - 1 && str[pos + 1] == sep) {
+				++pos;
+				next += sep;
+			} else {
+				next += '\\';
+			}
 		} else if (ch == sep) {
 			result.push_back(next);
 			// some stl lacks string::clear()
@@ -92,11 +71,12 @@ void separate_token(vector<string> & result, const string & str, char sep)
 		} else {
 			next += ch;
 		}
-		last_ch = ch;
 	}
 
 	if (!next.empty())
 		result.push_back(next);
+
+	return result;
 }
 
 
@@ -122,7 +102,7 @@ string trim(string const & str, string const & totrim)
 }
 
 
-string const format_double(double value, size_t int_width, size_t fract_width)
+string const format_percent(double value, size_t int_width, size_t fract_width)
 {
 	ostringstream os;
 
@@ -141,12 +121,13 @@ string const format_double(double value, size_t int_width, size_t fract_width)
 
 	string formatted = os.str();
 	if (is_prefix(formatted, "100."))
-		formatted.erase(formatted.size() -1);
+		formatted.erase(formatted.size() - 1);
 	return formatted;
 }
 
+
 template <>
-unsigned int lexical_cast_no_ws<unsigned int>(std::string const & str)
+unsigned int op_lexical_cast<unsigned int, string>(string const & str)
 {
 	char* endptr;
 
@@ -154,7 +135,7 @@ unsigned int lexical_cast_no_ws<unsigned int>(std::string const & str)
 	unsigned long ret = 0;
 	ret = strtoul(str.c_str(), &endptr, 0);
 	if (*endptr) {
-		throw std::invalid_argument("lexical_cast_no_ws<T>(\""+ str +"\")");
+		throw std::invalid_argument("op_lexical_cast(\""+ str +"\")");
 	}
 	return ret;
 }

@@ -18,7 +18,6 @@
 
 #include "string_manip.h"
 #include "oprof_start_config.h"
-#include "oprof_start_util.h"
 #include "op_config.h"
 #include "op_config_24.h"
 
@@ -69,11 +68,11 @@ void config_setting::load(istream & in)
 	while (getline(in, str)) {
 		string val = split(str, '=');
 		if (str == "BUF_SIZE") {
-			buffer_size = touint(val);
+			buffer_size = op_lexical_cast<unsigned int>(val);
 			if (buffer_size < OP_DEFAULT_BUF_SIZE)
 				buffer_size = OP_DEFAULT_BUF_SIZE;
 		} else if (str == "NOTE_SIZE") {
-			note_table_size = touint(val);
+			note_table_size = op_lexical_cast<unsigned int>(val);
 			if (note_table_size < OP_DEFAULT_NOTE_SIZE)
 				note_table_size = OP_DEFAULT_NOTE_SIZE;
 		} else if (str == "VMLINUX") {
@@ -85,13 +84,13 @@ void config_setting::load(istream & in)
 				kernel_filename = val;
 			}
 		} else if (str == "SEPARATE_LIB") {
-			separate_lib = tobool(val);
+			separate_lib = op_lexical_cast<bool>(val);
 		} else if (str == "SEPARATE_KERNEL") {
-			separate_kernel = tobool(val);
+			separate_kernel = op_lexical_cast<bool>(val);
 		} else if (str == "SEPARATE_CPU") {
-			separate_cpu = tobool(val);
+			separate_cpu = op_lexical_cast<bool>(val);
 		} else if (str == "SEPARATE_THREAD") {
-			separate_thread = tobool(val);
+			separate_thread = op_lexical_cast<bool>(val);
 		}
 	}
 }

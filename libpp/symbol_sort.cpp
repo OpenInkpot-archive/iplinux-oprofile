@@ -12,7 +12,6 @@
 #include "symbol_sort.h"
 #include "symbol.h"
 #include "symbol_functors.h"
-#include "file_manip.h"
 #include "name_storage.h"
 #include "op_exception.h"
 
@@ -128,11 +127,10 @@ void sort_options::sort(symbol_collection & syms,
 	long_filenames = lf;
 
 	std::vector<sort_order> sort_option(options);
-	for (sort_order cur = first; cur != last; ) {
+	for (sort_order cur = first; cur != last; cur = sort_order(cur + 1)) {
 		if (find(sort_option.begin(), sort_option.end(), cur) ==
 		    sort_option.end())
 			sort_option.push_back(cur);
-		cur = sort_order(cur + 1);
 	}
 
 	stable_sort(syms.begin(), syms.end(),

@@ -27,6 +27,9 @@ typedef unsigned long long cookie_t;
  */
 char const * find_cookie(cookie_t cookie);
 
+/** return true if this cookie should be ignored */
+int is_cookie_ignored(cookie_t cookie);
+
 /** give a textual description of the cookie */
 char const * verbose_cookie(cookie_t cookie);
 

@@ -28,8 +28,7 @@ parsed_filename parse_event_spec(string const & event_spec)
 
 	size_type const nr_parts = 6;
 
-	parts_type parts;
-	separate_token(parts, event_spec, '.');
+	parts_type parts = separate_token(event_spec, '.');
 
 	if (parts.size() != nr_parts) {
 		throw invalid_argument("parse_event_spec(): bad event specification: " + event_spec);
@@ -54,6 +53,7 @@ parsed_filename parse_event_spec(string const & event_spec)
 	return result;
 }
 
+
 /**
  * @param component  path component
  *
@@ -61,11 +61,13 @@ parsed_filename parse_event_spec(string const & event_spec)
  */
 void remove_base_dir(vector<string> & path)
 {
-	while (!path.empty()) {
-		if (path[0] == "{root}" || path[0] == "{kern}")
+	vector<string>::iterator it;
+	for (it = path.begin(); it != path.end(); ++it) {
+		if (*it == "{root}" || *it == "{kern}")
 			break;
-		path.erase(path.begin());
 	}
+
+	path.erase(path.begin(), it);
 }
 
 }  // anonymous namespace
@@ -95,14 +97,14 @@ parsed_filename parse_filename(string const & filename)
 
 	result.filename = filename;
 
-	vector<string> path;
-	separate_token(path, filename_spec, '/');
+	vector<string> path = separate_token(filename_spec, '/');
 
 	remove_base_dir(path);
 
 	// pp_interface PP:3.19 to PP:3.23 path must start either with {root}
-	// or {kern} and we must found at least 2 component
-	if (path.size() < 2 || (path[0] != "{root}" && path[0] != "{kern}")) {
+	// or {kern} and we must found at least 2 component, remove_base_dir()
+	// return an empty path if {root} or {kern} are not found
+	if (path.size() < 2) {
 		throw invalid_argument("parse_filename() invalid filename: " +
 				       filename);
 	}

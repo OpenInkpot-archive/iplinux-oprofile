@@ -1,5 +1,5 @@
 /**
- * @file dae/opd_parse_proc.c
+ * @file opd_parse_proc.c
  * Parsing of /proc/#pid
  *
  * @remark Copyright 2002 OProfile authors
@@ -109,12 +109,7 @@ static void opd_get_ascii_maps(struct opd_proc * proc)
 		return;
 
 	strcat(exe_name, "/exe");
-	image_name = op_get_link(exe_name);
-	if (!image_name)
-		/* FIXME likely to be kernel thread, actually we don't use them
-		 * because samples go to vmlinux samples file but for
-		 * completeness we record them in proc struct */
-		image_name = xstrdup(exe_name);
+	image_name = op_follow_link(exe_name);
 
 	verbprintf("image name %s for pid %u %u\n", image_name, proc->tid, proc->tgid);
 
@@ -164,6 +159,7 @@ static void opd_get_ascii_maps(struct opd_proc * proc)
 	op_close_file(fp);
 }
 
+
 static u32 read_tgid(u32 tid)
 {
 	char status_file[30] = "/proc/";
@@ -197,12 +193,7 @@ static u32 read_tgid(u32 tid)
 	return 0;
 }
 
-/**
- * opd_get_ascii_procs - read process and mapping information from /proc
- *
- * Read information on each process and its mappings from the /proc
- * filesystem.
- */
+
 void opd_get_ascii_procs(void)
 {
 	DIR * dir;

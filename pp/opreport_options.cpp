@@ -20,6 +20,7 @@
 #include "arrange_profiles.h"
 #include "opreport_options.h"
 #include "popt_options.h"
+#include "string_filter.h"
 #include "file_manip.h"
 #include "cverb.h"
 
@@ -28,8 +29,7 @@ using namespace std;
 profile_classes classes;
 
 namespace options {
-	bool demangle = true;
-	bool smart_demangle;
+	demangle_type demangle = dmt_normal;
 	bool symbols;
 	bool debug_info;
 	bool details;
@@ -53,14 +53,12 @@ vector<string> mergespec;
 vector<string> sort;
 vector<string> exclude_symbols;
 vector<string> include_symbols;
+string demangle_option = "normal";
 
 popt::option options_array[] = {
-	popt::option(options::demangle, "demangle", '\0',
-		     "demangle GNU C++ symbol names (default on)"),
-	popt::option(options::demangle, "no-demangle", '\0',
-		     "don't demangle GNU C++ symbol names"),
-	popt::option(options::smart_demangle, "smart-demangle", 'D',
-		     "demangle GNU C++ symbol names and shrink them"),
+	popt::option(demangle_option, "demangle", '\0',
+		     "demangle GNU C++ symbol names (default normal)",
+	             "none|normal|smart"),
 	popt::option(outfile, "output-file", 'o',
 	             "output to the given filename", "file"),
 	// PP:5
@@ -109,53 +107,6 @@ void handle_sort_option()
 
 	for (; cit != end; ++cit) {
 		options::sort_by.add_sort_option(*cit);
-	}
-}
-
-
-// FIXME: separate file if reused
-void handle_merge_option()
-{
-	using namespace options;
-
-	bool is_all = false;
-
-	vector<string>::const_iterator cit = mergespec.begin();
-	vector<string>::const_iterator end = mergespec.end();
-
-	for (; cit != end; ++cit) {
-		if (*cit == "cpu") {
-			merge_by.cpu = true;
-		} else if (*cit == "tid") {
-			merge_by.tid = true;
-		} else if (*cit == "tgid") {
-			// PP:5.21 tgid merge imply tid merging.
-			merge_by.tgid = true;
-			merge_by.tid = true;
-		} else if (*cit == "lib") {
-			merge_by.lib = true;
-		} else if (*cit == "unitmask") {
-			merge_by.unitmask = true;
-		} else if (*cit == "all") {
-			merge_by.cpu = true;
-			merge_by.lib = true;
-			merge_by.tid = true;
-			merge_by.tgid = true;
-			merge_by.unitmask = true;
-			is_all = true;
-		} else {
-			cerr << "unknown merge option: " << *cit << endl;
-			exit(EXIT_FAILURE);
-		}
-	}
-
-	// if --merge all, don't warn about lib merging,
-	// it's not user friendly. Behaviour should still
-	// be correct.
-	if (exclude_dependent && merge_by.lib && !is_all) {
-		cerr << "--merge=lib is meaningless "
-		     << "with --exclude-dependent" << endl;
-		exit(EXIT_FAILURE);
 	}
 }
 
@@ -236,8 +187,9 @@ void handle_options(vector<string> const & non_options)
 	}
 
 	handle_sort_option();
-	handle_merge_option();
+	merge_by = handle_merge_option(mergespec, true, exclude_dependent);
 	handle_output_file();
+	demangle = handle_demangle_option(demangle_option);
 	check_options();
 
 	symbol_filter = string_filter(include_symbols, exclude_symbols);

@@ -1,5 +1,5 @@
 /**
- * @file dae/opd_image.c
+ * @file opd_image.c
  * Management of binary images
  *
  * @remark Copyright 2002 OProfile authors
@@ -12,12 +12,11 @@
 #include "opd_image.h"
 #include "opd_printf.h"
 #include "opd_sample_files.h"
-#include "opd_stats.h"
-#include "opd_util.h"
+#include "opd_24_stats.h"
+#include "oprofiled.h"
 
 #include "op_file.h"
 #include "op_config_24.h"
-#include "op_mangle.h"
 #include "op_libiberty.h"
 
 #include <string.h>
@@ -25,16 +24,13 @@
 #include <stdio.h>
 
 /* maintained for statistics purpose only */
-unsigned int nr_images=0;
+static int nr_images;
 
 /* list of images */
 #define OPD_IMAGE_HASH_SIZE 2048
 static struct list_head opd_images[OPD_IMAGE_HASH_SIZE];
 
 
-/**
- * initialize hashed image lists
- */
 void opd_init_images(void)
 {
 	int i;
@@ -44,12 +40,12 @@ void opd_init_images(void)
 }
 
 
-/**
- * @param image  the image pointer
- *
- * free all memory belonging to this image -  This function does not close
- * nor flush the samples files
- */
+int opd_get_nr_images(void)
+{
+	return nr_images;
+}
+
+
 void opd_delete_image(struct opd_image * image)
 {
 	verbprintf("Deleting image: name %s app_name %s, kernel %d, "
@@ -80,12 +76,6 @@ void opd_delete_image(struct opd_image * image)
 }
 
 
-/**
- * @param image_cb callback to apply onto each existing image struct
- *
- * the callback receive a struct opd_image * (not a const struct) and is
- * allowed to freeze the image struct itself.
- */
 void opd_for_each_image(opd_image_cb image_cb)
 {
 	struct list_head * pos;
@@ -110,11 +100,9 @@ void opd_for_each_image(opd_image_cb image_cb)
  *
  * return the hash code for the passed parameters
  */
-static int opd_hash_image(char const * name, pid_t tid, pid_t tgid)
+static size_t opd_hash_image(char const * name, pid_t tid, pid_t tgid)
 {
-	int hash = 0;
-	for (; *name; ++name)
-		hash ^= (hash << 16) ^ (hash >> 8) ^ *name;
+	size_t hash = opd_hash_name(name);
 	if (separate_thread)
 		hash += tid + tgid;
 	return  hash % OPD_IMAGE_HASH_SIZE;
@@ -135,13 +123,13 @@ static int opd_hash_image(char const * name, pid_t tid, pid_t tgid)
  *
  * Initialise an opd_image struct for the image image
  * without opening the associated samples files. At return
- * the image is partially initialized.
+ * the image is fully initialized.
  */
 static struct opd_image *
 opd_new_image(char const * name, char const * app_name, int kernel,
               pid_t tid, pid_t tgid)
 {
-	int hash_image;
+	size_t hash_image;
 	struct opd_image * image;
 
 	verbprintf("Creating image: %s %s, kernel %d, tid %d, "
@@ -158,8 +146,13 @@ opd_new_image(char const * name, char const * app_name, int kernel,
 	image->app_name = app_name ? xstrdup(app_name) : NULL;
 	image->mtime = op_get_mtime(image->name);
 
-	memset(image->sfiles, '\0',
-	       OP_MAX_COUNTERS * NR_CPUS * sizeof(struct opd_sfile *));
+	image->ignored = 1;
+	if (separate_lib && app_name)
+		image->ignored = is_image_ignored(app_name);
+	if (image->ignored)
+		image->ignored = is_image_ignored(name);
+
+	memset(image->sfiles, '\0', NR_CPUS * sizeof(struct opd_24_sfile **));
 
 	hash_image = opd_hash_image(name, tid, tgid);
 	list_add(&image->hash_next, &opd_images[hash_image]);
@@ -230,12 +223,12 @@ static struct opd_image * opd_find_image(char const * name,
 {
 	struct opd_image * image = 0; /* supress warn non initialized use */
 	struct list_head * pos;
-	int bucket;
+	size_t bucket;
 
-	opd_stats[OPD_IMAGE_HASH_ACCESS]++;
+	opd_24_stats[OPD_IMAGE_HASH_ACCESS]++;
 	bucket = opd_hash_image(name, tid, tgid);
 	list_for_each(pos, &opd_images[bucket]) {
-		opd_stats[OPD_IMAGE_HASH_DEPTH]++;
+		opd_24_stats[OPD_IMAGE_HASH_DEPTH]++;
 		image = list_entry(pos, struct opd_image, hash_next);
 
 		if (!strcmp(image->name, name)) {
@@ -252,19 +245,6 @@ static struct opd_image * opd_find_image(char const * name,
 }
 
  
-/**
- * opd_get_image - get an image from the image structure
- * @param name  name of image
- * @param app_name  the application name where belongs this image
- * @param kernel  is the image a kernel/module image
- * @param tid  thread id
- * @param tgid  thread group id
- *
- * Get the image specified by the file name name from the
- * image structure. If it is not present, the image is
- * added to the structure. In either case, the image number
- * is returned.
- */
 struct opd_image * opd_get_image(char const * name, char const * app_name,
                                  int kernel, pid_t tid, pid_t tgid)
 {
@@ -276,18 +256,6 @@ struct opd_image * opd_get_image(char const * name, char const * app_name,
 }
 
 
-/**
- * opd_get_kernel_image - get a kernel image
- * @param name of image
- * @param app_name application owner of this kernel image. non-null only
- *  when separate_kernel_sample != 0
- * @param tid  thread id
- * @param tgid  thread group id
- *
- * Create and initialise an image adding it
- * to the image lists and to image hash list
- * entry HASH_KERNEL
- */
 struct opd_image * opd_get_kernel_image(char const * name,
                                char const * app_name, pid_t tid, pid_t tgid)
 {

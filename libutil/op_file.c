@@ -51,25 +51,6 @@ time_t op_get_mtime(char const * file)
 }
 
 
-char * op_get_link(char const * filename)
-{
-	char  * linkbuf;
-	int c;
-
-	linkbuf = xmalloc(FILENAME_MAX+1);
-
-	c = readlink(filename, linkbuf, FILENAME_MAX);
-
-	if (c == -1) {
-		free(linkbuf);
-		return NULL;
-	}
-
-	linkbuf[c] = '\0';
-	return linkbuf;
-}
-
-
 /* remove_component_p() and op_simplify_pathname() comes from the gcc
  preprocessor */
 
@@ -265,12 +246,115 @@ int create_path(char const * path)
 		*pos = '\0';
 		ret = create_dir(str);
 		*pos = '/';
-		if (ret) {
-			goto out;
-		}
+		if (ret)
+			break;
 	}
 
-out:
 	free(str);
 	return ret;
+}
+
+
+int op_is_directory(char const * dirname)
+{
+	struct stat st;
+
+	return !stat(dirname, &st) && S_ISDIR(st.st_mode);
+}
+
+
+/**
+ * @param path_name the path where we remove trailing '/'
+ *
+ * erase all trailing '/' in path_name except if the last '/' is at pos 0
+ */
+static void erase_trailing_path_separator(char * path_name)
+{
+	size_t len;
+	while ((len = strlen(path_name)) > 1) {
+		if (path_name[len - 1] != '/')
+			break;
+		path_name[len - 1] = '\0';
+	}
+}
+
+char * op_c_dirname(char const * file_name)
+{
+	char * result = xstrdup(file_name);
+	char * pos;
+
+	erase_trailing_path_separator(result);
+
+	if (!strchr(result, '/')) {
+		free(result);
+		result = xstrdup(".");
+		return result;
+	}
+
+	/* catch result == "/" */
+	if (strlen(result) == 1)
+		return result;
+
+	pos = strrchr(result, '/');
+
+	/* "/usr" must return "/" */
+	if (pos == result)
+		pos = result + 1;
+	*pos = '\0';
+
+	/* "////usr" must return "/" */
+	erase_trailing_path_separator(result);
+
+	return result;
+}
+
+
+/**
+ * Follow exactly one level of symbolic link.
+ * Returns NULL if it's not a symlink or on error,
+ * or a string that caller must free.
+ *
+ * This does not re-seat any returned relative
+ * symbolic links.
+ */
+static char * get_link(char const * filename)
+{
+	char  * linkbuf;
+	int c;
+
+	linkbuf = xmalloc(FILENAME_MAX+1);
+
+	c = readlink(filename, linkbuf, FILENAME_MAX);
+
+	if (c == -1) {
+		free(linkbuf);
+		return NULL;
+	}
+
+	linkbuf[c] = '\0';
+	return linkbuf;
+}
+
+
+char * op_follow_link(char const * name)
+{
+	char * tmp = xstrdup(name);
+	int iterate = 20;
+
+	while (iterate--) {
+		char * base;
+		char * linkbuf = get_link(tmp);
+		if (linkbuf == NULL)
+			return tmp;
+
+		if (op_is_directory(tmp))
+			base = xstrdup(tmp);
+		else
+			base = op_c_dirname(tmp);
+		free(tmp);
+		tmp = op_relative_to_absolute_path(linkbuf, base);
+		free(linkbuf);
+	}
+
+	return xstrdup(name);
 }

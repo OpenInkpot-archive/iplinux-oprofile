@@ -18,9 +18,7 @@
 
 #include "ui/oprof_start.base.h"
 #include "oprof_start_config.h"
-#include "oprof_start_util.h"
 
-#include "op_hw_config.h"
 #include "op_events.h"
 
 class QIntValidator;
@@ -65,6 +63,8 @@ protected slots:
 	void event_selected();
 	/// the mouse is over an event
 	void event_over(QListViewItem *);
+	/// state of separate_kernel_cb changed
+	void on_separate_kernel_cb_changed(int);
 
 	/// close the dialog
 	void accept();

@@ -41,6 +41,9 @@
 #include "string_manip.h"
 #include "op_cpufreq.h"
 #include "op_alloc_counter.h"
+#include "oprof_start_util.h"
+
+#include "op_hw_config.h"
 
 using namespace std;
 
@@ -125,7 +128,13 @@ oprof_start::oprof_start()
 		fill_events();
 	}
 
-	bool is_26 = op_get_interface() == OP_INTERFACE_26;
+	op_interface interface = op_get_interface();
+	if (interface == OP_INTERFACE_NO_GOOD) {
+		QMessageBox::warning(this, 0, "Couldn't determine kernel"
+		                     " interface version");
+		exit(EXIT_FAILURE);
+	}
+	bool is_26 = interface == OP_INTERFACE_26;
 
 	if (is_26) {
 		note_table_size_edit->hide();
@@ -297,8 +306,7 @@ void oprof_start::read_set_events()
 		one_enabled = true;
 
 		// CHOSEN_EVENTS[0]=CPU_CLK_UNHALTED:10000:0:1:1
-		vector<string> parts;
-		separate_token(parts, val, ':');
+		vector<string> parts = separate_token(val, ':');
 
 		if (parts.size() != 5 && parts.size() != 2) {
 			cerr << "invalid configuration file\n";
@@ -307,13 +315,17 @@ void oprof_start::read_set_events()
 		}
 
 		string ev_name = parts[0];
-		event_cfgs[ev_name].count = touint(parts[1]);
+		event_cfgs[ev_name].count =
+			op_lexical_cast<unsigned int>(parts[1]);
 
 		// CPU_CLK_UNHALTED:10000 is also valid
 		if (parts.size() == 5) {
-			event_cfgs[ev_name].umask = touint(parts[2]);
-			event_cfgs[ev_name].user_ring_count = touint(parts[3]);
-			event_cfgs[ev_name].os_ring_count = touint(parts[4]);
+			event_cfgs[ev_name].umask =
+				op_lexical_cast<unsigned int>(parts[2]);
+			event_cfgs[ev_name].user_ring_count =
+				op_lexical_cast<unsigned int>(parts[3]);
+			event_cfgs[ev_name].os_ring_count =
+				op_lexical_cast<unsigned int>(parts[4]);
 		} else {
 			event_cfgs[ev_name].umask = 0;
 			event_cfgs[ev_name].user_ring_count = 1;
@@ -895,10 +907,10 @@ bool oprof_start::save_config()
 		one_enabled = true;
 
 		string arg = "--event=" + descr.name;
-		arg += ":" + tostr(cfg.count);
-		arg += ":" + tostr(cfg.umask);
-		arg += ":" + tostr(cfg.os_ring_count);
-		arg += ":" + tostr(cfg.user_ring_count);
+		arg += ":" + op_lexical_cast<string>(cfg.count);
+		arg += ":" + op_lexical_cast<string>(cfg.umask);
+		arg += ":" + op_lexical_cast<string>(cfg.os_ring_count);
+		arg += ":" + op_lexical_cast<string>(cfg.user_ring_count);
 
 		tmpargs.push_back(arg);
 	}
@@ -914,9 +926,10 @@ bool oprof_start::save_config()
 	}
 
 	if (op_get_interface() == OP_INTERFACE_24) {
-		args.push_back("--buffer-size=" + tostr(config.buffer_size));
+		args.push_back("--buffer-size=" +
+		       op_lexical_cast<string>(config.buffer_size));
 		args.push_back("--note-table-size=" +
-			       tostr(config.note_table_size));
+		       op_lexical_cast<string>(config.note_table_size));
 	}
 
 	string sep = "--separate=";
@@ -952,6 +965,13 @@ void oprof_start::on_stop_profiler()
 		QMessageBox::warning(this, 0, "The profiler is already stopped.");
 
 	timerEvent(0);
+}
+
+
+void oprof_start::on_separate_kernel_cb_changed(int state)
+{
+	if (state == 2)
+		separate_lib_cb->setChecked(true);
 }
 
 

@@ -15,16 +15,13 @@
 #include <string>
 #include <vector>
 
-#include "utility.h"
 #include "common_option.h"
-#include "string_filter.h"
 #include "path_filter.h"
 
 class profile_classes;
 
 namespace options {
-	extern bool demangle;
-	extern bool smart_demangle;
+	extern demangle_type demangle;
 	extern bool source;
 	extern bool assembly;
 	extern string_filter symbol_filter;

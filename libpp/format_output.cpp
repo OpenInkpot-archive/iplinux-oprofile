@@ -12,7 +12,6 @@
 #include <sstream>
 #include <iomanip>
 
-#include "file_manip.h"
 #include "string_manip.h"
 
 #include "format_output.h"
@@ -124,7 +123,6 @@ size_t formatter::output_field(ostream & out, field_datum const & datum,
 {
 	if (!hide_immutable) {
 		out << string(padding, ' ');
-		padding = 0;
 
 		field_description const & field(format_map[fl]);
 		string str = (this->*field.formatter)(datum);
@@ -146,7 +144,6 @@ size_t formatter::output_header_field(ostream & out, format_flags fl,
 					size_t padding)
 {
 	out << string(padding, ' ');
-	padding = 0;
 
 	field_description const & field(format_map[fl]);
 	out << field.header_name;
@@ -386,7 +383,7 @@ string formatter::format_percent(field_datum const & f)
 	double ratio = op_ratio(f.sample.counts[f.pclass],
 	                        total_count[f.pclass]);
 
-	return format_double(ratio * 100, percent_int_width,
+	return ::format_percent(ratio * 100, percent_int_width,
 	                     percent_fract_width);
 }
 
@@ -398,7 +395,7 @@ string formatter::format_cumulated_percent(field_datum const & f)
 	double ratio = op_ratio(cumulated_percent[f.pclass],
 	                        total_count[f.pclass]);
 
-	return format_double(ratio * 100, percent_int_width,
+	return ::format_percent(ratio * 100, percent_int_width,
 	                     percent_fract_width);
 }
 
@@ -409,7 +406,7 @@ string formatter::format_percent_details(field_datum const & f)
 	double ratio = op_ratio(f.sample.counts[f.pclass],
 	                        total_count_details[f.pclass]);
 
-	return format_double(ratio * 100, percent_int_width,
+	return ::format_percent(ratio * 100, percent_int_width,
 	                     percent_fract_width);
 }
 
@@ -423,7 +420,7 @@ string formatter::format_cumulated_percent_details(field_datum const & f)
 	double ratio = op_ratio(cumulated_percent_details[f.pclass],
 	                        total_count_details[f.pclass]);
 
-	return format_double(ratio * 100, percent_int_width,
+	return ::format_percent(ratio * 100, percent_int_width,
 			     percent_fract_width);
 }
 

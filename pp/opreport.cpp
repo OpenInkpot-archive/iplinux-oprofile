@@ -209,7 +209,7 @@ void output_header()
 
 string get_filename(string const & filename)
 {
-	return options::long_filenames ? filename : basename(filename);
+	return options::long_filenames ? filename : op_basename(filename);
 }
 
 
@@ -218,7 +218,7 @@ void output_count(double total_count, size_t count)
 {
 	cout << setw(9) << count << ' ';
 	double ratio = op_ratio(count, total_count);
-	cout << format_double(ratio * 100, percent_int_width,
+	cout << format_percent(ratio * 100, percent_int_width,
 			      percent_fract_width) << ' ';
 }
 

@@ -24,7 +24,6 @@
 #include <qmessagebox.h>
 
 #include "op_file.h"
-#include "string_manip.h"
 #include "file_manip.h"
 #include "child_reader.h"
 #include "op_libiberty.h"
@@ -67,7 +66,7 @@ daemon_status::daemon_status()
 	int HZ;
 	if (!daemon_pid.empty()) {
 		string const exec =
-			op_follow_link(string("/proc/") + daemon_pid + "/exe");
+			follow_link(string("/proc/") + daemon_pid + "/exe");
 		if (exec.empty())
 			daemon_pid.erase();
 		else
@@ -85,9 +84,9 @@ daemon_status::daemon_status()
 
 		while ((dirent = readdir(dir))) {
 			string const exec =
-				op_follow_link(string("/proc/")
+				follow_link(string("/proc/")
 				               + dirent->d_name + "/exe");
-			string const name = basename(exec);
+			string const name = op_basename(exec);
 			if (name != "oprofiled")
 				continue;
 

@@ -17,16 +17,13 @@
 #include <iosfwd>
 
 #include "common_option.h"
-#include "utility.h"
-#include "string_filter.h"
 #include "symbol_sort.h"
 
 class profile_classes;
 class merge_option;
 
 namespace options {
-	extern bool demangle;
-	extern bool smart_demangle;
+	extern demangle_type demangle;
 	extern bool symbols;
 	extern bool debug_info;
 	extern bool details;
