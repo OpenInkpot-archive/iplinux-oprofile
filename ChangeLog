@@ -1,5 +1,13 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* libpp/format_output.h:
+	* libpp/format_output.cpp:
+	* pp/opreport.cpp:
+	* pp/opreport_options.h:
+	* pp/opreport_options.cpp: s/--short-filename/--long-filenames/
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* libpp/profile_spec.h:
 	* libpp/profile_spec.cpp: take exclude_dependent not
 	include_dependent

@@ -34,7 +34,7 @@ formatter::formatter(profile_container const & profile_)
 	vma_64(false),
 	need_details(false),
 	need_header(true),
-	short_filename(false)
+	long_filenames(false)
 {
 	total_count = profile.samples_count();
 	total_count_details = profile.samples_count();
@@ -104,9 +104,9 @@ void formatter::hide_header()
 }
 
 
-void formatter::show_short_filename()
+void formatter::show_long_filenames()
 {
-	short_filename = true;
+	long_filenames = true;
 }
  
 
@@ -257,17 +257,17 @@ string formatter::format_symb_name(field_datum const & f)
  
 string formatter::format_image_name(field_datum const & f)
 {
-	return short_filename
-		? basename(f.symbol.image_name)
-		: f.symbol.image_name;
+	return long_filenames
+		? f.symbol.image_name
+		: basename(f.symbol.image_name);
 }
 
  
 string formatter::format_app_name(field_datum const & f)
 {
-	return short_filename
-		? basename(f.symbol.app_name)
-		: f.symbol.app_name;
+	return long_filenames
+		? f.symbol.app_name
+		: basename(f.symbol.app_name);
 }
 
  
@@ -276,9 +276,9 @@ string formatter::format_linenr_info(field_datum const & f)
 	ostringstream out;
 
 	if (!f.sample.file_loc.filename.empty()) {
-		string filename = short_filename
-			? basename(f.sample.file_loc.filename)
-			: f.sample.file_loc.filename;
+		string filename = long_filenames
+			? f.sample.file_loc.filename
+			: basename(f.sample.file_loc.filename);
 		out << filename << ":" << f.sample.file_loc.linenr;
 	} else {
 		out << "(no location information)";

@@ -33,7 +33,7 @@ namespace options {
 	extern bool exclude_dependent;
 	extern merge_option merge_by;
 	extern bool global_percent;
-	extern bool short_filename;
+	extern bool long_filenames;
 	extern string_filter symbol_filter;
 	extern double threshold;
 	extern bool show_header;

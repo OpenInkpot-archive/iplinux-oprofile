@@ -42,7 +42,7 @@ namespace options {
 	string_filter symbol_filter;
 	merge_option merge_by;
 	bool show_header = true;
-	bool short_filename;
+	bool long_filenames;
 	bool accumulated;
 	bool reverse_sort;
 	bool global_percent;
@@ -85,8 +85,8 @@ popt::option options_array[] = {
 		     "comma separated list", "cpu,pid,lib"),
 	popt::option(options::show_header, "no-header", '\0',
 		     "remove all header from output"),
-	popt::option(options::short_filename, "short-filename", '\0',
-		     "use basename of filename in output"),
+	popt::option(options::long_filenames, "long-filenames", '\0',
+		     "show the full path of filenames"),
 	popt::option(options::accumulated, "accumulated", '\0',
 		     "percentage field show accumulated count"),
 	popt::option(options::reverse_sort, "reverse-sort", 'r',

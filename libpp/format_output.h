@@ -47,8 +47,8 @@ public:
 	void show_details();
 	/// set the need_header boolean to false
 	void hide_header();
-	/// set the short_filename boolean
-	void show_short_filename();
+	/// show long (full path) filenames
+	void show_long_filenames();
 
 private:
 
@@ -145,8 +145,8 @@ private:
 	bool need_details;
 	/// true if we need to show header before the before the first output
 	bool need_header;
-	/// true if we use basename(filename) in output rather filename
-	bool short_filename;
+	/// false if we use basename(filename) in output rather filename
+	bool long_filenames;
 };
 
 }; // namespace format_output 

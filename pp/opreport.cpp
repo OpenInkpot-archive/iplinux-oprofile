@@ -42,7 +42,7 @@ void output_header(partition_files const & files)
 
 string get_filename(string const & filename)
 {
-	return options::short_filename ? basename(filename) : filename;
+	return options::long_filenames ? filename : basename(filename);
 }
 
 
@@ -288,8 +288,8 @@ void output_symbols(profile_container const & samples)
 
 	if (options::details)
 		out.show_details();
-	if (options::short_filename)
-		out.show_short_filename();
+	if (options::long_filenames)
+		out.show_long_filenames();
 	if (!options::show_header)
 		out.hide_header();
 
