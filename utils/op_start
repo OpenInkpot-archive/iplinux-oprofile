@@ -477,7 +477,7 @@ do_start() {
 	fi
  
 	OPD_ARGS="--vmlinux=$VMLINUX --kernel-range=$KERNEL_RANGE \
-		--separate-samples=$SEPARATE_SAMPLES \
+		--separate-lib-samples=$SEPARATE_SAMPLES \
 		--pid-filter=$PID_FILTER --pgrp-filter=$PGRP_FILTER"
 
 	if [ "$VERBOSE" = "1" ]; then
