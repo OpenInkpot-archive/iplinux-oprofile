@@ -68,3 +68,9 @@ void filename_spec::set_sample_filename(string const & filename)
 	tid.set(parsed.tid);
 	cpu.set(parsed.cpu);
 }
+
+
+bool filename_spec::is_dependant() const
+{
+	return image != lib_image;
+}

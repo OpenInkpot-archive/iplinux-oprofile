@@ -152,6 +152,11 @@ void output_gprof(op_bfd const & abfd, profile_container const & samples,
 
 	size_t histsize = (high_pc - low_pc) / multiplier;
 
+	// FIXME: must we skip the flat profile write if histsize == 0 ?
+	// (this can occur with callgraph w/o samples to the binary) but in
+	// this case user must gprof --no-flat-profile whiwh is a bit boring
+	// and result *seems* weirds.
+
 	FILE * fp = op_open_file(gmon_filename.c_str(), "w");
 
 	op_write_file(fp,&hdr, sizeof(gmon_hdr));
@@ -185,7 +190,7 @@ void output_gprof(op_bfd const & abfd, profile_container const & samples,
 
 			if (pos >= histsize) {
 				cerr << "Bogus histogram bin " << pos
-			     << ", larger than " << pos << " !\n";
+				     << ", larger than " << pos << " !\n";
 				continue;
 			}
 	
@@ -210,17 +215,22 @@ void output_gprof(op_bfd const & abfd, profile_container const & samples,
 }
 
 
-void load_samples(op_bfd const & abfd, list<string> const & files,
+void
+load_samples(op_bfd const & abfd, list<profile_sample_files> const & files,
                   string const & image, profile_container & samples)
 {
-	list<string>::const_iterator it = files.begin();
-	list<string>::const_iterator const end = files.end();
+	list<profile_sample_files>::const_iterator it = files.begin();
+	list<profile_sample_files>::const_iterator const end = files.end();
 
 	for (; it != end; ++it) {
+		// we can get call graph w/o any samples to the binary
+		if (it->sample_filename.empty())
+			continue;
 
 		profile_t profile;
 
-		profile.add_sample_file(*it, abfd.get_start_offset());
+		profile.add_sample_file(it->sample_filename,
+		   abfd.get_start_offset());
 
 		check_mtime(abfd.get_filename(), profile.get_header());
 
@@ -229,10 +239,10 @@ void load_samples(op_bfd const & abfd, list<string> const & files,
 }
 
 
-void load_cg(profile_t & cg_db, list<string> const & files)
+void load_cg(profile_t & cg_db, list<profile_sample_files> const & files)
 {
-	list<string>::const_iterator it = files.begin();
-	list<string>::const_iterator const end = files.end();
+	list<profile_sample_files>::const_iterator it = files.begin();
+	list<profile_sample_files>::const_iterator const end = files.end();
 
 	/* the list of non cg files is a super set of the list of cg file
 	 * (module always log a samples to non-cg files before logging
@@ -240,14 +250,12 @@ void load_cg(profile_t & cg_db, list<string> const & files)
 	 * all existing cg files.
 	 */
 	for (; it != end; ++it) {
-		string::size_type prefixend = it->find_last_of("/");
-		string const base = it->substr(0, prefixend + 1);
-		string const end = it->substr(prefixend + 1, string::npos);
-
-		string const cg_file = base + "{cg}/" + end;
-
-		if (op_file_readable(cg_file.c_str()))
-			cg_db.add_sample_file(cg_file, 0);
+		list<string>::const_iterator cit;
+		list<string>::const_iterator const cend = it->cg_files.end();
+		for (cit = it->cg_files.begin(); cit != cend; ++cit) {
+			// FIXME: do we need filtering ?
+			cg_db.add_sample_file(*cit, 0);
+		}
 	}
 }
 

@@ -47,21 +47,29 @@ struct summary {
 	}
 
 	/// add a set of files to a summary
-	size_t add_files(list<string> const & files, size_t pclass);
+	size_t add_files(list<profile_sample_files> const & files,
+			 size_t pclass);
 };
 
 
-size_t summary::add_files(list<string> const & files, size_t pclass)
+size_t summary::
+add_files(list<profile_sample_files> const & files, size_t pclass)
 {
 	size_t subtotal = 0;
 
-	list<string>::const_iterator it = files.begin();
-	list<string>::const_iterator const end = files.end();
+	list<profile_sample_files>::const_iterator it = files.begin();
+	list<profile_sample_files>::const_iterator const end = files.end();
 
 	for (; it != end; ++it) {
-		size_t count = profile_t::sample_count(*it);
+		size_t count = profile_t::sample_count(it->sample_filename);
 		counts[pclass] += count;
 		subtotal += count;
+
+		// FIXME: is it worth (for now yes I expect bugs ...)
+		if (!it->cg_files.empty()) {
+			throw "opreport.cpp::add_files(): unxpected non empty "
+				"cg file set\n";
+		}
 	}
 
 	return subtotal;

@@ -28,13 +28,20 @@ namespace {
 
 /// load merged files for one set of sample files
 void
-populate_from_files(profile_t & profile, list<string> const & files, u32 offset)
+populate_from_files(profile_t & profile,
+   list<profile_sample_files> const & files, u32 offset)
 {
-	list<string>::const_iterator it = files.begin();
-	list<string>::const_iterator const end = files.end();
+	list<profile_sample_files>::const_iterator it = files.begin();
+	list<profile_sample_files>::const_iterator const end = files.end();
 
-	for (; it != end; ++it)
-		profile.add_sample_file(*it, offset);
+	for (; it != end; ++it) {
+		profile.add_sample_file(it->sample_filename, offset);
+		// FIXME: is it worth (for now yes I expect bugs ...)
+		if (!it->cg_files.empty()) {
+			throw "opreport.cpp::add_files(): unxpected non empty "
+				"cg file set\n";
+		}
+	}
 }
 
 }  // anon namespace

@@ -61,6 +61,8 @@ public:
 	bool match(filename_spec const & rhs,
 	           std::string const & binary) const;
 
+	bool is_dependant() const;
+
 private:
 	std::string image;
 	std::string lib_image;

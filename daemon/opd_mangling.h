@@ -12,6 +12,8 @@
 #ifndef OPD_MANGLING_H
 #define OPD_MANGLING_H
 
+#include "odb_hash.h"
+
 struct sfile;
 
 /*
@@ -25,6 +27,7 @@ struct sfile;
  *
  * Returns 0 on success.
  */
-int opd_open_sample_file(struct sfile * sf, int counter, int cg);
+int opd_open_sample_file(samples_odb_t * file, struct sfile * last,
+                         struct sfile * sf, int counter, int cg);
 
 #endif /* OPD_MANGLING_H */

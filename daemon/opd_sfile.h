@@ -24,6 +24,18 @@
 struct kernel_image;
 struct transient;
 
+#define CG_HASH_TABLE_SIZE 16
+
+struct cg_hash_entry {
+	/** cg are indexable by { from, to, counter } */
+	cookie_t from;
+	cookie_t to;
+	unsigned int counter;
+	/** next in the hash slot */
+	struct list_head next;
+	samples_odb_t file;
+};
+
 /**
  * Each set of sample files (where a set is over the
  * physical counter types) will have one of these
@@ -52,8 +64,9 @@ struct sfile {
 	int ignored;
 	/** opened sample files */
 	samples_odb_t files[OP_MAX_COUNTERS];
-	/** opened cg sample files */
-	samples_odb_t cg_files[OP_MAX_COUNTERS];
+	/** hash table of opened cg sample files, this table is hashed
+	 * on counter nr, from cookie and to cookie */
+	struct list_head cg_files[CG_HASH_TABLE_SIZE];
 };
 
 /** clear any sfiles that are for the kernel */

@@ -122,10 +122,11 @@ create_sfile(struct transient const * trans, struct kernel_image * ki)
 	sf->cpu = 0;
 	sf->kernel = ki;
 
-	for (i = 0 ; i < op_nr_counters ; ++i) {
+	for (i = 0 ; i < op_nr_counters ; ++i)
 		odb_init(&sf->files[i]);
-		odb_init(&sf->cg_files[i]);
-	}
+
+	for (i = 0; i < CG_HASH_TABLE_SIZE; ++i)
+		list_init(&sf->cg_files[i]);
 
 	if (separate_thread) {
 		sf->tid = trans->tid;
@@ -196,15 +197,46 @@ lru:
 }
 
 
-static samples_odb_t * get_file(struct sfile * sf, uint counter, int cg)
+static size_t cg_hash(cookie_t from, cookie_t to, size_t counter)
+{
+	/* FIXME: better hash ? */
+	return ((from >> 32) ^ from ^ (to >> 32) ^ to ^ counter) % CG_HASH_TABLE_SIZE;
+}
+
+
+static samples_odb_t * get_file(struct sfile * sf, struct sfile * last,
+                                uint counter, int cg)
 {
 	samples_odb_t * file = &sf->files[counter];
 
-	if (cg)
-		file = &sf->cg_files[counter];
+	if (cg) {
+		struct cg_hash_entry * temp;
+		size_t hash = cg_hash(last->cookie, sf->cookie, counter);
+		struct list_head * pos;
+		list_for_each(pos, &sf->cg_files[hash]) {
+			temp = list_entry(pos, struct cg_hash_entry, next);
+			if (temp->from == last->cookie &&
+			    temp->to == sf->cookie &&
+			    temp->counter == counter)
+				break;
+		}
+
+		if (pos == &sf->cg_files[hash]) {
+			temp = xmalloc(sizeof(struct cg_hash_entry));
+			odb_init(&temp->file);
+			temp->from = last->cookie;
+			temp->to = sf->cookie;
+			temp->counter = counter;
+			list_add(&temp->next, &sf->cg_files[hash]);
+		} else {
+			temp = list_entry(pos, struct cg_hash_entry, next);
+		}
+
+		file = &temp->file;
+	}
 
 	if (!file->base_memory)
-		opd_open_sample_file(sf, counter, cg);
+		opd_open_sample_file(file, last, sf, counter, cg);
 
 	/* Error is logged by opd_open_sample_file */
 	if (!file->base_memory)
@@ -222,11 +254,7 @@ static void sfile_log_arc(struct transient const * trans)
 	uint64_t key;
 	samples_odb_t * file;
 
-	/* FIXME: cross-binary arcs not yet handled */
-	if (trans->last != trans->current)	
-		return;
-
-	file = get_file(trans->current, trans->event, 1);
+	file = get_file(trans->current, trans->last, trans->event, 1);
 
 	/* absolute value -> offset */
 	if (trans->current->kernel)
@@ -279,11 +307,14 @@ void sfile_log_sample(struct transient const * trans)
 	samples_odb_t * file;
 
 	if (trans->tracing == TRACING_ON) {
-		sfile_log_arc(trans);
+		/* can happen if kernel sample falls through the cracks,
+		 * see opd_put_sample() */
+		if (trans->last)
+			sfile_log_arc(trans);
 		return;
 	}
 
-	file = get_file(trans->current, trans->event, 0);
+	file = get_file(trans->current, trans->last, trans->event, 0);
 
 	/* absolute value -> offset */
 	if (trans->current->kernel)
@@ -313,9 +344,18 @@ static void kill_sfile(struct sfile * sf)
 	size_t i;
 
 	/* it's OK to close a non-open odb file */
-	for (i = 0; i < op_nr_counters; ++i) {
+	for (i = 0; i < op_nr_counters; ++i)
 		odb_close(&sf->files[i]);
-		odb_close(&sf->cg_files[i]);
+
+	for (i = 0 ; i < CG_HASH_TABLE_SIZE; ++i) {
+		struct list_head * pos, * pos2;
+		list_for_each_safe(pos, pos2, &sf->cg_files[i]) {
+			struct cg_hash_entry * temp = 
+				list_entry(pos, struct cg_hash_entry, next);
+			odb_close(&temp->file);
+			list_del(pos);
+			free(temp);
+		}
 	}
 
 	list_del(&sf->lru);
@@ -346,9 +386,16 @@ void sfile_sync_files(void)
 
 	list_for_each(pos, &lru_list) {
 		sf = list_entry(pos, struct sfile, lru);
-		for (i = 0; i < op_nr_counters; ++i) {
+		for (i = 0; i < op_nr_counters; ++i)
 			odb_sync(&sf->files[i]);
-			odb_sync(&sf->cg_files[i]);
+
+		for (i = 0 ; i < CG_HASH_TABLE_SIZE; ++i) {
+			struct list_head * pos;
+			list_for_each(pos, &sf->cg_files[i]) {
+				struct cg_hash_entry * temp = 
+				   list_entry(pos, struct cg_hash_entry, next);
+				odb_sync(&temp->file);
+			}
 		}
 	}
 }
@@ -362,9 +409,16 @@ void sfile_close_files(void)
 
 	list_for_each(pos, &lru_list) {
 		sf = list_entry(pos, struct sfile, lru);
-		for (i = 0; i < op_nr_counters; ++i) {
+		for (i = 0; i < op_nr_counters; ++i)
 			odb_close(&sf->files[i]);
-			odb_close(&sf->cg_files[i]);
+
+		for (i = 0 ; i < CG_HASH_TABLE_SIZE; ++i) {
+			struct list_head * pos;
+			list_for_each(pos, &sf->cg_files[i]) {
+				struct cg_hash_entry * temp = 
+				   list_entry(pos, struct cg_hash_entry, next);
+				odb_close(&temp->file);
+			}
 		}
 	}
 }

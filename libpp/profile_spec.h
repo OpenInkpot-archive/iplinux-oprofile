@@ -52,11 +52,11 @@ public:
 	generate_file_list(bool exclude_dependent, bool exclude_cg) const;
 
 	/**
-	 * @param filename  the filename to check
+	 * @param file_spec  the filename specification to check
 	 *
 	 * return true if filename match the spec. PP:3.24 internal loop
 	 */
-	bool match(std::string const & filename) const;
+	bool match(filename_spec const & file_spec) const;
 
 private:
 	profile_spec(extra_images const & extra);

@@ -256,10 +256,8 @@ bool comma_match(comma_list<T> const & cl, generic_spec<T> const & value)
 }
 
 
-bool profile_spec::match(string const & filename) const
+bool profile_spec::match(filename_spec const & spec) const
 {
-	filename_spec spec(filename);
-
 	// PP:3.3 if spec was defined through sample-file: match it directly
 	if (sample_file_set) {
 		return file_spec.match(spec, binary);
@@ -396,11 +394,11 @@ vector<string> filter_session(vector<string> const & session,
 bool valid_candidate(string const & filename, profile_spec const & spec,
 		     bool exclude_dependent, bool exclude_cg)
 {
-	if (spec.match(filename)) {
-		if (exclude_dependent &&
-		    filename.find("{dep}") != string::npos)
-			return false;
-		if (exclude_cg && filename.find("{cg}") != string::npos)
+	if (exclude_cg && filename.find("{cg}") != string::npos)
+		return false;
+	filename_spec file_spec(filename);
+	if (spec.match(file_spec)) {
+		if (exclude_dependent && file_spec.is_dependant())
 			return false;
 		return true;
 	}

@@ -33,7 +33,7 @@
 
 static char const * get_dep_name(struct sfile const * sf)
 {
-	/* don't add a useless depname */
+	/* avoid to call find_cookie(), caller can recover using image_name */
 	if (sf->cookie == sf->app_cookie)
 		return NULL;
 
@@ -49,7 +49,7 @@ static char const * get_dep_name(struct sfile const * sf)
 
 
 static char *
-mangle_filename(struct sfile const * sf, int counter, int cg)
+mangle_filename(struct sfile * last, struct sfile const * sf, int counter, int cg)
 {
 	char * mangled;
 	struct mangle_values values;
@@ -68,8 +68,8 @@ mangle_filename(struct sfile const * sf, int counter, int cg)
 		return NULL;
 
 	values.dep_name = get_dep_name(sf);
-	if (values.dep_name)
-		values.flags |= MANGLE_DEP_NAME;
+	if (!values.dep_name)
+		values.dep_name = values.image_name;
 
 	if (separate_thread) {
 		values.flags |= MANGLE_TGID | MANGLE_TID;
@@ -82,8 +82,15 @@ mangle_filename(struct sfile const * sf, int counter, int cg)
 		values.cpu = sf->cpu;
 	}
 
-	if (cg)
+	if (cg) {
 		values.flags |= MANGLE_CALLGRAPH;
+		if (last->kernel)
+			values.cg_image_name = last->kernel->name;
+		else
+			values.cg_image_name = find_cookie(last->cookie);
+		if (!values.cg_image_name)
+			return NULL;
+	}
 
 	values.event_name = event->name;
 	values.count = event->count;
@@ -95,18 +102,14 @@ mangle_filename(struct sfile const * sf, int counter, int cg)
 }
 
 
-int opd_open_sample_file(struct sfile * sf, int counter, int cg)
+int opd_open_sample_file(samples_odb_t * file, struct sfile * last,
+                         struct sfile * sf, int counter, int cg)
 {
 	char * mangled;
-	samples_odb_t * file;
 	char const * binary;
 	int err;
 
-	file = &sf->files[counter];
-	if (cg)
-		file = &sf->cg_files[counter];
-
-	mangled = mangle_filename(sf, counter, cg);
+	mangled = mangle_filename(last, sf, counter, cg);
 
 	if (!mangled)
 		return EINVAL;
@@ -115,7 +118,7 @@ int opd_open_sample_file(struct sfile * sf, int counter, int cg)
 
 	create_path(mangled);
 
-	sfile_get(sf);
+	sfile_get(sf);	/* locking sf will lock associated cg files too */
 
 retry:
 	err = odb_open(file, mangled, ODB_RDWR, sizeof(struct opd_header));

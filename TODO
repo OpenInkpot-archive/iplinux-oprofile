@@ -12,6 +12,10 @@ for some pointers and/or read HACKING and doc/CodingStyle.
 	Read buffer of 35253 entries.
 	Read buffer of 35220 entries.
 	Unknown code !
+  phe: look like to occur when sampling rate is a bit too high.
+ o when samples rate is too high (< 100000) a lot of cpu buffer overflow occur
+  then daemon get many problems. I dunno exactly what is wrong but in this case
+  a lot of samples file creation fails, many samples are lost due to no mm etc.
 
 0.9 release
 -----------

@@ -55,8 +55,8 @@ void opd_print_24_stats(void)
 	printf("Nr. samples total: %lu\n", opd_24_stats[OPD_SAMPLES]);
 	printf("Nr. notifications: %lu\n", opd_24_stats[OPD_NOTIFICATIONS]);
 	printf("Nr. kernel note buffer overflow: %u\n",
-	       opd_read_fs_int(OP_MOUNT, "note_buffer_overflow"));
+	       opd_read_fs_int(OP_MOUNT, "note_buffer_overflow", 0));
 	printf("Nr. kernel samples buffer overflow: %u\n",
-	       opd_read_fs_int(OP_MOUNT, "buffer_overflow"));
+	       opd_read_fs_int(OP_MOUNT, "buffer_overflow", 0));
 	fflush(stdout);
 }
