@@ -41,6 +41,11 @@ public:
 	void set(std::string const & tag_value);
 
 	/**
+	 * @param image  an image or a libray name given on command line
+	 */
+	void set_image_or_lib_name(std::string const & tag_value);
+
+	/**
 	 * @param str  a "tag:value"
 	 *
 	 * return true if tag is a valid tag
@@ -121,6 +126,8 @@ private:
 	comma_list<pid_t> tid;
 	comma_list<pid_t> tgid;
 	comma_list<int> cpu;
+	// specified by user on command like opreport image1 image2 ...
+	std::vector<std::string> image_or_lib_image;
 
 	/// tree if any tag except sample-file: and binary: are seen
 	bool set_p;

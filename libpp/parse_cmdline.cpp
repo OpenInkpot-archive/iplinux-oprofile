@@ -52,6 +52,12 @@ void parse_cmdline::set(string const & tag_value)
 	(this->*action)(value);
 }
 
+void parse_cmdline::set_image_or_lib_name(string const & str)
+{
+	set_p = true;
+	image_or_lib_image.push_back(str);
+}
+
 
 bool parse_cmdline::is_valid_tag(string const & tag_value)
 {
@@ -219,16 +225,40 @@ bool parse_cmdline::match(string const & filename) const
 		return file_spec.match(spec, binary);
 	}
 
-	if (!image.empty()) {
-		glob_filter filter(image, image_exclude);
-		if (!filter.match(spec.image)) {
-			return false;
+	bool matched_by_image_or_lib_image = false;
+
+	// PP:3.19
+	if (!image_or_lib_image.empty()) {
+		glob_filter f_1(image_or_lib_image, image_exclude);
+		glob_filter f_2(image_or_lib_image, lib_image_exclude);
+		if (f_1.match(spec.image) || f_2.match(spec.lib_image)) {
+			matched_by_image_or_lib_image = true;
 		}
 	}
 
-	if (!lib_image.empty()) {
-		glob_filter filter(lib_image, lib_image_exclude);
-		if (!filter.match(spec.lib_image)) {
+	if (!matched_by_image_or_lib_image) {
+		// PP:3.7 3.8
+		if (!image.empty()) {
+			glob_filter filter(image, image_exclude);
+			if (!filter.match(spec.image)) {
+				return false;
+			}
+		} else if (!image_or_lib_image.empty()) {
+			// image.empty() means match all except if user
+			// specified image_or_lib_image
+			return false;
+		}
+
+		// PP:3.9 3.10
+		if (!lib_image.empty()) {
+			glob_filter filter(lib_image, lib_image_exclude);
+			if (!filter.match(spec.lib_image)) {
+				return false;
+			}
+		} else if (image.empty() && !image_or_lib_image.empty()) {
+			// lib_image empty means match all except if user
+			// specified image_or_lib_image *or* we already
+			// matched this spec through image
 			return false;
 		}
 	}
@@ -283,7 +313,7 @@ parse_cmdline handle_non_options(vector<string> const & args)
 		if (parser.is_valid_tag(args[i])) {
 			parser.set(args[i]);
 		} else if (!substitute_alias(parser, args[i])) {
-			parser.set("image:" + args[i]);
+			parser.set_image_or_lib_name(args[i]);
 		}
 	}
 
