@@ -555,8 +555,6 @@ void output_one_file(istream & in, string const & filename,
 		return;
 	}
 
-	cout << "creating " << out_filename << endl;
-
 	ofstream out(out_filename.c_str());
 	if (!out) {
 		cerr << "unable to open output file "
