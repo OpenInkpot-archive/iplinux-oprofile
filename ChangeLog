@@ -1,3 +1,12 @@
+2003-05-16  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/op_header.cpp: remove cpu_speed checking
+
+	* libutil++/op_bfd.h:
+	* libutil++/op_bfd.cpp: bailout in get_linenr() if binary doesn't
+	  contain any debug info. Speed up my test case opreport --debug-info
+	  -l by 25
+
 2003-05-16  John Levon  <levon@movementarian.org>
 
 	* libutil++/op_bdf.cpp: clean up interesting_symbol

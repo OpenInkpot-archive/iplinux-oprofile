@@ -78,9 +78,6 @@ vma      samples  %           symbol name             app name
   flushed data in cout buffer. It's also not clear if at exit() we have not
   a problem (who is the owner of the buffer and in what order of and cout will
   be destroyed ?)
- o $ opreport --merge=lib -l
-    header cpu speeds are different (1218.37, 1218.39)
-  cpu speed can change slightly at each boot.
 
  o fix John movement on 2.5: odb_insert failure (and message error corrupted ?)
    - haven't been able to reproduce yet, I just get too many files open instead ;)

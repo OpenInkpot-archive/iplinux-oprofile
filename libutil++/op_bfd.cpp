@@ -30,7 +30,8 @@ op_bfd::op_bfd(string const & filename, string_filter const & symbol_filter)
 	:
 	file_size(0),
 	ibfd(0),
-	text_offset(0)
+	text_offset(0),
+	debug_info(false)
 {
 	if (filename.empty()) {
 		cerr << "op_bfd() empty image filename." << endl;
@@ -54,10 +55,17 @@ op_bfd::op_bfd(string const & filename, string_filter const & symbol_filter)
 		exit(EXIT_FAILURE);
 	}
 
-	asection * sect = bfd_get_section_by_name(ibfd, ".text");
+	asection const * sect = bfd_get_section_by_name(ibfd, ".text");
 	if (sect) {
 		text_offset = sect->filepos;
 		cverb << ".text filepos " << hex << text_offset << endl;
+	}
+
+	for (sect = ibfd->sections; sect; sect = sect->next) {
+		if (sect->flags & SEC_DEBUGGING) {
+			debug_info = true;
+			break;
+		}
 	}
 
 	// after creating all symbol it's convenient for user code to access
@@ -248,12 +256,7 @@ u32 op_bfd::sym_offset(symbol_index_t sym_index, u32 num) const
 
 bool op_bfd::have_debug_info() const
 {
-	sec* section;
-	for (section = ibfd->sections; section; section = section->next)
-		if (section->flags & SEC_DEBUGGING)
-			break;
-
-	return section != NULL;
+	return debug_info;
 }
 
 
@@ -262,6 +265,9 @@ bool op_bfd::get_linenr(symbol_index_t sym_idx, uint offset,
 {
 	char const * functionname;
 	bfd_vma pc;
+
+	if (!debug_info)
+		return false;
 
 	char const * cfilename = "";
 	linenr = 0;

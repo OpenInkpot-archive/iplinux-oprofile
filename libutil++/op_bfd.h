@@ -173,6 +173,9 @@ private:
 	// by this value.
 	u32 text_offset;
 
+	/// true if at least one section has (flags & SEC_DEBUGGING) != 0
+	bool debug_info;
+
 	/// temporary container for getting symbols
 	typedef std::list<op_bfd_symbol> symbols_found_t;
 
