@@ -383,6 +383,8 @@ struct transient {
 	cookie_t cookie;
 	cookie_t app_cookie;
 	struct opd_image * image;
+	cookie_t last_cookie;
+	vma_t last_offset;
 	int in_kernel;
 	enum tracing_type tracing;
 	unsigned long event;
@@ -430,6 +432,29 @@ static int enough_remaining(struct transient * trans, size_t size)
 }
 
 
+static void opd_put_arc(struct transient * trans, vma_t eip)
+{
+	struct opd_image * last_image =
+		opd_get_image(trans->last_cookie, trans->app_cookie);
+
+	if (trans->in_kernel > 0) {
+		struct opd_image * app_image = 0;
+
+		/* We can get a NULL image if it's a kernel thread */
+		if (separate_kernel_samples && trans->image)
+			app_image = trans->image->app_image;
+		opd_put_kernel_arc(trans->last_offset, eip,
+		                   trans->event, app_image);
+	} else {
+		verbprintf("ARC: 0x%llx (%s) -> 0x%llx (%s)\n",
+			trans->last_offset, last_image->name,
+			eip, trans->image ? trans->image->name : "kernel");
+	}
+
+	trans->last_offset = eip;
+}
+
+
 static void opd_put_sample(struct transient * trans, vma_t eip)
 {
 	unsigned long event;
@@ -444,18 +469,28 @@ static void opd_put_sample(struct transient * trans, vma_t eip)
 	if (trans->tracing != TRACING_ON)
 		trans->event = event;
 
-	if (trans->tracing == TRACING_START)
-		trans->tracing = TRACING_ON;
-
 	/* There is a small race where this *can* happen, see
 	 * caller of cpu_buffer_reset() in the kernel
 	 */
 	if (trans->in_kernel == -1) {
 		verbprintf("Losing sample at 0x%llx of unknown provenance.\n",
 		           eip);
-		pop_buffer_value(trans);
 		opd_stats[OPD_NO_CTX]++;
 		return;
+	}
+
+	/* if we have an arc, handle it specially */
+	if (trans->tracing == TRACING_ON) {
+		opd_put_arc(trans, eip);
+		trans->last_cookie = trans->cookie;
+		return;
+	}
+
+	/* we want to log the first sample as a normal one */
+	if (trans->tracing == TRACING_START) {
+		trans->last_cookie = trans->cookie;
+		trans->last_offset = eip;
+		trans->tracing = TRACING_ON;
 	}
 
 	opd_stats[OPD_SAMPLES]++;
@@ -548,8 +583,11 @@ static void code_cookie_switch(struct transient * trans)
 		return;
 	}
 
+	trans->last_cookie = trans->cookie;
 	trans->cookie = pop_buffer_value(trans);
+
 	trans->image = opd_get_image(trans->cookie, trans->app_cookie);
+
 	verbprintf("COOKIE_SWITCH to cookie %llx (%s)\n",
 	           trans->cookie, trans->image->name); 
 }
@@ -613,6 +651,8 @@ void opd_process_samples(char const * buffer, size_t count)
 		.remaining = count,
 		.cookie = 0,
 		.app_cookie = 0,
+		.last_cookie = 0,
+		.last_offset = 0,
 		.image = NULL,
 		.in_kernel = -1,
 		.tracing = TRACING_OFF,
@@ -628,8 +668,6 @@ void opd_process_samples(char const * buffer, size_t count)
 
 	while (trans.remaining) {
 		code = pop_buffer_value(&trans);
-
-		verbprintf("start code is %lu\n", code);
 
 		if (!is_escape_code(code)) {
 			opd_put_sample(&trans, code);

@@ -450,6 +450,14 @@ opd_handle_kernel_sample(vma_t eip, u32 counter, struct opd_image * app_image)
 }
  
 
+void
+opd_put_kernel_arc(vma_t from, vma_t to, u32 event, struct opd_image * image)
+{
+	image = (void*)event;
+	verbprintf("ARC: %llx -> %llx (kernel)\n", from, to);
+}
+
+
 void opd_delete_modules(struct opd_image * image)
 {
 	struct list_head * pos;

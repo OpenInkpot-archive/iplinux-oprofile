@@ -19,8 +19,11 @@ struct opd_image;
 void opd_init_kernel_image(void);
 void opd_parse_kernel_range(char const * arg);
 void opd_reread_module_info(void);
-void opd_handle_kernel_sample(vma_t eip, u32 counter,
-			      struct opd_image * app_image);
 void opd_delete_modules(struct opd_image * image);
+
+void
+opd_handle_kernel_sample(vma_t eip, u32 counter, struct opd_image * app_image);
+void
+opd_put_kernel_arc(vma_t from, vma_t to, u32 event, struct opd_image * image);
 
 #endif /* OPD_KERNEL_H */
