@@ -1,6 +1,6 @@
 /**
  * @file filename_spec.cpp
- * Container holding a sample filename splitted into its components
+ * Container holding a sample filename split into its components
  *
  * @remark Copyright 2003 OProfile authors
  * @remark Read the file COPYING
@@ -25,15 +25,13 @@ filename_spec::filename_spec(string const & filename)
 
 
 filename_spec::filename_spec()
-	:
-	image("*"),
-	lib_image("*")
+	: image("*"), lib_image("*")
 {
 }
 
 
 bool filename_spec::match(filename_spec const & rhs,
-			  string const & binary) const
+                          string const & binary) const
 {
 	if (!tid.match(rhs.tid) || !cpu.match(rhs.cpu) ||
 	    !tgid.match(rhs.tgid) || count != rhs.count ||

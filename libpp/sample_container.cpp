@@ -41,6 +41,7 @@ sample_container::samples_iterator sample_container::end() const
 	return samples.end();
 }
 
+
 sample_container::samples_iterator
 sample_container::begin(symbol_entry const * symbol) const
 {
@@ -60,7 +61,7 @@ sample_container::end(symbol_entry const * symbol) const
 
 
 void sample_container::insert(symbol_entry const * symbol,
-			      sample_entry const & sample)
+                              sample_entry const & sample)
 {
 	samples_storage::key_type key(symbol, sample.vma);
 
@@ -119,7 +120,7 @@ sample_entry const * sample_container::find_by_vma(bfd_vma vma) const
 
 unsigned int
 sample_container::accumulate_samples(string const & filename,
-		size_t linenr) const
+                                     size_t linenr) const
 {
 	build_by_loc();
 

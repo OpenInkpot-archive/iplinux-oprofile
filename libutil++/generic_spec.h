@@ -51,7 +51,7 @@ private:
 
 
 /**
- * convert str to a T through an instrigstream but conversion is strict:
+ * convert str to a T through an istringstream but conversion is strict:
  * no space are allowed at begin or end of str.
  * throw invalid_argument if conversion fail.
  */

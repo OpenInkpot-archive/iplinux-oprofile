@@ -1,6 +1,6 @@
 /**
- * @file sample_sample_filename.h
- * Container holding a sample filename splitted into its string components
+ * @file split_sample_filename.h
+ * Split a sample filename into its constituent parts
  *
  * @remark Copyright 2003 OProfile authors
  * @remark Read the file COPYING
@@ -34,13 +34,13 @@ struct split_sample_filename
  * split a sample filename
  * @param filename in: samples filename
  *
- * filename are splited in eight part, the lib_image is optionnal and can
+ * filename is split into eight parts, the lib_image is optionnal and can
  * be empty on successfull call. All other error are fatal. filenames
  * are encoded according to PP:3.19 to PP:3.25
  *
  * all error throw an std::invalid_argument exception
  *
- * return the splited filename
+ * return the split filename
  */
 split_sample_filename split_sample_file(std::string const & filename);
 

@@ -44,12 +44,12 @@ public:
 	 * to record them at symbol level. This is an optimization hint
 	 */
 	profile_container(bool add_zero_samples_symbols, outsymbflag flags,
-			    bool need_details);
+	                  bool need_details);
 
 	~profile_container();
  
 	/**
-	 * add() -  record symbols/samples in the underlined container
+	 * add() -  record symbols/samples in the underlying container
 	 *
 	 * @param profile the samples files container
 	 * @param abfd the associated bfd object
@@ -121,6 +121,7 @@ public:
 	sample_container::samples_iterator begin(symbol_entry const *) const;
 	/// return iterator to the last samples for this symbol
 	sample_container::samples_iterator end(symbol_entry const *) const;
+
 private:
 	/// helper for do_add()
 	void add_samples(profile_t const & profile,
@@ -155,13 +156,15 @@ private:
 	/// since user of profile_container often need it later.
 	unsigned int total_count;
 
-	/// parameters passed to ctor
-	bool add_zero_samples_symbols;
+	/**
+	 * Optimization hints for what information we are going to need,
+	 * see the explanation in profile_container()	
+	 */
+	//@{
 	outsymbflag flags;
-
-	/// optimization hint to add_samples, true if we need to record
-	/// at symbol level or vma level
+	bool add_zero_samples_symbols;
 	bool need_details;
+	//@}
 };
 
 /**

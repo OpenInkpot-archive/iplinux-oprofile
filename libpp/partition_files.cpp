@@ -26,16 +26,19 @@ unmergeable_profile::unmergeable_profile(std::string const & event_,
 {
 }
 
+
 bool unmergeable_profile::operator<(unmergeable_profile const & rhs) const
 {
 	return event < rhs.event || (event == rhs.event && count < rhs.count);
 }
+
 
 ostream & operator<<(ostream & out, unmergeable_profile const & lhs)
 {
 	out << lhs.event << " " << lhs.count;
 	return out;
 }
+
 
 vector<unmergeable_profile> merge_profile(list<string> const & files)
 {
@@ -58,6 +61,7 @@ vector<unmergeable_profile> merge_profile(list<string> const & files)
 	return result;
 }
 
+
 /**
  * merge_compare - comparator used to partition a set of samples filename
  * into equivalence class.  The equivalence relation equiv(a, b) is given by
@@ -72,11 +76,13 @@ private:
 	merge_option merge_by;
 };
 
+
 merge_compare::merge_compare(merge_option const & merge_by_)
 	:
 	merge_by(merge_by_)
 {
 }
+
 
 bool merge_compare::operator()(string const & lhs_, string const & rhs_) const
 {
@@ -114,6 +120,7 @@ bool merge_compare::operator()(string const & lhs_, string const & rhs_) const
 	return false;
 }
 
+
 partition_files::partition_files(list<string> const & filename,
 				 merge_option const & merge_by)
 {
@@ -144,10 +151,12 @@ partition_files::partition_files(list<string> const & filename,
 	}
 }
 
+
 size_t partition_files::nr_set() const
 {
 	return filenames.size();
 }
+
 
 partition_files::filename_set const & partition_files::set(size_t index) const
 {

@@ -1,6 +1,6 @@
 /**
- * @file sample_sample_filename.h
- * Container holding a sample filename splitted into its string components
+ * @file split_sample_filename.h
+ * Split a sample filename into its constituent parts
  *
  * @remark Copyright 2003 OProfile authors
  * @remark Read the file COPYING
@@ -19,33 +19,36 @@ using namespace std;
 
 namespace {
 
-
 // PP:3.19 event_name.count.unitmask.tgid.tid.cpu
 split_sample_filename split_event_spec(string const & event_spec)
 {
-	size_t const nr_spec = 6;
+	typedef vector<string> parts_type;
+	typedef parts_type::size_type size_type;
 
-	vector<string> temp;
-	separate_token(temp, event_spec, '.');
-	if (temp.size() != nr_spec) {
+	size_type const nr_parts = 6;
+
+	parts_type parts;
+	separate_token(parts, event_spec, '.');
+
+	if (parts.size() != nr_parts) {
 		throw invalid_argument("split_event_spec(): bad event specification: " + event_spec);
 	}
 
-	for (size_t i = 0; i < nr_spec ; ++i) {
-		if (temp[i].empty()) {
+	for (size_type i = 0; i < nr_parts ; ++i) {
+		if (parts[i].empty()) {
 			throw invalid_argument("split_event_spec(): bad event specification: " + event_spec);
 		}
 	}
 
 	split_sample_filename result;
 
-	int i = 0;
-	result.event = temp[i++];
-	result.count = temp[i++];
-	result.unitmask = temp[i++];
-	result.tgid = temp[i++];
-	result.tid = temp[i++];
-	result.cpu = temp[i++];
+	size_type i = 0;
+	result.event = parts[i++];
+	result.count = parts[i++];
+	result.unitmask = parts[i++];
+	result.tgid = parts[i++];
+	result.tid = parts[i++];
+	result.cpu = parts[i++];
 
 	return result;
 }

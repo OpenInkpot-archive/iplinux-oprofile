@@ -29,7 +29,6 @@ struct merge_option {
 
 /**
  * unmergeable profile specification are those with distinct event/count
- *
  */
 struct unmergeable_profile {
 	std::string event;
@@ -52,6 +51,7 @@ std::vector<unmergeable_profile> merge_profile(std::list<std::string> const & fi
 std::ostream & operator<<(std::ostream & out, unmergeable_profile const & lhs);
 
 
+/// FIXME: doc
 class partition_files {
 
 public:

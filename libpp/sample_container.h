@@ -30,8 +30,18 @@ public:
 	typedef std::map<sample_index_t, sample_entry> samples_storage;
 	typedef samples_storage::const_iterator samples_iterator;
 
+	/// return iterator to the first samples for this symbol
+	samples_iterator begin(symbol_entry const *) const;
+	/// return iterator to the last samples for this symbol
+	samples_iterator end(symbol_entry const *) const;
+
+	/// return iterator to the first samples
+	samples_iterator begin() const;
+	/// return iterator to the last samples
+	samples_iterator end() const;
+
 	/// insert a sample entry by creating a new entry or by cumulating
-	/// samples into an existing once. Can only be done before any lookups
+	/// samples into an existing one. Can only be done before any lookups
 	void insert(symbol_entry const * symbol, sample_entry const &);
 
 	/// return nr of samples in the given filename
@@ -43,16 +53,6 @@ public:
 
 	/// return the sample entry for the given VMA if any
 	sample_entry const * find_by_vma(bfd_vma vma) const;
-
-	/// return iterator to the first samples for this symbol
-	samples_iterator begin(symbol_entry const *) const;
-	/// return iterator to the last samples for this symbol
-	samples_iterator end(symbol_entry const *) const;
-
-	/// return iterator to the first samples
-	samples_iterator begin() const;
-	/// return iterator to the last samples
-	samples_iterator end() const;
 
 private:
 	/// build the symbol by file-location cache

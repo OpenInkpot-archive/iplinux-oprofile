@@ -36,8 +36,9 @@ public:
 	size_type size() const;
 
 	/**
-	 * Insert a new symbol. If the symbol already exist cumulate count
-	 * Return the newly created symbol or the existing one. This pointer
+	 * Insert a new symbol. If the symbol already exists in the container,
+	 * then the sample counts are accumulated.
+	 * Returns the newly created symbol or the existing one. This pointer
 	 * remains valid during the whole life time of a symbol_container
 	 * object and is warranted unique according to less_symbol comparator.
 	 * Can only be done before any file-location based lookups, since the

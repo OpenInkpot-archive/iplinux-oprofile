@@ -1,6 +1,6 @@
 /**
  * @file filename_spec.h
- * Container holding a sample filename splitted into its components
+ * Container holding a sample filename split into its components
  *
  * @remark Copyright 2003 OProfile authors
  * @remark Read the file COPYING
@@ -56,7 +56,8 @@ public:
 	 * This operation is not commutative. First part of PP:3.24
 	 */
 	bool match(filename_spec const & rhs,
-		   std::string const & binary) const;
+	           std::string const & binary) const;
+
 private:
 	std::string image;
 	std::string lib_image;
