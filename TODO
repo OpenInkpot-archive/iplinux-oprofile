@@ -6,12 +6,6 @@ for some pointers and/or read HACKING and doc/CodingStyle.
 Before merging with trunk
 -------------------------
 
-[moz@lambent oprofile-pp]$ pp/opreport --include-dependent | more
-
-odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/cat/CPU_CLK_UNHALTED.50000.0.all.all.all to 2208 length, cause : Invalid argument
-
-   - race with opcontrol --shutdown on odb_open() ?
-
  o we show a header but not column headers for image report
  o write the man page and xml doc (i'll do this right at the end - john)
  o we show "app name" when --separate=none. Don't
