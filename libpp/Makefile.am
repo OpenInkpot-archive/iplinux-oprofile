@@ -11,12 +11,14 @@ noinst_LIBRARIES = libpp.a
 libpp_a_SOURCES = \
 	filename_spec.cpp \
 	filename_spec.h \
+	format_flags.h \
 	format_output.cpp \
 	format_output.h \
 	locate_images.cpp \
 	locate_images.h \
 	op_header.cpp \
 	op_header.h \
+	opp_symbol.h \
 	partition_files.h \
 	partition_files.cpp \
 	profile.cpp \
@@ -32,6 +34,4 @@ libpp_a_SOURCES = \
 	symbol_container.cpp \
 	symbol_container.h \
 	symbol_functors.cpp \
-	symbol_functors.h \
-	outsymbflag.h \
-	opp_symbol.h
+	symbol_functors.h

@@ -16,7 +16,6 @@
 #include <vector>
 
 #include "opp_symbol.h"
-#include "outsymbflag.h"
 #include "utility.h"
 #include "op_bfd.h"
 #include "sample_container.h"

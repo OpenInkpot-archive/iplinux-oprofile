@@ -1,5 +1,15 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* libpp/Makefile.am:
+	* libpp/outsymbflags.h:
+	* libpp/format_flags.h:
+	* libpp/profile_container.h:
+	* libpp/format_output.h:
+	* libpp/format_output.cpp:
+	* pp/opreport.cpp: rename outsymbflags to format_flags
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* profile_container.h:
 	* profile_container.cpp:
 	* opannotate.cpp: clean up select_filename() in a

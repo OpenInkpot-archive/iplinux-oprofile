@@ -1,5 +1,5 @@
 /**
- * @file outsymbflag.h
+ * @file format_flags.h
  * output options
  *
  * @remark Copyright 2002 OProfile authors
@@ -9,8 +9,8 @@
  * @author Philippe Elie
  */
 
-#ifndef OUTSYMBFLAG_H
-#define OUTSYMBFLAG_H
+#ifndef FORMAT_FLAGS_H
+#define FORMAT_FLAGS_H
 
 // FIXME
 
@@ -19,7 +19,7 @@
  * order of field output: lower enum tag ==> comes first in output order
  * Note than changing value of enum is not safe.
  */
-enum outsymbflag {
+enum format_flags {
 	osf_none = 0,
 	osf_vma = 1 << 0,
 	/// this four field can be repeated on output for each counter.
@@ -45,4 +45,4 @@ enum outsymbflag {
 	osf_immutable_field = osf_symb_name + osf_image_name + osf_app_name
 };
 
-#endif // OUTSYMBFLAG_H
+#endif // FORMAT_FLAGS_H

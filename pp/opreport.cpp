@@ -296,18 +296,18 @@ void output_symbols(profile_container const & samples)
 
 	// FIXME: we probably don't want to show application name if
 	// we report samples about only one application
-	outsymbflag flags = outsymbflag(osf_vma | osf_nr_samples | osf_percent);
-	flags = outsymbflag(flags | osf_symb_name | osf_app_name);
+	format_flags flags = format_flags(osf_vma | osf_nr_samples | osf_percent);
+	flags = format_flags(flags | osf_symb_name | osf_app_name);
 	if (options::accumulated) {
-		flags = outsymbflag(flags | osf_nr_samples_cumulated);
-		flags = outsymbflag(flags | osf_percent_cumulated);
+		flags = format_flags(flags | osf_nr_samples_cumulated);
+		flags = format_flags(flags | osf_percent_cumulated);
 	}
 
 	if (options::include_dependent && !options::merge_by.lib)
-		flags = outsymbflag(flags | osf_image_name);
+		flags = format_flags(flags | osf_image_name);
 
 	if (options::debug_info)
-		flags = outsymbflag(flags | osf_linenr_info);
+		flags = format_flags(flags | osf_linenr_info);
 
 	out.add_format(flags);
 

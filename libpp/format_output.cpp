@@ -56,9 +56,9 @@ formatter::formatter(profile_container const & profile_)
 }
 
  
-void formatter::add_format(outsymbflag flag)
+void formatter::add_format(format_flags flag)
 {
-	flags = static_cast<outsymbflag>(flags | flag);
+	flags = static_cast<format_flags>(flags | flag);
 }
 
 
@@ -118,7 +118,7 @@ void formatter::show_short_filename()
 // field flags)
 size_t formatter::output_field(ostream & out, symbol_entry const & symbol,
 				 sample_entry const & sample,
-				 outsymbflag fl, size_t padding)
+				 format_flags fl, size_t padding)
 {
 	out << string(padding, ' ');
 	padding = 0;
@@ -135,7 +135,7 @@ size_t formatter::output_field(ostream & out, symbol_entry const & symbol,
 }
 
  
-size_t formatter::output_header_field(ostream & out, outsymbflag fl,
+size_t formatter::output_header_field(ostream & out, format_flags fl,
 					size_t padding)
 {
 	out << string(padding, ' ');
@@ -192,7 +192,7 @@ void formatter::do_output(ostream & out, symbol_entry const & symb,
 
 	size_t temp_flag = flags;
 	for (size_t i = 1 ; temp_flag != 0 ; i <<= 1) {
-		outsymbflag fl = static_cast<outsymbflag>(i);
+		format_flags fl = static_cast<format_flags>(i);
 		if (flags & fl) {
 			if (hide_immutable_field && (fl & osf_immutable_field)) {
 				field_description const & field(format_map[fl]);
@@ -226,7 +226,7 @@ void formatter::output_header(ostream & out)
 	size_t temp_flag = flags;
 	for (size_t i = 1 ; temp_flag != 0 ; i <<= 1) {
 		if ((temp_flag & i) != 0) {
-			outsymbflag fl = static_cast<outsymbflag>(i);
+			format_flags fl = static_cast<format_flags>(i);
 			padding = output_header_field(out, fl, padding);
 			temp_flag &= ~i;
 		}

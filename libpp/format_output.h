@@ -19,7 +19,7 @@
 #include <vector>
 #include <iosfwd>
 
-#include "outsymbflag.h"
+#include "format_flags.h"
 #include "opp_symbol.h"
 
 class profile_container;
@@ -35,7 +35,7 @@ public:
 	formatter(profile_container const & profile);
 
 	/// convenience to add output options flags w/o worrying about cast
-	void add_format(outsymbflag flag);
+	void add_format(format_flags flag);
 
 	/** output a vector of symbols to out according to the output format
 	 * specifier previously set by call(s) to add_format() */
@@ -92,7 +92,7 @@ private:
 		fct_format formatter;
 	};
  
-	typedef std::map<outsymbflag, field_description> format_map_t;
+	typedef std::map<format_flags, field_description> format_map_t;
 
 	/// stores functors for doing actual formatting
 	format_map_t format_map;
@@ -115,14 +115,14 @@ private:
 	size_t output_field(std::ostream & out,
 	                   symbol_entry const & symbol,
 			   sample_entry const & sample,
-			   outsymbflag fl, size_t padding);
+			   format_flags fl, size_t padding);
  
 	/// returns the nr of char needed to pad this field
-	size_t output_header_field(std::ostream & out, outsymbflag fl,
+	size_t output_header_field(std::ostream & out, format_flags fl,
 				 size_t padding);
 
 	/// formatting flags set
-	outsymbflag flags;
+	format_flags flags;
  
 	/// container we work from
 	profile_container const & profile;
