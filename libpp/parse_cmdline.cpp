@@ -275,9 +275,10 @@ static bool substitute_alias(parse_cmdline & /*parser*/,
 }
 
 
-void handle_non_options(parse_cmdline & parser, 
-			vector<string> const & args)
+parse_cmdline handle_non_options(vector<string> const & args)
 {
+	parse_cmdline parser;
+
 	for (size_t i = 0 ; i < args.size() ; ++i) {
 		if (parser.is_valid_tag(args[i])) {
 			parser.set(args[i]);
@@ -287,4 +288,6 @@ void handle_non_options(parse_cmdline & parser,
 	}
 
 	parser.validate();
+
+	return parser;
 }
