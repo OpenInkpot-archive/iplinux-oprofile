@@ -92,27 +92,36 @@ static unsigned int const percent_width = percent_int_width + percent_fract_widt
 
 
 /**
- * convert str to a T through an istringstream but conversion is strict:
- * no space are allowed at begin or end of str.
- * throw invalid_argument if conversion fail.
+ * convert str to a T through an istringstream.
+ * No leading or trailing whitespace is allowed.
+ *
+ * Throws invalid_argument if conversion fail.
+ *
+ * Note that this is not as foolproof as boost's lexical_cast
  */
 template <class T>
-T strict_convert(std::string const & str)
+T lexical_cast_no_ws(std::string const & str)
 {
 	T value;
 
 	std::istringstream in(str);
-	// this doesn't work properly for 2.95/2.91 so with these compiler
-	// " 33" is accepted as valid input, no big deal.
+	// this doesn't work properly for 2.95/2.91 so with these
+	// compiler " 33" is accepted as valid input, no big deal.
 	in.unsetf(std::ios::skipws);
+
 	in >> value;
-	if (in.fail())
-		throw std::invalid_argument("strict_convert<T>::set(\""+ str +"\")");
+
+	if (in.fail()) {
+		throw std::invalid_argument("lexical_cast<T>(\""+ str +"\")");
+	}
+
 	// we can't check eof here, eof is reached at next read.
+	// FIXME: dubious code, at least we should put back the char
 	char ch;
 	in >> ch;
-	if (!in.eof())
-		throw std::invalid_argument("strict_convert<T>::set(\""+ str +"\")");
+	if (!in.eof()) {
+		throw std::invalid_argument("lexical_cast<T>(\""+ str +"\")");
+	}
 
 	return value;
 }

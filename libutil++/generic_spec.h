@@ -68,7 +68,7 @@ void generic_spec<T>::set(std::string const & str)
 	}
 
 	is_all = false;
-	data = strict_convert<T>(str);
+	data = lexical_cast_no_ws<T>(str);
 }
 
 
