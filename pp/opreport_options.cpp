@@ -73,7 +73,7 @@ popt::option options_array[] = {
 		     "count or percent"),
 	popt::option(options::include_dependent, "include-dependent", 'n',
 		     "include libs, modules etc."),
-	popt::option(options::hide_dependent, "hide-dependent", 'n',
+	popt::option(options::hide_dependent, "hide-dependent", 'h',
 		     "include libs, modules in %-age count but hide them in output"),
 	popt::option(sort_by, "sort", 's',
 		     "sort by", "vma,sample,symbol,debug,image"),
@@ -274,6 +274,8 @@ void get_options(int argc, char const * argv[])
 	cverb << "Matched sample files: " << sample_files.size() << endl;
 	copy(sample_files.begin(), sample_files.end(),
 	     ostream_iterator<string>(cverb, "\n"));
+
+	// FIXME: crash here if we do opreport /usr/bin/doesntexist
 
 	vector<unmergeable_profile>
 		unmerged_profile = merge_profile(sample_files);
