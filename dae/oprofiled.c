@@ -603,6 +603,11 @@ void opd_do_samples(const struct op_sample *opd_buf, size_t count)
 	for (i=0; i < count/sizeof(struct op_sample); i++) {
 		verbprintf("%.6u: EIP: 0x%.8x pid: %.6d count: %.6d\n", i, opd_buf[i].eip, opd_buf[i].pid, opd_buf[i].count);
 
+		// happens during initial startup whilst the
+		// hash table is being filled
+		if (opd_buf[i].eip == 0)
+			continue;
+ 
 		if (ignore_myself && opd_buf[i].pid == mypid)
 			continue;
 
