@@ -228,31 +228,38 @@ out:
  * counter and set up memory mappings for it.
  * image->kernel and image->name must have meaningful
  * values.
- * FIXME: make same "return int" change as in opd_open_sample_file
  */
-void opd_open_cg_file(struct opd_image * image, int counter)
+int opd_open_cg_file(struct opd_image * image, int counter)
 {
 	char * mangled;
 	samples_ocg_t * sample_file;
 	struct opd_header * header;
-	int rc;
+	int err;
 
 	sample_file = &image->cg_files[counter];
 
-	mangled = opd_mangle_filename(image, counter, 1, 1);
+	mangled = opd_mangle_filename(image, counter, 1);
 
 	verbprintf("Opening \"%s\"\n", mangled);
 
-	rc = ocg_open(sample_file, mangled, ODB_RDWR, sizeof(struct opd_header));
-	if (rc != EXIT_SUCCESS) {
+	create_path(mangled);
+
+	err = ocg_open(sample_file, mangled, ODB_RDWR, sizeof(struct opd_header));
+
+	/* This can naturally happen when racing against opcontrol --reset. */
+	if (err != EXIT_SUCCESS) {
 		fprintf(stderr, "%s", sample_file->err_msg);
-		exit(EXIT_FAILURE);
+		fprintf(stderr, "%s", sample_file->err_msg);
+		ocg_clear_error(sample_file);
+		goto out;
 	}
+
 	if (!sample_file->base_memory) {
+		err = errno;
 		fprintf(stderr,
 			"oprofiled: ocg_open() of image sample file \"%s\" failed: %s\n",
 			mangled, strerror(errno));
-		goto err;
+		goto out;
 	}
 
 	header = sample_file->base_memory;
@@ -271,8 +278,9 @@ void opd_open_cg_file(struct opd_image * image, int counter)
 	header->separate_lib_samples = separate_lib_samples;
 	header->separate_kernel_samples = separate_kernel_samples;
 
-err:
+out:
 	free(mangled);
+	return err;
 }
 
 

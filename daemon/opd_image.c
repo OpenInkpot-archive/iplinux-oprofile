@@ -263,8 +263,7 @@ void opd_put_cg_sample(struct opd_image * image, vma_t from, vma_t to, int count
 	cg_file = &image->cg_files[counter];
 
 	if (!cg_file->base_memory) {
-		opd_open_cg_file(image, counter);
-		if (!cg_file->base_memory) {
+		if (opd_open_cg_file(image, counter)) {
 			/* opd_open_cg_file output an error message */
 			return;
 		}
