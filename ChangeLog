@@ -1,3 +1,67 @@
+2004-01-18  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libop/op_sample_file.h: with cg file we need to field is_kernel.
+	* daemon/opd_events.c:
+	* daemon/opd_events.h:
+	* daemon/opd_mangling.c:
+	* daemon/liblegacy/opd_sample_files.c: handle cg_to_is_kernel
+
+	* pp/populate.cpp:
+	* pp/populate.h:
+	* pp/image_errors.cpp:
+	* pp/image_errors.h: move this four files to libpp
+
+	* libpp/populate.cpp: we can get empty filename now, ignore them.
+	* libpp/image_error.h: remove this file by moving its contents ...
+	* libpp/image_errors.h here (this two filenames was confusing)
+
+	* libpp/Makefile.am: update according to files move.
+
+	* libpp/arrange_profiles.h:
+	* libpp/arrange_profiles.cpp: Fix find_profile_sample_files(), I was
+	  creating to many profile_sample_files. Add a bunch of operator<<.
+
+	* libpp/callgraph_container.h:
+	* libpp/callgraph_container.cpp:
+
+	* libpp/filename_spec.h: add cg_filename member
+	* libpp/filename_spec.cpp: handle cg_filename, Fix an error in
+	  is_dependant(), I'm a bit nervous about this predicate...
+
+	* libpp/locate_images.h:
+	* libpp/locate_images.cpp: #include fix
+
+	* libpp/parse_filename.cpp: Fix cg filename handling to not trigger
+	  some invalid_filename error with cg filename.
+
+	* libpp/profile.h:
+	* libpp/profile.cpp: we can no longer assume we use u32, so use
+	  odb_key_t in public interface. Add operator== acting on iterator
+
+	* libpp/symbol_container.cpp:
+	* libpp/symbol_container.h: add find(symbol const &);
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp: add a public interface to iterate over
+	  all smybols and to find a specific symbol
+
+	* libpp/symbol.h: typo, missing include
+
+	* pp/Makefile.am: handle opstack various new files and files move to
+	  libpp.
+
+	* pp/opreport.cpp:
+	* pp/opannotate.cpp: pass symbol_filter as params to populate()
+
+	* pp/opannotate_options.cpp: add verbose output of profile_classes
+	* pp/opgprof_options.cpp:
+	* pp/opreport_options.cpp:
+
+	* pp/opstack.cpp:
+	* pp/opstack_options.cpp:
+	* pp/opstack_options.h: new callgraph utility far to be complete but
+	  enough to start to play with callgraph.
+
+
 2004-01-04  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libutil/op_fileio.c: op_write_file(): allow to write zero byte.

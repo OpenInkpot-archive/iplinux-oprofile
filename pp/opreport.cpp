@@ -423,7 +423,7 @@ int opreport(vector<string> const & non_options)
 	list<inverted_profile>::iterator const end = iprofiles.end();
 
 	for (; it != end; ++it)
-		populate_for_image(samples, *it);
+		populate_for_image(samples, *it, options::symbol_filter);
 
 	output_header();
 

@@ -66,6 +66,7 @@ public:
 private:
 	std::string image;
 	std::string lib_image;
+	std::string cg_image;
 	std::string event;
 	int count;
 	unsigned int unitmask;

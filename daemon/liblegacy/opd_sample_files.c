@@ -142,7 +142,7 @@ retry:
 	}
 
 	fill_header(sfile->sample_file.base_memory, counter,
-	            image->kernel, image->mtime);
+	            image->kernel, 0, image->mtime);
 
 out:
 	free(mangled);

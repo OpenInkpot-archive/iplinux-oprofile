@@ -74,7 +74,7 @@ public:
 	 * return an iterator pair to [start, end) range
 	 */
 	iterator_pair
-	samples_range(unsigned int start, unsigned int end) const;
+	samples_range(odb_key_t start, odb_key_t end) const;
 
 	/// return a pair of iterator for all samples
 	iterator_pair samples_range() const;
@@ -145,6 +145,9 @@ public:
 
 	bool operator!=(const_iterator const & rhs) const {
 		return it != rhs.it;
+	}
+	bool operator==(const_iterator const & rhs) const {
+		return it == rhs.it;
 	}
 
 private:

@@ -138,8 +138,16 @@ parsed_filename parse_filename(string const & filename)
 		result.lib_image += "/" + path[i];
 	}
 
-	if (i != path.size())
+	if (i != path.size()) {
 		++i;  // skip "{cg}"
+		if (i == path.size() ||
+		    (path[i] != "{kern}" && path[i] != "{root}")) {
+			throw invalid_argument(
+				"parse_filename() invalid filename: " +
+				filename);
+		}
+		++i; // skip "{root}" or "{kern}"
+	}
 	for (; i < path.size(); ++i) {
 		result.cg_image += "/" + path[i];
 	}

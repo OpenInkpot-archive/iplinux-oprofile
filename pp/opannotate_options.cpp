@@ -122,6 +122,8 @@ void handle_options(vector<string> const & non_options)
 
 	classes = arrange_profiles(sample_files, merge_by);
 
+	cverb << "profile_classes:\n" << classes << endl;
+
 	if (classes.v.empty()) {
 		cerr << "error: no sample files found: profile specification "
 		     "too strict ?" << endl;

@@ -15,8 +15,9 @@
 #include <string>
 #include <list>
 #include <vector>
+#include <iosfwd>
 
-#include "image_error.h"
+#include "image_errors.h"
 
 /**
  * store merging options options used to classify profiles
@@ -114,9 +115,6 @@ struct profile_class {
 	profile_template ptemplate;
 };
 
-bool operator<(profile_class const & lhs,
-               profile_class const & rhs);
-
 
 struct profile_classes {
 	/**
@@ -135,6 +133,14 @@ struct profile_classes {
 	/// the actual classes
 	std::vector<profile_class> v;
 };
+
+
+std::ostream & operator<<(std::ostream &, profile_sample_files const &);
+std::ostream & operator<<(std::ostream &, profile_dep_set const &);
+std::ostream & operator<<(std::ostream &, profile_set const &);
+std::ostream & operator<<(std::ostream &, profile_template const &);
+std::ostream & operator<<(std::ostream &, profile_class const &);
+std::ostream & operator<<(std::ostream &, profile_classes const &);
 
 
 /**
@@ -188,7 +194,7 @@ struct inverted_profile {
 	std::string image;
 
 	/// an error found in reading the image
-	image_error error;
+	mutable image_error error;
 
 	/// all sample files with data for the above image
 	std::vector<image_group_set> groups;

@@ -144,6 +144,7 @@ retry:
 		binary = sf->kernel->name;
 
 	fill_header(file->base_memory, counter, !!sf->kernel,
+		    last ? !!last->kernel : 0,
 	            binary ? op_get_mtime(binary) : 0);
 
 out:

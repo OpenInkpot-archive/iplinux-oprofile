@@ -60,6 +60,8 @@ bool try_merge_profiles(profile_spec const & spec, bool exclude_dependent)
 	profile_classes classes
 		= arrange_profiles(sample_files, merge_by);
 
+	cverb << "profile_classes:\n" << classes << endl;
+
 	size_t nr_classes = classes.v.size();
 
 	list<inverted_profile> iprofiles
