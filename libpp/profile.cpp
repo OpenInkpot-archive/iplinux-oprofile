@@ -29,7 +29,6 @@ profile_t::profile_t(string const & sample_file, u32 offset)
 	: start_offset(0)
 {
 	build_ordered_samples(sample_file);
-	start_offset = offset;
 
 	if (!get_header().is_kernel)
 		return;

@@ -1,7 +1,11 @@
 2003-05-07  John Levon  <levon@movementarian.org>
 
-	* profile.h:
-	* profile.cpp: remove sample_filename member,
+	* libpp/profile.cpp: fix stupid error in last commit
+
+2003-05-07  John Levon  <levon@movementarian.org>
+
+	* libpp/profile.h:
+	* libpp/profile.cpp: remove sample_filename member,
 	bogus old spurious check, set_start_offset().
 
 	* libpp/profile_container.cpp:
