@@ -152,7 +152,7 @@ string const format_double(double value, size_t int_width, size_t fract_width)
 		os.setf(ios::scientific, ios::floatfield);
 		os << setw(int_width + fract_width + 1)
 		   // - 3 to count exponent part
-		   << setprecision(fract_width-3) << value;
+		   << setprecision(fract_width - 3) << value;
 	}
 
 	return os.str();
