@@ -88,6 +88,7 @@ vma      samples  cum. samples  %           cum. %     symbol name             i
  o must we do setrlimit(RLIMIT_NOFILE, ...) for daemon ? Isn't already limited
   by the kernel itself ?
  o allow --ctr0-event to take event numbers. (is it worth ?)
+ o when we dump stats for oprofiled, dump kernel-side values too (for 2.5)
  o better treatment of section /wo symbol, actually we rely on _init being
   the first symbol in the first CODE section, we would rather lookup all CODE
   section and create a symbol from the start of the section to the fist symbol
