@@ -30,6 +30,15 @@
  * any left over command line arguments in the add_params vector. Note
  * that the template parameter denotes the type of the option argument.
  *
+ * When the template parameter type is bool, option starting with "no-" prefix
+ * are implicitely considered as negated before writing the associated bool so
+ * this will work as expected:
+ * \code
+ * bool demangle;
+ * popt::option(demangle, "demangle", 'd', "demangle C++ symbols"),
+ * popt::option(demangle, "no-demangle", '\0', "don't demangle C++ symbols"),
+ * \endcode
+ *
  * @remark Copyright 2002 OProfile authors
  * @remark Read the file COPYING
  *

@@ -47,6 +47,8 @@ public:
 	 * post_process - perform any necessary post-processing
 	 */
 	virtual void post_process() {}
+protected:
+	char const * option_name;
 };
 
 /** the popt array singleton options */
@@ -282,9 +284,11 @@ option::option(vector<string> & value,
 {
 }
 
-option_base::option_base(char const * option_name, char short_name,
+option_base::option_base(char const * option_name_, char short_name,
 			 char const * help_str, char const * arg_help_str,
 			 void * data, int popt_flags)
+	:
+	option_name(option_name_)
 {
 	poptOption opt = { option_name, short_name, popt_flags,
 			     data, 0, help_str, arg_help_str};
@@ -307,7 +311,12 @@ option_imp<void>::option_imp(bool & value_,
 
 void option_imp<void>::post_process()
 {
-	value = popt_value != 0;
+	if (popt_value) {
+		if (is_prefix(option_name, "no-"))
+			value = !popt_value;
+		else 
+			value = popt_value;
+	}
 }
 
 option_imp<int>::option_imp(int & value, char const * option_name,

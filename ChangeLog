@@ -1,3 +1,35 @@
+2003-04-18  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libopt++/popt_options.cpp: allow "no-" prefix to long option name
+	  implicitely specify the value must be negated
+	* libopt++/popt_options.cpp: update doxygen documentation
+
+	* libpp/format_output.h: missing #include
+	* libpp/format_output.cpp: space + minor change
+
+	* pp/opannotate_options.h:
+	* pp/opannotate_options.cpp:
+	* pp/opdiff_options.h:
+	* pp/opdiff_options.cpp:
+	* pp/opgprof_options.h:
+	* pp/opgprof_options.cpp:
+	* pp/opreport_options.h:
+	* pp/opreport_options.cpp:
+	* pp/opsummary_options.h:
+	* pp/opsummary_options.cpp: new squeleton file
+
+	* pp/opannotate.cpp:
+	* pp/opdiff.cpp:
+	* pp/opgprof.cpp:
+	* pp/opreport.cpp:
+	* pp/opsummary.cpp: update to handle options
+
+	* pp/common_option.cpp: follow more closely pp_interface
+
+	* pp/opsummary_options.cpp: start to handle opsummary option
+
+	* pp/Makefile.am: update
+
 2003-04-17  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libpp/format_output.h:

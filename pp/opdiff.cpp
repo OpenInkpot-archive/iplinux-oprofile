@@ -11,15 +11,19 @@
 
 #include <iostream>
 
-#include "common_option.h"
+#include "opdiff_options.h"
 
 using namespace std;
 
-int opdiff(int /*argc*/, char const * /*argv*/[])
+
+int opdiff(int argc, char const * argv[])
 {
+	get_options(argc, argv);
+
 	cerr << "N/A\n";
 	return 0;
 }
+
 
 int main(int argc, char const * argv[])
 {

@@ -67,7 +67,7 @@ output_option const * find_option(char ch)
 
  
 namespace format_output {
- 
+
 outsymbflag parse_format(string const & option)
 {
 	size_t flag = 0;
@@ -81,9 +81,10 @@ outsymbflag parse_format(string const & option)
 	return static_cast<outsymbflag>(flag);
 }
 
+
 void show_help(ostream & out)
 {
-	out << "--ouput-format strings:\n";
+	out << "--ouput format string:\n";
 	for (size_t i = 0 ; i < nr_output_option ; ++i) {
 		out << output_options[i].option << "\t"
 		    << output_options[i].help_string << endl;
@@ -133,6 +134,7 @@ void formatter::add_format(outsymbflag flag)
 	flags = static_cast<outsymbflag>(flags | flag);
 }
 
+
 void formatter::output(ostream & out, symbol_entry const * symb, bool vma_64_)
 {
 	vma_64 = vma_64_;
@@ -142,6 +144,7 @@ void formatter::output(ostream & out, symbol_entry const * symb, bool vma_64_)
 		output_details(out, symb);
 	}
 }
+
 
 void formatter::output(ostream & out,
 			  vector<symbol_entry const *> const & symbols,
@@ -378,6 +381,7 @@ string formatter::format_short_image_name(field_datum const & f)
 	return basename(f.sample.file_loc.image_name);
 }
 
+
 string formatter::format_app_name(field_datum const & f)
 {
 	return f.sample.file_loc.app_name;
@@ -389,6 +393,7 @@ string formatter::format_short_app_name(field_datum const & f)
 	return basename(f.sample.file_loc.app_name);
 }
  
+
 string formatter::format_linenr_info(field_datum const & f)
 {
 	ostringstream out;

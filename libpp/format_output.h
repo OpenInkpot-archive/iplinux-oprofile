@@ -21,6 +21,7 @@
 
 #include "counter_array.h"
 #include "outsymbflag.h"
+#include "opp_symbol.h"
 
 class profile_container_t;
 class symbol_entry;

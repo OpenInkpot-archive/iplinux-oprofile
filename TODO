@@ -11,6 +11,12 @@ Before merging with trunk
   samples files open not at image opening
  o opd_mangle_filename() in dae/ daemon/ use create_path blindly and try to
   recreate from /var.
+ o at least add some FIXME in dae/daemon (see opd_mangle_file(),
+  op_mangle_file() and caller)
+ o option xxx and negated option --no-xxx: we can hide them in --help and
+  mention in the xxx option help string than the --no-xxx is allowed. Not
+  really usefull if we have a little number of --no.
+ o inhibit build of opdiff in pp/Makefile.am
 
 Before 1.0 big stuff
 --------------------
