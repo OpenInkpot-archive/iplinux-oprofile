@@ -297,10 +297,8 @@ void populate_profiles(partition_files const & files, profile_container & sample
 }
 
 
-void output_symbols(profile_container const & samples)
+void output_symbols(profile_container const & samples, bool show_app_name)
 {
-	// FIXME: it's a weird API that requires a string() as first
-	// arg here ...
 	vector<symbol_entry const *> symbols =
 		samples.select_symbols(options::threshold);
 
@@ -315,20 +313,23 @@ void output_symbols(profile_container const & samples)
 	if (!options::show_header)
 		out.hide_header();
 
-	// FIXME: we probably don't want to show application name if
-	// we report samples about only one application
-	format_flags flags = format_flags(osf_vma | osf_nr_samples | osf_percent);
-	flags = format_flags(flags | osf_symb_name | osf_app_name);
+	format_flags flags = format_flags(osf_vma | osf_nr_samples);
+	flags = format_flags(flags | osf_percent | osf_symb_name);
+
+	// FIXME: this is not perfect
+	if (show_app_name && !options::merge_by.lib)
+		flags = format_flags(flags | osf_app_name);
+	if (options::debug_info)
+		flags = format_flags(flags | osf_linenr_info);
+
 	if (options::accumulated) {
 		flags = format_flags(flags | osf_nr_samples_cumulated);
 		flags = format_flags(flags | osf_percent_cumulated);
 	}
 
-	if (!options::exclude_dependent && !options::merge_by.lib)
+	if (!options::exclude_dependent)
 		flags = format_flags(flags | osf_image_name);
 
-	if (options::debug_info)
-		flags = format_flags(flags | osf_linenr_info);
 
 	out.add_format(flags);
 
@@ -342,6 +343,8 @@ int opreport(vector<string> const & non_options)
 
 	output_header(*sample_file_partition);
 
+	bool show_app_name = true;
+
 	if (!options::symbols) {
 		vector<group_summary> summaries;
 		double const total =
@@ -352,13 +355,15 @@ int opreport(vector<string> const & non_options)
 		if (summaries.size() > 1 || !summaries[0].should_hide_deps()) {
 			output_summaries(summaries, total);
 			return 0;
+		} else {
+			show_app_name = false;
 		}
 	}
 
 	profile_container samples(false,
 		options::debug_info, options::details);
 	populate_profiles(*sample_file_partition, samples);
-	output_symbols(samples);
+	output_symbols(samples, show_app_name);
 	return 0;
 }
 

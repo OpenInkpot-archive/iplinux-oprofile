@@ -1,5 +1,10 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* pp/opreport.cpp: improve the app/image name column
+	showing a bit
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* pp/opreport.cpp: default to -l if we were just
 	going to show one image summary.
 
