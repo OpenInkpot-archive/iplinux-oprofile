@@ -191,6 +191,9 @@ output_summaries(vector<group_summary> const & summaries, double total_count)
 	vector<group_summary>::const_iterator end = summaries.end();
 
 	for (; it != end; ++it) {
+		if ((it->count * 100.0) / total_count < options::threshold)
+			continue;
+
 		output_counter(total_count, it->count);
 
 		string image = it->image_name;
