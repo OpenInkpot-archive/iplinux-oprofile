@@ -1,0 +1,40 @@
+.TH OPANNOTATE 1 "@DATE@" "oprofile @VERSION@"
+.UC 4
+.SH NAME
+opannotate \- produce source or assembly annotated with profile data
+.SH SYNOPSIS
+.br
+.B opannotate
+[
+.I options
+]
+[event name]
+.SH DESCRIPTION
+
+.B opannotate
+outputs annotated source and/or assembly from profile data of an OProfile
+session.
+
+.SH OPTIONS
+.TP
+.BI "--help / -? / --usage"
+Show help message.
+.br
+.TP
+.BI "--version / -v"
+Show version.
+
+.SH ENVIRONMENT
+No special environment variables are recognised by opannotate.
+
+.SH FILES
+.TP
+.I /var/lib/oprofile/samples/
+The location of the generated sample files.
+
+.SH VERSION
+.TP
+This man page is current for @PACKAGE@-@VERSION@.
+
+.SH SEE ALSO
+.BR oprofile(1)

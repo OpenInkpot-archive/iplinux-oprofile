@@ -1,5 +1,16 @@
 2003-05-26  John Levon  <levon@movementarian.org>
 
+	* configure.in:
+	* doc/Makefile.am:
+	* doc/oprofile.1.in:
+	* doc/op_help.1.in:
+	* doc/opcontrol.1.in:
+	* doc/opreport.1.in:
+	* doc/opannotate.1.in:
+	* doc/opgprof.1.in: re-organise and add manpages
+
+2003-05-26  John Levon  <levon@movementarian.org>
+
 	* doc/oprofile.xml: start to document the pp interface
 
 2003-05-26  Philippe Elie  <phil.el@wanadoo.fr>

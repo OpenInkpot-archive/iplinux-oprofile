@@ -1,0 +1,40 @@
+.TH OPREPORT 1 "@DATE@" "oprofile @VERSION@"
+.UC 4
+.SH NAME
+opreport \- show binary image or symbol profile summaries
+.SH SYNOPSIS
+.br
+.B opreport
+[
+.I options
+]
+[profile specification]
+.SH DESCRIPTION
+
+.B opreport
+is used for outputting either binary image profile summaries,
+or per-symbol profile data from an OProfile session.
+
+.SH OPTIONS
+.TP
+.BI "--help / -? / --usage"
+Show help message.
+.br
+.TP
+.BI "--version / -v"
+Show version.
+
+.SH ENVIRONMENT
+No special environment variables are recognised by opreport.
+
+.SH FILES
+.TP
+.I /var/lib/oprofile/samples/
+The location of the generated sample files.
+
+.SH VERSION
+.TP
+This man page is current for @PACKAGE@-@VERSION@.
+
+.SH SEE ALSO
+.BR oprofile(1)
