@@ -47,6 +47,7 @@ int compare_by(sort_options::sort_order order,
 			int ret = f1.filename.compare(f2.filename);
 			if (ret == 0)
 				ret = f1.linenr - f2.linenr;
+			return ret;
 		}
 		default:
 			cerr << "compare_by(): unknown sort option: "

@@ -109,6 +109,7 @@ void handle_sort_option()
 	}
 }
 
+
 // FIXME: separate file if reused
 void handle_merge_option()
 {
