@@ -1,3 +1,59 @@
+2003-11-12  John Levon  <levon@movementarian.org>
+
+	* configure.in: bump to 0.8cvs
+
+2003-11-11  John Levon  <levon@movementarian.org>
+
+	* configure.in: bump to 0.7.1
+
+2003-11-11  Joseph VanAndel  <unknown@unknown.org>
+
+	* daemon/liblegacy/init.c: fix #840046 (segfault when starting profiler
+	 with --no-vmlinux setup), this bug was present in 0.7.0.
+
+2003-11-11  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/profile_spec.cpp: more precise error message
+	* libutil++/tests/file_manip_tests.cpp: corner case test added
+	  for dirname
+
+2003-11-11  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/arrange_profiles.cpp: report_error() shows only distinct
+	  conflicting name.
+
+2003-11-10  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* doc/opcontrol.1.in: reverse kernel:user in event setting description.
+	  Fix #838968
+
+2003-11-09  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* daemon/init.c:
+	* daemon/liblegacy/init.c: move opd_read_fs_int ...
+	* daemon/oprofiled.h:
+	* daemon/oprofiled.c: here
+	* daemon/liblegacy/opd_24_stats.c: dump kernel note buffer overflow and
+	  buffer overlow
+
+2003-11-09  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* utils/op_help.c: do not use OP_MAX_COUNTERS but get counter number
+	  at runtime
+
+2003-11-09  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libutil++/tests/string_manip_tests.cpp: rtrim/ltrim/trim tests
+
+2003-11-08  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libop/tests/Makefile.am:
+	* libop/tests/mangle_tests.c: new tests: sample filename mangling
+
+2003-11-08  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* module/x86/op_syscalls.c: fix build with 2.2 kernel
+
 2003-11-06  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* Makefile.am: use .PHONY for module goal to not statisfy this goal
