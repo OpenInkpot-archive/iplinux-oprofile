@@ -23,7 +23,7 @@ struct split_sample_filename
 	std::string lib_image;
 	std::string event;
 	std::string count;
-	std::string unit_mask;
+	std::string unitmask;
 	std::string tgid;
 	std::string tid;
 	std::string cpu;

@@ -11,10 +11,22 @@
 #ifndef OPREPORT_OPTIONS_H
 #define OPREPORT_OPTIONS_H
 
+#include <string>
+
 #include "common_option.h"
+#include "utility.h"
+
+class partition_files;
 
 namespace options {
+	extern bool symbols;
 }
+
+/**
+ * a partition of sample filename to treat, each sub-list is a list of
+ * sample to merge. filled by get_options()
+ */
+extern scoped_ptr<partition_files> sample_file_partition;
 
 /**
  * get_options - process command line

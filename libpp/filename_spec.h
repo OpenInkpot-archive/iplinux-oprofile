@@ -62,7 +62,7 @@ private:
 	std::string lib_image;
 	std::string event;
 	int count;
-	unsigned int unit_mask;
+	unsigned int unitmask;
 	generic_spec<pid_t> tgid;
 	generic_spec<pid_t> tid;
 	generic_spec<int> cpu;

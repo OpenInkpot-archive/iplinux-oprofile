@@ -79,7 +79,7 @@ private:
 	void parse_lib_image_exclude(std::string const &);
 	void parse_event(std::string const &);
 	void parse_count(std::string const &);
-	void parse_unit_mask(std::string const &);
+	void parse_unitmask(std::string const &);
 	void parse_tid(std::string const &);
 	void parse_tgid(std::string const &);
 	void parse_cpu(std::string const &);
@@ -117,7 +117,7 @@ private:
 	std::vector<std::string> lib_image_exclude;
 	generic_spec<std::string> event;
 	generic_spec<int> count;
-	generic_spec<unsigned int> unit_mask;
+	generic_spec<unsigned int> unitmask;
 	comma_list<pid_t> tid;
 	comma_list<pid_t> tgid;
 	comma_list<int> cpu;

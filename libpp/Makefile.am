@@ -17,10 +17,10 @@ libpp_a_SOURCES = \
 	filename_spec.h \
 	format_output.cpp \
 	format_output.h \
-	merge_spec.cpp \
-	merge_spec.h \
 	parse_cmdline.cpp \
 	parse_cmdline.h \
+	partition_files.h \
+	partition_files.cpp \
 	profile.cpp \
 	profile.h \
 	profile_container.cpp \

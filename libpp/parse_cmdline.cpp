@@ -33,7 +33,7 @@ parse_cmdline::parse_cmdline()
 		&parse_cmdline::parse_lib_image_exclude;
 	parse_table["event"] = &parse_cmdline::parse_event;
 	parse_table["count"] = &parse_cmdline::parse_count;
-	parse_table["unit-mask"] = &parse_cmdline::parse_unit_mask;
+	parse_table["unit-mask"] = &parse_cmdline::parse_unitmask;
 	parse_table["tid"] = &parse_cmdline::parse_tid;
 	parse_table["tgid"] = &parse_cmdline::parse_tgid;
 	parse_table["cpu"] = &parse_cmdline::parse_cpu;
@@ -155,10 +155,10 @@ void parse_cmdline::parse_event(string const & str)
 }
 
 
-void parse_cmdline::parse_unit_mask(string const & str)
+void parse_cmdline::parse_unitmask(string const & str)
 {
 	set_p = true;
-	unit_mask.set(str);
+	unitmask.set(str);
 }
 
 
@@ -241,7 +241,7 @@ bool parse_cmdline::match(string const & filename) const
 		return false;
 	}
 
-	if (!unit_mask.match(spec.unit_mask)) {
+	if (!unitmask.match(spec.unitmask)) {
 		return false;
 	}
 

@@ -42,7 +42,7 @@ split_sample_filename split_event_spec(string const & event_spec)
 	int i = 0;
 	result.event = temp[i++];
 	result.count = temp[i++];
-	result.unit_mask = temp[i++];
+	result.unitmask = temp[i++];
 	result.tgid = temp[i++];
 	result.tid = temp[i++];
 	result.cpu = temp[i++];

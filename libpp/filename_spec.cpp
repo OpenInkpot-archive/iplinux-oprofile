@@ -37,7 +37,7 @@ bool filename_spec::match(filename_spec const & rhs,
 {
 	if (!tid.match(rhs.tid) || !cpu.match(rhs.cpu) ||
 	    !tgid.match(rhs.tgid) || count != rhs.count ||
-	    unit_mask != rhs.unit_mask || event != rhs.event) {
+	    unitmask != rhs.unitmask || event != rhs.event) {
 		return false;
 	}
 
@@ -65,7 +65,7 @@ void filename_spec::set_sample_filename(string const & filename)
 	lib_image = split.lib_image;
 	event = split.event;
 	count = strict_convert<int>(split.count);
-	unit_mask = strict_convert<unsigned int>(split.unit_mask);
+	unitmask = strict_convert<unsigned int>(split.unitmask);
 	tgid.set(split.tgid);
 	tid.set(split.tid);
 	cpu.set(split.cpu);

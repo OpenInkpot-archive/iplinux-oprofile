@@ -22,13 +22,15 @@
 #include "opreport_options.h"
 #include "popt_options.h"
 #include "file_manip.h"
-#include "merge_spec.h"
+#include "partition_files.h"
 #include "cverb.h"
 
 using namespace std;
 
+scoped_ptr<partition_files> sample_file_partition;
+
 namespace options {
-	vector<string> symbols;
+	bool symbols;
 	bool debug_info;
 	bool details;
 	double threshold;
@@ -42,11 +44,7 @@ namespace options {
 	vector<string> ignore_symbols;
 	vector<string> exclude_symbols;
 	vector<string> image_path;
-	bool merge_cpu;
-	bool merge_lib;
-	bool merge_tid;
-	bool merge_tgid;
-	bool merge_unitmask;
+	merge_option merge_by;
 	bool no_header;
 	bool short_filename;
 	bool accumulated;
@@ -64,7 +62,7 @@ vector<string> sort_by;
 popt::option options_array[] = {
 	// PP:5
 	popt::option(options::symbols, "symbols", 'l',
-		     "symbols to consider", "comma separated list"),
+		     "list all symbols"),
 	popt::option(options::debug_info, "debug-info", 'b',
 		     "add source file and line number to output"),
 	popt::option(options::details, "details", 'a',
@@ -152,23 +150,23 @@ void handle_merge_option()
 
 	for (size_t i = 0; i < merge.size(); ++i) {
 		if (merge[i] == "cpu") {
-			options::merge_cpu = true;
+			options::merge_by.merge_cpu = true;
 		} else if (merge[i] == "tid") {
-			options::merge_tid = true;
+			options::merge_by.merge_tid = true;
 		} else if (merge[i] == "tgid") {
 			// PP:5.21 tgid merge imply tid merging.
-			options::merge_tgid = true;
-			options::merge_tid = true;
+			options::merge_by.merge_tgid = true;
+			options::merge_by.merge_tid = true;
 		} else if (merge[i] == "lib") {
-			options::merge_lib = true;
+			options::merge_by.merge_lib = true;
 		} else if (merge[i] == "unitmask") {
-			options::merge_unitmask = true;
+			options::merge_by.merge_unitmask = true;
 		} else if (merge[i] == "all") {
-			options::merge_cpu = true;
-			options::merge_lib = true;
-			options::merge_tid = true;
-			options::merge_tgid = true;
-			options::merge_unitmask = true;
+			options::merge_by.merge_cpu = true;
+			options::merge_by.merge_lib = true;
+			options::merge_by.merge_tid = true;
+			options::merge_by.merge_tgid = true;
+			options::merge_by.merge_unitmask = true;
 		} else {
 			cerr << "unknown merge option: " << merge[i] << endl;
 			exit(EXIT_FAILURE);
@@ -262,6 +260,9 @@ void get_options(int argc, char const * argv[])
 
 	set_verbose(verbose);
 
+	if (options::details)
+		options::symbols = true;
+
 	handle_threshold();
 
 	handle_sort_option();
@@ -283,17 +284,6 @@ void get_options(int argc, char const * argv[])
 	copy(unmerged_profile.begin(), unmerged_profile.end(),
 	     ostream_iterator<unmergeable_profile>(cverb, "\n"));
 
-	// partition sample filename in unmerged spec
-	list<list<string> > unmerged_file =
-		partition_files(sample_files, options::merge_cpu,
-				options::merge_lib, options::merge_tid,
-				options::merge_tgid, options::merge_unitmask);
-
-	cverb << "Partition entries: " << unmerged_file.size() << endl;
-	list<list<string> >::const_iterator it;
-	for (it = unmerged_file.begin(); it != unmerged_file.end(); ++it) {
-		cverb << "Partition entry:\n";
-		copy(it->begin(), it->end(), 
-		     ostream_iterator<string>(cverb, "\n"));
-	}
+	sample_file_partition.reset(
+		new partition_files(sample_files, options::merge_by));
 }

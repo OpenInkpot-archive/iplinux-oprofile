@@ -20,6 +20,7 @@ Before merging with trunk
  o consider to do the symbol (details too ?) sort at output, format_output receive
   a vector of symbol to consider, we can perhaps sort in format_output
  o implement pp_interface alias
+ o add --symbol-list=symbol,symbol to opreport
  o fix John movement on 2.5: odb_insert failure (and message error corrupted ?)
 
 After merging with trunk
