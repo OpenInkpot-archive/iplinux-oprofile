@@ -18,10 +18,17 @@
 #ifndef OP_USER_H
 #define OP_USER_H
 
-/* stuff shared between user-space and the module */
-
 #include "version.h"
 
+/* various paths, duplicated in op_start */
+#define OP_BASE_DIR "/var/lib/oprofile/"
+#define OP_SAMPLES_DIR OP_BASE_DIR "samples/"
+#define OP_LOCK_FILE OP_BASE_DIR "lock"
+#define OP_DEVICE OP_BASE_DIR "opdev"
+#define OP_NOTE_DEVICE OP_BASE_DIR "opnotedev"
+#define OP_HASH_DEVICE OP_BASE_DIR "ophashmapdev"
+#define OP_LOG_FILE OP_BASE_DIR "oprofiled.log"
+ 
 /*@{\name miscellaneous types */
 #ifndef u8
 #define u8 unsigned char

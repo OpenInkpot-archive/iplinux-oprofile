@@ -68,7 +68,7 @@ struct opd_fentry {
 extern "C" {
 #endif
 
-char* opd_mangle_filename(const char *smpdir, const char* filename, const char * app_name);
+char* opd_mangle_filename(const char* filename, const char * app_name);
 
 #define opd_try_open_file(n,m) opd_do_open_file((n), (m), 0)
 #define opd_open_file(n,m) opd_do_open_file((n), (m), 1)
@@ -93,6 +93,9 @@ void opd_close_device(fd_t devfd);
 ssize_t opd_read_device(fd_t devfd, void *buf, size_t size, int seek);
 off_t opd_get_fsize(const char *file, int fatal);
 time_t opd_get_mtime(const char *file);
+
+pid_t opd_read_lock_file(const char * file);
+int opd_write_lock_file(const char * file);
 
 char *opd_get_time(void);
 char *opd_get_line(FILE *fp);

@@ -168,8 +168,6 @@ extern int demangle;
 extern char const *samplefile;
 /** command line option specifying an image filename */
 extern const char *imagefile;
-/** command line option specifying the base directory of samples files */
-extern char *basedir;
 /** command line option specifying the set of symbols to ignore */
 extern const char * exclude_symbols_str;
 

@@ -77,7 +77,6 @@ extern int verbose;
 extern int kernel_only;
 extern op_cpu cpu_type; 
 extern int separate_samples;
-extern char * smpdir; 
 extern char * vmlinux;
 extern unsigned long opd_stats[];
 
