@@ -92,13 +92,10 @@ public:
 	/// used for select_symbols()
 	struct symbol_choice {
 		symbol_choice()
-			: hints(cf_none), sort_by_vma(false),
-			  threshold(0.0), match_image(false) {}
+			: hints(cf_none), threshold(0.0), match_image(false) {}
 
 		/// hints filled in
 		column_flags hints;
-		/// sort by vma
-		bool sort_by_vma;
 		/// percentage threshold
 		double threshold;
 		/// match the image name only

@@ -34,4 +34,6 @@ libpp_a_SOURCES = \
 	symbol_container.cpp \
 	symbol_container.h \
 	symbol_functors.cpp \
-	symbol_functors.h
+	symbol_functors.h \
+	symbol_sort.cpp \
+	symbol_sort.h

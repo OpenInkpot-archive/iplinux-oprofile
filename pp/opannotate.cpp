@@ -28,6 +28,7 @@
 #include "partition_files.h"
 #include "opannotate_options.h"
 #include "profile_container.h"
+#include "symbol_sort.h"
 
 using namespace std;
 using namespace options;
@@ -416,6 +417,10 @@ void output_asm(string const & app_name)
 	choice.image_name = app_name;
 	choice.match_image = true;
 	vector<symbol_entry const *> symbols = samples->select_symbols(choice);
+	// FIXME: necessary ?
+	sort_options options;
+	options.sample = true;
+	sort_by(symbols, options);
 
 	output_info(cout);
 

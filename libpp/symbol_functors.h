@@ -14,29 +14,6 @@
 
 #include "opp_symbol.h"
 
-/// compare based on vma value (address)
-struct less_sample_entry_by_vma {
-	bool operator()(sample_entry const & lhs, sample_entry const & rhs) const {
-		return lhs.vma < rhs.vma;
-	}
-
-	bool operator()(symbol_entry const * lhs, symbol_entry const * rhs) const {
-		return (*this)(lhs->sample, rhs->sample);
-	}
-
-};
-
-/// compare based on number of accumulated samples
-struct less_symbol_entry_by_samples_nr {
-	bool operator()(symbol_entry const * lhs, symbol_entry const * rhs) const {
-		// sorting by vma when samples count are identical is better
-		if (lhs->sample.count != rhs->sample.count)
-			return lhs->sample.count > rhs->sample.count;
-
-		return lhs->sample.vma > rhs->sample.vma;
-	}
-};
-
 /// compare based on file location
 struct less_by_file_loc {
 	bool operator()(sample_entry const * lhs,

@@ -19,6 +19,7 @@
 #include "string_filter.h"
 #include "file_manip.h"
 #include "profile_container.h"
+#include "symbol_sort.h"
 #include "partition_files.h"
 #include "opgprof_options.h"
 #include "cverb.h"
@@ -152,8 +153,12 @@ void output_gprof(profile_container const & samples,
 
 	profile_container::symbol_choice choice;
 	choice.threshold = options::threshold;
-	profile_container::symbol_collection const symbols
+	profile_container::symbol_collection symbols
 		= samples.select_symbols(choice);
+	// FIXME: necessary ?
+	sort_options options;
+	options.sample = true;
+	sort_by(symbols, options);
 
 	profile_container::symbol_collection::const_iterator sit
 		= symbols.begin();

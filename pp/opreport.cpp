@@ -22,6 +22,7 @@
 #include "profile.h"
 #include "partition_files.h"
 #include "profile_container.h"
+#include "symbol_sort.h"
 #include "format_output.h"
 
 using namespace std;
@@ -302,6 +303,7 @@ void output_symbols(profile_container const & samples)
 	profile_container::symbol_choice choice;
 	choice.threshold = options::threshold;
 	vector<symbol_entry const *> symbols = samples.select_symbols(choice);
+	sort_by(symbols, options::sort_by);
 
 	format_output::formatter out(samples);
 

@@ -1,5 +1,24 @@
 2003-05-12  John Levon  <levon@movementarian.org>
 
+	* libpp/Makefile.am:
+	* libpp/symbol_sort.h:
+	* libpp/symbol_sort.cpp: add sorting code
+
+	* symbol_functors.h: move some less() into
+	symbol_sort.cpp
+
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp: don't pass in
+	sort option to select_symbols(), do it in caller
+
+	* pp/opannotate.cpp:
+	* pp/opgprof.cpp:
+	* pp/opreport.cpp:
+	* pp/opreport_options.h:
+	* pp/opreport_options.cpp: from the above
+
+2003-05-12  John Levon  <levon@movementarian.org>
+
 	* format_flags.h: remove vma64_p. Add column_flags
 
 	* libpp/profile_container.h:

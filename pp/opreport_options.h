@@ -19,6 +19,7 @@
 #include "common_option.h"
 #include "utility.h"
 #include "string_filter.h"
+#include "symbol_sort.h"
 
 class partition_files;
 class merge_option;
@@ -31,6 +32,7 @@ namespace options {
 	extern bool details;
 	extern bool reverse_sort;
 	extern bool exclude_dependent;
+	extern sort_options sort_by;
 	extern merge_option merge_by;
 	extern bool global_percent;
 	extern bool long_filenames;

@@ -107,6 +107,4 @@ void symbol_container::get_symbols_by_count(
 	symbols_t::const_iterator end = symbols.end();
 	for (; cit != end; ++cit)
 		v.push_back(&*cit);
-
-	stable_sort(v.begin(), v.end(), less_symbol_entry_by_samples_nr());
 }

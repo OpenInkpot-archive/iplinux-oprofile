@@ -34,12 +34,8 @@ namespace options {
 	bool debug_info;
 	bool details;
 	bool exclude_dependent;
-	bool sort_by_vma;
-	bool sort_by_sample;
-	bool sort_by_symbol;
-	bool sort_by_debug;
-	bool sort_by_image;
 	string_filter symbol_filter;
+	sort_options sort_by;
 	merge_option merge_by;
 	bool show_header = true;
 	bool long_filenames;
@@ -53,7 +49,7 @@ namespace {
 
 string outfile;
 vector<string> mergespec;
-vector<string> sort_by;
+vector<string> sort;
 vector<string> exclude_symbols;
 vector<string> include_symbols;
 
@@ -75,7 +71,7 @@ popt::option options_array[] = {
 		     "output detailed samples for each symbol"),
 	popt::option(options::exclude_dependent, "exclude-dependent", 'x',
 		     "exclude libs, kernel, and module samples for applications"),
-	popt::option(sort_by, "sort", 's',
+	popt::option(sort, "sort", 's',
 		     "sort by", "vma,sample,symbol,debug,image"),
 	popt::option(exclude_symbols, "exclude-symbols", 'e',
 		     "exclude these comma separated symbols", "symbols"),
@@ -100,25 +96,25 @@ popt::option options_array[] = {
 // FIXME: separate file if reused
 void handle_sort_option()
 {
-	if (sort_by.empty()) {
+	if (sort.empty()) {
 		// PP:5.14 sort default to sample
-		sort_by.push_back("sample");
+		sort.push_back("sample");
 	}
 
-	vector<string>::const_iterator cit = sort_by.begin();
-	vector<string>::const_iterator end = sort_by.end();
+	vector<string>::const_iterator cit = sort.begin();
+	vector<string>::const_iterator end = sort.end();
 
 	for (; cit != end; ++cit) {
 		if (*cit == "vma") {
-			options::sort_by_vma = true;
+			options::sort_by.vma = true;
 		} else if (*cit == "sample") {
-			options::sort_by_sample = true;
+			options::sort_by.sample = true;
 		} else if (*cit == "symbol") {
-			options::sort_by_symbol = true;
+			options::sort_by.symbol = true;
 		} else if (*cit == "debug") {
-			options::sort_by_debug = true;
+			options::sort_by.debug = true;
 		} else if (*cit == "image") {
-			options::sort_by_image = true;
+			options::sort_by.image = true;
 		} else {
 			cerr << "unknown sort option: " << *cit << endl;
 			exit(EXIT_FAILURE);

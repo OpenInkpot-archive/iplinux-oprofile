@@ -199,10 +199,6 @@ profile_container::select_symbols(symbol_choice & choice) const
 		}
 	}
 
-	if (choice.sort_by_vma) {
-		sort(result.begin(), result.end(), less_sample_entry_by_vma());
-	}
-
 	return result;
 }
 
