@@ -474,8 +474,11 @@ do_sysctl_setup() {
 do_start() {
  
 	if test -f $LOCK_FILE; then
-		echo "lock file $LOCK_FILE still present." >&2
-		exit 1
+		kill -s 0 `cat $LOCK_FILE` 2>/dev/null
+		if test "$?" -eq 0; then
+			echo "oprofiled appears to be running already." >&2
+			echo "delete $LOCK_FILE if this is not the case." >&2
+			exit 1
 	fi
  
 	OPD_ARGS="--vmlinux=$VMLINUX --map-file=$MAP_FILE \
