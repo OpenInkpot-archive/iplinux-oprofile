@@ -17,7 +17,6 @@
 
 #include "string_manip.h"
 #include "file_manip.h"
-#include "split_sample_filename.h"
 #include "opreport_options.h"
 #include "profile.h"
 #include "partition_files.h"
@@ -31,7 +30,8 @@ namespace {
 struct merged_file_count {
 	merged_file_count() : count(0) {}
 	size_t count;
-	string filename;
+	string image_name;
+	string lib_image;
 };
 
 struct compare_merged_file_count {
@@ -81,7 +81,8 @@ files_count counts(partition_files::filename_set const & files)
 	for (it = files.begin(); it != files.end(); ++it) {
 		merged_file_count sub_count;
 
-		sub_count.filename = it->sample_filename;
+		sub_count.image_name = it->image;
+		sub_count.lib_image  = it->lib_image;
 		profile_t samples(it->sample_filename);
 		sub_count.count = samples.accumulate_samples(0, ~0);
 
@@ -139,11 +140,10 @@ void output_sub_count(files_count const & files, double total_count)
 			? total_count : files.count;
 		output_counter(tot_count, count.count);
 
-		split_sample_filename sp = split_sample_file(count.filename);
-		if (sp.lib_image.empty())
-			cout << " " << get_filename(sp.image);
+		if (count.lib_image.empty())
+			cout << " " << get_filename(count.image_name);
 		else
-			cout << " " << get_filename(sp.lib_image);
+			cout << " " << get_filename(count.lib_image);
 		cout << endl;
 	}
 }
