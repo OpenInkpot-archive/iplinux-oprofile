@@ -250,10 +250,9 @@ string formatter::format_symb_name(field_datum const & f)
 
 namespace {
 
-inline string const & get_image(name_id id, bool lf)
+inline string const & get_image(image_name_id id, bool lf)
 {
-	return lf ? image_names.name(id)
-		: image_names.basename(id);
+	return lf ? image_names.name(id) : image_names.basename(id);
 }
 
 }

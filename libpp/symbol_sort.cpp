@@ -23,7 +23,7 @@ namespace {
 
 bool long_filenames;
 
-int image_compare(name_id l, name_id r)
+int image_compare(image_name_id l, image_name_id r)
 {
 	if (long_filenames)
 		return image_names.name(l).compare(image_names.name(r));
@@ -31,7 +31,7 @@ int image_compare(name_id l, name_id r)
 }
 
 
-int debug_compare(name_id l, name_id r)
+int debug_compare(debug_name_id l, debug_name_id r)
 {
 	if (long_filenames)
 		return debug_names.name(l).compare(debug_names.name(r));

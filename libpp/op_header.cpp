@@ -12,13 +12,13 @@
 #include <iostream>
 #include <cstdlib>
 #include <iomanip>
+#include <set>
 
 #include "odb_hash.h"
 #include "op_cpu_type.h"
 #include "op_file.h"
 #include "op_header.h"
 #include "op_events.h"
-#include "name_storage.h"
 
 using namespace std;
 
@@ -56,7 +56,7 @@ void op_check_header(opd_header const & h1, opd_header const & h2)
 
 namespace {
 
-name_storage warned_files;
+set<string> warned_files;
 
 }
 
@@ -68,10 +68,10 @@ void check_mtime(string const & file, opd_header const & header)
 	if (newmtime == header.mtime)
 	       return;
 
-	if (warned_files.present(file))
+	if (warned_files.find(file) != warned_files.end())
 		return;
 
-	warned_files.create(file);
+	warned_files.insert(file);
 
 	// Files we couldn't get mtime of have zero mtime
 	if (!header.mtime) {

@@ -81,7 +81,7 @@ sample_container::accumulate_samples(string const & filename) const
 
 	sample_entry lower, upper;
 
-	name_id const id = debug_names.create(filename);
+	debug_name_id const id = debug_names.create(filename);
 
 	lower.file_loc.filename = upper.file_loc.filename = id;
 	lower.file_loc.linenr = 0;

@@ -217,8 +217,8 @@ vector<string> const profile_container::select_filename(double threshold) const
 	sample_container::samples_iterator const send = samples->end();
 
 	for (; sit != send; ++sit) {
-		int name_id = sit->second.file_loc.filename;
-		if (name_id) {
+		debug_name_id name_id = sit->second.file_loc.filename;
+		if (name_id.id) {
 			string const & file = debug_names.name(name_id);
 			filename_set.insert(file);
 		}

@@ -30,6 +30,7 @@ struct less_by_file_loc {
 
 /// compare based on symbol contents
 struct less_symbol {
+	// implementation compare by id rather than by string
 	bool operator()(symbol_entry const & lhs,
 			symbol_entry const & rhs) const;
 };

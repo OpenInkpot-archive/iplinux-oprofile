@@ -13,66 +13,110 @@
 #define NAME_STORAGE_H
 
 #include <string>
+#include <vector>
 #include <map>
 
-typedef int name_id;
-
 /**
- * Holds shared names for filenames and symbol names.
- * Each ID identifies a unique string, and IDs  can be
- * shared across all users.
+ * Base class to holds shared names. Each ID identifies a unique string,
+ * and IDs can be shared across all users.
  */
 class name_storage {
 
 public:
 	name_storage();
 
+protected:
 	/// allocate or re-use an ID for this name
-	name_id create(std::string const & name);
+	size_t do_create(std::string const & name);
 
-	/// return true if the given name is present
-	bool present(std::string const & name) const;
+	/// return the original name form of the given ID
+	std::string const & get_name(size_t id) const;
 
-	/// return the original name for the given ID
-	std::string const & name(name_id id) const;
-
-	/// return the demangled form of the given ID
-	std::string const & demangle(name_id id) const;
-
-	/// return the basename form of the given ID
-	std::string const & basename(name_id id) const;
-
-private:
 	struct stored_name {
 		stored_name(std::string const & n = std::string())
 			: name(n) {}
 
-		std::string name;
-		mutable std::string name_processed;
-
 		bool operator<(stored_name const & rhs) const {
 			return name < rhs.name;
 		}
+		std::string name;
+		mutable std::string name_processed;
 	};
 
-	typedef std::map<name_id, stored_name> name_map;
-
-	typedef std::map<std::string, name_id> id_map;
+	/// return a reference to the storage used for the given ID
+	stored_name const & processed_name(size_t id) const;
+private:
+	typedef std::vector<stored_name> name_map;
+	typedef std::map<std::string, size_t> id_map;
 
 	name_map names;
-
 	id_map ids;
+};
 
-	static int last_id;
+/**
+ * base class for shared filename storage
+ */
+class filename_storage : public name_storage {
+ protected:
+	/// return the basename name for the given ID
+	std::string const & basename(size_t id) const;
+};
+
+struct image_name_id {
+	image_name_id() : id(0) {}
+	size_t id;
+};
+
+class image_name_storage : public filename_storage {
+public:
+	/// allocate or re-use an ID for this name
+	image_name_id create(std::string const & name);
+
+	/// return the original name form of the given ID
+	std::string const & name(image_name_id id) const;
+	/// return the basename name for the given ID
+	std::string const & basename(image_name_id id) const;
+};
+
+struct debug_name_id {
+	debug_name_id() : id(0) {}
+	size_t id;
+};
+
+class debug_name_storage : public filename_storage {
+public:
+	/// allocate or re-use an ID for this name
+	debug_name_id create(std::string const & name);
+
+	/// return the original name form of the given ID
+	std::string const & name(debug_name_id id) const;
+	/// return the basename for the given ID
+	std::string const & basename(debug_name_id id) const;
+};
+
+struct symbol_name_id {
+	symbol_name_id() : id(0) {}
+	size_t id;
+};
+
+class symbol_name_storage : public name_storage {
+public:
+	/// allocate or re-use an ID for this name
+	symbol_name_id create(std::string const & name);
+
+	/// return the original name form of the given ID
+	std::string const & name(symbol_name_id id) const;
+	/// return the demangled name for the given ID
+	std::string const & demangle(symbol_name_id id) const;
 };
 
 /// for images
-extern name_storage image_names;
+extern image_name_storage image_names;
 
 /// for debug filenames
-extern name_storage debug_names;
+extern debug_name_storage debug_names;
 
 /// for symbols
-extern name_storage symbol_names;
+extern symbol_name_storage symbol_names;
 
 #endif /* !NAME_STORAGE_H */

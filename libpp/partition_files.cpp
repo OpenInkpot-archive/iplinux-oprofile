@@ -16,7 +16,6 @@
 #include "file_manip.h"
 #include "partition_files.h"
 #include "split_sample_filename.h"
-#include "name_storage.h"
 
 using namespace std;
 
@@ -212,15 +211,15 @@ partition_files::filename_set const & partition_files::set(size_t index) const
 
 namespace {
 
-name_storage warned_images;
+set<string> warned_images;
 
 void not_found(string const & image)
 {
 	static bool warned_already;
-	if (!warned_images.present(image)) {
+	if (warned_images.find(image) == warned_images.end()) {
 		cerr << "warning: couldn't find the binary file "
 		     << image << endl;
-		warned_images.create(image);
+		warned_images.insert(image);
 	}
 
 	if (!warned_already) {
@@ -233,10 +232,10 @@ void not_found(string const & image)
 
 void not_readable(string const & image)
 {
-	if (!warned_images.present(image)) {
+	if (warned_images.find(image) == warned_images.end()) {
 		cerr << "warning: couldn't read the binary file "
 		     << image << endl;
-		warned_images.create(image);
+		warned_images.insert(image);
 	}
 }
 
