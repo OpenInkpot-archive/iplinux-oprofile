@@ -40,7 +40,7 @@
 #define streq(a,b) (!strcmp((a), (b)))
 
 #define OPD_MAGIC "DAE\n"
-#define OPD_VERSION 0x5
+#define OPD_VERSION 0x6
 
 /* header of the sample files */
 struct opd_header {
