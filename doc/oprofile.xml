@@ -981,7 +981,10 @@ Counted CPU_CLK_UNHALTED events (clocks processor is not halted) with a unit mas
     ...
 </screen>
 <para>
-This is a symbol summary of the OProfile daemon. Note that as we used
+If we had specified <option>--symbols</option> in the previous command, we would have
+gotten a symbol summary of all the images across the entire system. We can restrict this to only
+part of the system profile; for example,
+below is a symbol summary of the OProfile daemon. Note that as we used
 <command>opcontrol --separate=all</command>, symbols from images that <command>oprofiled</command>
 has used are also shown.
 </para>
