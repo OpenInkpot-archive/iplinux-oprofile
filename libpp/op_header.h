@@ -22,11 +22,13 @@
 /**
  * @param h1 sample file header
  * @param h2 sample file header
+ * @param filename sample filename
  *
  * check that the h1 and h2 are coherent (same size, same mtime etc.)
  * all error are fatal
  */
-void op_check_header(opd_header const & h1, opd_header const & h2);
+void op_check_header(opd_header const & h1, opd_header const & h2,
+		     string const & filename);
 
 /**
  * check mtime of samples file header against file

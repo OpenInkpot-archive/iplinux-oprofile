@@ -22,30 +22,35 @@
 
 using namespace std;
 
-void op_check_header(opd_header const & h1, opd_header const & h2)
+void op_check_header(opd_header const & h1, opd_header const & h2,
+		     string const & filename)
 {
 	if (h1.mtime != h2.mtime) {
 		cerr << "header timestamps are different ("
-		     << h1.mtime << ", " << h2.mtime << ")\n";
+		     << h1.mtime << ", " << h2.mtime << ") for "
+		     << filename << "\n";
 		exit(EXIT_FAILURE);
 	}
 
 	if (h1.is_kernel != h2.is_kernel) {
-		cerr << "header is_kernel flags are different\n";
+		cerr << "header is_kernel flags are different for "
+		     << filename << "\n";
 		exit(EXIT_FAILURE);
 	}
 
 	if (h1.separate_lib_samples != h2.separate_lib_samples) {
 		cerr << "header separate_lib_samples are different ("
 		     << h1.separate_lib_samples << ", " 
-		     << h2.separate_lib_samples << ")\n";
+		     << h2.separate_lib_samples << ") for "
+		     << filename << "\n";
 		exit(EXIT_FAILURE);
 	}
 
 	if (h1.separate_kernel_samples != h2.separate_kernel_samples) {
 		cerr << "header separate_kernel_samples are different ("
 		     << h1.separate_kernel_samples << ", " 
-		     << h2.separate_kernel_samples << ")\n";
+		     << h2.separate_kernel_samples << ") for"
+		     << filename << "\n";
 		exit(EXIT_FAILURE);
 	}
 
