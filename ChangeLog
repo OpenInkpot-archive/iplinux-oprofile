@@ -1,5 +1,11 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* libpp/format_output.cpp:
+	* libpp/format_flags.h: better output for
+	the default of short filenames
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* pp/opreport.cpp: improve the app/image name column
 	showing a bit
 
