@@ -1,3 +1,49 @@
+2003-12-29  John Levon  <levon@movementarian.org>
+
+	* configure.in:
+	* doc/*.1.in: add HTML docs to SEE ALSO
+
+2003-12-29  John Levon  <levon@movementarian.org>
+
+	* doc/opcontrol.1.in:
+	* doc/oprofile.xml: minor language cleanups
+
+	* utils/opcontrol: only allow --verbose when it makes sense
+
+2003-12-28  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libutil++/tests/file_manip_tests.cpp: ensure filename passed to
+	  op_realpath() exists
+
+2003-12-28  John Levon  <levon@movementarian.org>
+
+	* doc/internals.xml:
+	* libutil++/file_manip.h: fix typos
+
+2003-12-16  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* utils/opcontrol: error message rewording
+
+2003-12-16  Carlo Wood  <carlo@alinoe.com>
+
+	* libregex/tests/Makefile.am: avoid to install mangled-name test file
+
+2003-11-20  John Levon  <levon@movementarian.org>
+
+	* libregex/op_regex.cpp: move global ctor out of namespace
+	anon (bug #845616)
+
+2003-11-19  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/arrange_profiles.cpp: merge all unit mask before generating
+	  event description string
+
+2003-11-17  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/arrange_profiles.cpp: put unitmask in the same axis as
+	  event:count, meaning than unitmask is now a part of the event
+	  specification.
+
 2003-12-19  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* daemon/opd_sfile.c: we reversed to/from pc in call graph sample

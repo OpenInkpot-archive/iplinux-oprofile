@@ -22,8 +22,6 @@ for some pointers and/or read HACKING and doc/CodingStyle.
 Before 1.0 little stuff
 -----------------------
 
- o we should try and resolve each path component for symlinks too
-  (/lib/modules/foo/build/vmlinux)
  o x86_64 and 2.4 kernel: it's apparently broken
  o Alpha ev67 events are broken
  o odb_insert() can fail on ftruncate or mremap() in db_manage.c but we don't
@@ -70,6 +68,8 @@ General checks to make
 Later
 -----
  
+ o we should notice an opcontrol config change (--separate etc.) and
+   auto-restart the daemon if necessary (Run)
  o we can add lots more unit tests yet
  o remove 2.2 / gcc 2.91 support ?
  o Itanium event constraints are not implemented
