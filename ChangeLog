@@ -1,5 +1,17 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* libpp/profile_spec.h:
+	* libpp/profile_spec.cpp: take exclude_dependent not
+	include_dependent
+
+	* pp/opannotate_options.c:
+	* pp/opgprof_options.c:
+	* pp/opreport_options.h:
+	* pp/opreport_options.c: change to use exclude_dependent,
+	remove --hide-dependent
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* locate_images.h:
 	* locate_images.cpp: extra_images can now use
 	relative paths for its search dirs. Move most of 

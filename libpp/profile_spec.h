@@ -49,7 +49,7 @@ public:
 	 * Use the spec to generate the list of candidate sample files.
 	 */
 	std::list<std::string>
-	generate_file_list(bool include_dependent) const;
+	generate_file_list(bool exclude_dependent) const;
 
 	/**
 	 * @param filename  the filename to check

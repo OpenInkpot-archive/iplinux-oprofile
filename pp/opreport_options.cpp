@@ -33,8 +33,7 @@ namespace options {
 	bool symbols;
 	bool debug_info;
 	bool details;
-	bool include_dependent;
-	bool hide_dependent;
+	bool exclude_dependent;
 	bool sort_by_vma;
 	bool sort_by_sample;
 	bool sort_by_symbol;
@@ -74,10 +73,8 @@ popt::option options_array[] = {
 		     "add source file and line number to output"),
 	popt::option(options::details, "details", 'a',
 		     "output detailed samples for each symbol"),
-	popt::option(options::include_dependent, "include-dependent", 'n',
-		     "include libs, modules etc."),
-	popt::option(options::hide_dependent, "hide-dependent", 'h',
-		     "include libs, modules in %-age count but hide them in output"),
+	popt::option(options::exclude_dependent, "exclude-dependent", 'x',
+		     "exclude libs, kernel, and module samples for applications"),
 	popt::option(sort_by, "sort", 's',
 		     "sort by", "vma,sample,symbol,debug,image"),
 	popt::option(exclude_symbols, "exclude-symbols", 'e',
@@ -198,7 +195,7 @@ void handle_options(vector<string> const & non_options)
 	profile_spec const spec =
 		profile_spec::create(non_options, options::extra_found_images);
 
-	list<string> sample_files = spec.generate_file_list(include_dependent);
+	list<string> sample_files = spec.generate_file_list(exclude_dependent);
 
 	cverb << "Matched sample files: " << sample_files.size() << endl;
 	copy(sample_files.begin(), sample_files.end(),

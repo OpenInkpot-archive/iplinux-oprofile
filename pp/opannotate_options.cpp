@@ -35,7 +35,7 @@ namespace options {
 	bool source;
 	bool assembly;
 	vector<string> objdump_params;
-	bool include_dependent;
+	bool exclude_dependent;
 }
 
 
@@ -69,8 +69,8 @@ popt::option options_array[] = {
 		     "exclude these comma separated symbols", "symbols"),
 	popt::option(options::objdump_params, "objdump-params", 'p',
 		     "additionnal params to pass to objdump", "parameters"),
-	popt::option(options::include_dependent, "include-dependent", 'n',
-		     "include libs, modules etc."),
+	popt::option(options::exclude_dependent, "exclude-dependent", 'n',
+		     "exclude libs, kernel, and module samples for applications"),
 	popt::option(options::source, "source", 's', "output source"),
 	popt::option(options::assembly, "assembly", 'a', "output assembly"),
 };
@@ -100,8 +100,7 @@ void handle_options(vector<string> const & non_options)
 	profile_spec const spec =
 		profile_spec::create(non_options, options::extra_found_images);
 
-	// FIXME add --include-dependent
-	list<string> sample_files = spec.generate_file_list(include_dependent);
+	list<string> sample_files = spec.generate_file_list(exclude_dependent);
 
 	cverb << "Matched sample files: " << sample_files.size() << endl;
 	copy(sample_files.begin(), sample_files.end(),

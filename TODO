@@ -12,7 +12,6 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
 
    - race with opcontrol --shutdown on odb_open() ?
 
- o default to opreport -n as discussed
  o we show a header but not column headers for image report
  o write the man page and xml doc (i'll do this right at the end - john)
  o I think we should have the ability to have *fixed* width headers, e.g. :
@@ -51,15 +50,8 @@ vma      samples  %           symbol name             app name
  o opreport unhandled option (probably not exhaustive) 
   --global-percent is not handled according to pp_interface
   --sort= (?)
- o pp/opreport --merge lib /lib/i686/libc-2.3.2.so doesn't do anything when using
-   separate, you need to specify --include-dependent ... makes sense ???
- o pp/opreport --merge=lib. This should give a list of all the binaries shown separately,
-   including the libs, e.g.
-
-   44 45% /bin/bash
-   54 45% /lib/libc.so
-
-   it doesn't work ...
+ o pp/opreport --exclude-dependent --merge lib /lib/i686/libc-2.3.2.so doesn't do anything when using
+   separate, you need to remove --exclude-dependent ... makes sense ???
 
  o opreport /usr/bin/whatever should imply -l (like oprofpp back-compat) but
   NOT if opreport <some spec> and it just *happens* to match one image. The
@@ -69,7 +61,7 @@ vma      samples  %           symbol name             app name
 	  what to do ?
 
  o merging vmlinux as dependent library and as primary image
-   $ pp/opreport --merge=lib -n | more
+   $ pp/opreport --merge=lib | more
    194561  40.1204 /boot/2.5.66/vmlinux
     62102  12.8060 /boot/2.5.66/vmlinux
   The first is the dependent and merged vmlinux from all application the

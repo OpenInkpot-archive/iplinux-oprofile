@@ -202,8 +202,7 @@ output_summaries(vector<group_summary> const & summaries, double total_count)
 
 		cout << get_filename(image) << endl;
 
-		bool hidedep = !options::include_dependent;
-		hidedep |= options::hide_dependent;
+		bool hidedep = options::exclude_dependent;
 		hidedep |= options::merge_by.lib;
 
 		summary const & first = it->files[0];
@@ -303,7 +302,7 @@ void output_symbols(profile_container const & samples)
 		flags = format_flags(flags | osf_percent_cumulated);
 	}
 
-	if (options::include_dependent && !options::merge_by.lib)
+	if (!options::exclude_dependent && !options::merge_by.lib)
 		flags = format_flags(flags | osf_image_name);
 
 	if (options::debug_info)

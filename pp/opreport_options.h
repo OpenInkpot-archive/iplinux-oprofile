@@ -30,8 +30,7 @@ namespace options {
 	extern bool debug_info;
 	extern bool details;
 	extern bool reverse_sort;
-	extern bool hide_dependent;
-	extern bool include_dependent;
+	extern bool exclude_dependent;
 	extern merge_option merge_by;
 	extern bool global_percent;
 	extern bool short_filename;

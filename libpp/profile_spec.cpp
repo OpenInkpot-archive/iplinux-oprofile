@@ -372,10 +372,10 @@ vector<string> filter_session(vector<string> const & session,
 
 
 bool valid_candidate(string const & filename, profile_spec const & spec,
-		     bool include_dependent)
+		     bool exclude_dependent)
 {
 	if (spec.match(filename)) {
-		if (!include_dependent &&
+		if (exclude_dependent &&
 		    filename.find("{dep}") != string::npos)
 			return false;
 		return true;
@@ -387,7 +387,7 @@ bool valid_candidate(string const & filename, profile_spec const & spec,
 }  // anonymous namespace
 
 
-list<string> profile_spec::generate_file_list(bool include_dependent) const
+list<string> profile_spec::generate_file_list(bool exclude_dependent) const
 {
 	// FIXME: isn't remove_duplicates faster than doing this, then copy() ?
 	set<string> unique_files;
@@ -431,7 +431,7 @@ list<string> profile_spec::generate_file_list(bool include_dependent) const
 		list<string>::const_iterator it = files.begin();
 		list<string>::const_iterator fend = files.end();
 		for (; it != fend; ++it) {
-			if (valid_candidate(*it, *this, include_dependent)) {
+			if (valid_candidate(*it, *this, exclude_dependent)) {
 				unique_files.insert(*it);
 			}
 		}

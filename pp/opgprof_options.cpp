@@ -39,9 +39,9 @@ popt::option options_array[] = {
 
 // FIXME: pass merge_option as parameter and re-use in opreport_options.cpp
 // *probably*
-bool try_partition_file(profile_spec const & spec, bool include_dependent)
+bool try_partition_file(profile_spec const & spec, bool exclude_dependent)
 {
-	list<string> sample_files = spec.generate_file_list(include_dependent);
+	list<string> sample_files = spec.generate_file_list(exclude_dependent);
 
 	cverb << "Matched sample files: " << sample_files.size() << endl;
 	copy(sample_files.begin(), sample_files.end(),
@@ -54,7 +54,7 @@ bool try_partition_file(profile_spec const & spec, bool include_dependent)
 	copy(unmerged_profile.begin(), unmerged_profile.end(),
 	     ostream_iterator<unmergeable_profile>(cverb, "\n"));
 
-	if (unmerged_profile.empty() && include_dependent == true) {
+	if (unmerged_profile.empty() && !exclude_dependent) {
 		cerr << "No samples files found: profile specification too "
 		     << "strict ?" << endl;
 		exit(EXIT_FAILURE);
@@ -102,10 +102,10 @@ void handle_options(vector<string> const & non_options)
 	profile_spec const spec =
 		profile_spec::create(non_options, options::extra_found_images);
 
-	// we do a first try w/o include-dependent if it fails we include
+	// we do a first try with exclude-dependent if it fails we include
 	// dependent. First try should catch "opgrof /usr/bin/make" whilst
 	// the second catch "opgprof /lib/libc-2.2.5.so"
-	if (!try_partition_file(spec, false)) {
-		try_partition_file(spec, true);
+	if (!try_partition_file(spec, true)) {
+		try_partition_file(spec, false);
 	}
 }
