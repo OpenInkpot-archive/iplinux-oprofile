@@ -136,9 +136,8 @@ ostream & operator<<(ostream & out, opd_header const & header)
 {
 	op_cpu cpu = static_cast<op_cpu>(header.cpu_type);
 
-	out << "CPU type: " << op_get_cpu_type_str(cpu) << endl;
-
-	out << "Estimated CPU speed was (MHz): " << header.cpu_speed << endl;
+	out << "CPU: " << op_get_cpu_type_str(cpu);
+	out << ", speed " << header.cpu_speed << " MHz (estimated)" << endl;
 
 	op_print_event(out, cpu, header.ctr_event,
 	               header.ctr_um, header.ctr_count);

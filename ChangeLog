@@ -1,5 +1,10 @@
 2003-05-10  John Levon  <levon@movementarian.org>
 
+	* libop++/op_header.cpp: make CPU info take up
+	one line not two
+
+2003-05-10  John Levon  <levon@movementarian.org>
+
 	* libop++/Makefile.am:
 	* libop++/op_header.cpp:
 	* libop++/op_print_event.h:
