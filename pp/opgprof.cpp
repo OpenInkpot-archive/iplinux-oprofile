@@ -22,7 +22,7 @@
 #include "image_errors.h"
 #include "opgprof_options.h"
 #include "cverb.h"
-#include "odb_hash.h"
+#include "op_file.h"
 
 using namespace std;
 
@@ -103,35 +103,27 @@ bool aligned_samples(profile_container const & samples, int gap)
 }
 
 
-void output_cg(FILE * fp, op_bfd const & abfd, samples_odb_t const & cg_db)
+void output_cg(FILE * fp, op_bfd const & abfd, profile_t const & cg_db)
 {
-	odb_node_nr_t node_nr, pos;
-	odb_node_t * node = odb_get_iterator(&cg_db, &node_nr);
-
-	opd_header const & head = *static_cast<opd_header *>(cg_db.base_memory);
 	bfd_vma offset = abfd.get_start_offset();
-	if (!head.is_kernel)
+	if (!cg_db.get_header().is_kernel)
 		offset = 0;
 
-	for (pos = 0; pos < node_nr; ++pos) {
-		if (!node[pos].key)
-			continue;
+	profile_t::iterator_pair p_it = cg_db.samples_range();
+	for (; p_it.first != p_it.second; ++p_it.first) {
+		bfd_vma from = p_it.first.vma() >> 32;
+		bfd_vma to = p_it.first.vma() & 0xffffffff;
 
-		bfd_vma from = node[pos].key >> 32;
-		bfd_vma to = node[pos].key & 0xffffffff;
-
-		from += offset;
-		to += offset;
 		op_write_u8(fp, GMON_TAG_CG_ARC);
-		op_write_vma(fp, abfd, abfd.offset_to_pc(from));
-		op_write_vma(fp, abfd, abfd.offset_to_pc(to));
-		op_write_u32(fp, node[pos].value);
+		op_write_vma(fp, abfd, abfd.offset_to_pc(from + offset));
+		op_write_vma(fp, abfd, abfd.offset_to_pc(to + offset));
+		op_write_u32(fp, p_it.first.count());
 	}
 }
 
 
 void output_gprof(op_bfd const & abfd, profile_container const & samples,
-                  samples_odb_t const & cg_db, bool is_cg,
+                  profile_t const & cg_db, bool is_cg,
                   string const & gmon_filename)
 {
 	static gmon_hdr hdr = { { 'g', 'm', 'o', 'n' }, GMON_VERSION, {0,0,0,},};
@@ -238,19 +230,31 @@ void load_samples(op_bfd const & abfd, list<string> const & files,
 }
 
 
-// FIXME: merging
-bool load_cg(samples_odb_t & cg_db, string const & filename)
+bool load_cg(profile_t & cg_db, list<string> const & files)
 {
-	string::size_type prefixend = filename.find_last_of("/");
-	string const base = filename.substr(0, prefixend + 1);
-	string const end = filename.substr(prefixend + 1, string::npos);
+	bool found = false;
+	list<string>::const_iterator it = files.begin();
+	list<string>::const_iterator const end = files.end();
 
-	string const cg_file = base + "{cg}/" + end;
+	/* the list of non cg files is a super set of the list of cg file
+	 * (module always log a samples to non-cg files before logging
+	 * call stack) so by using the list of non-cg file we are sure to get
+	 * all existing cg files.
+	 */
+	for (; it != end; ++it) {
+		string::size_type prefixend = it->find_last_of("/");
+		string const base = it->substr(0, prefixend + 1);
+		string const end = it->substr(prefixend + 1, string::npos);
 
-	int rc = odb_open(&cg_db, cg_file.c_str(), ODB_RDONLY,
-		sizeof(struct opd_header));
+		string const cg_file = base + "{cg}/" + end;
 
-	return rc == EXIT_SUCCESS;
+		if (op_file_readable(cg_file.c_str())) {
+			cg_db.add_sample_file(cg_file, 0);
+			found = true;
+		}
+	}
+
+	return found;
 }
 
 
@@ -274,15 +278,12 @@ int opgprof(vector<string> const & non_options)
 	load_samples(abfd, image_profile.groups[0].begin()->files,
 	             image_profile.image, samples);
 
-	samples_odb_t cg_db;
+	profile_t cg_db;
 
-	bool const is_cg = load_cg(cg_db,
-		*(image_profile.groups[0].begin()->files.begin()));
+	bool const is_cg =
+	   load_cg(cg_db, image_profile.groups[0].begin()->files);
 
 	output_gprof(abfd, samples, cg_db, is_cg, options::gmon_filename);
-
-	if (is_cg)
-		odb_close(&cg_db);
 
 	return 0;
 }

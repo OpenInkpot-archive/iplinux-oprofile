@@ -137,7 +137,7 @@ public:
 	unsigned int operator*() const { return it->second; }
 	const_iterator & operator++() { ++it; return *this; }
 
-	unsigned int vma() const { return it->first + start_offset; }
+	odb_key_t vma() const { return it->first + start_offset; }
 	unsigned int count() const { return **this; }
 
 	bool operator!=(const_iterator const & rhs) const {
