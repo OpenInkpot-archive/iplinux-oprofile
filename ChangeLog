@@ -1,5 +1,9 @@
 2003-05-01  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* libpp/derive_files.cpp: typo
+
+2003-05-01  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libutil++/op_bfd.cpp: remove _init from excluded symbol
 	* libpp/profile_container.cpp: tidy
 
