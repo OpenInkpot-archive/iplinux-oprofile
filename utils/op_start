@@ -85,7 +85,7 @@ do_help() {
 	  --kernel-only=[0|1]          profile only the kernel
 	  --ctrN-event=name            symbolic event name for ctr N
 	  --ctrN-count=val             number of events between samples for ctr N
-	  --ctrN-unit-mask=val         unit mask for ctr N
+	  --ctrN-unit-mask=val         unit mask for ctr N (e.g. --ctr0-unit-mask=0xf)
 	  --ctrN-kernel=[0|1]          whether to count kernel events for ctr N
 	  --ctrN-user=[0|1]            whether to count user events for ctr N
 	Allowed counters for N are [$OP_COUNTERS]
