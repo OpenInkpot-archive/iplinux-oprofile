@@ -15,14 +15,14 @@ libpp_a_SOURCES = \
 	format_output.h \
 	locate_images.cpp \
 	locate_images.h \
-	parse_cmdline.cpp \
-	parse_cmdline.h \
 	partition_files.h \
 	partition_files.cpp \
 	profile.cpp \
 	profile.h \
 	profile_container.cpp \
 	profile_container.h \
+	profile_spec.cpp \
+	profile_spec.h \
 	sample_container.cpp \
 	sample_container.h \
 	split_sample_filename.cpp \

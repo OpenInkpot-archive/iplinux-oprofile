@@ -16,15 +16,15 @@
 
 #include "generic_spec.h"
 
-
-class parse_cmdline;
+class profile_spec;
 
 /**
  * a class to split and store components of a sample filename.
  */
 class filename_spec
 {
-	friend class parse_cmdline;
+	friend class profile_spec;
+
 public:
 	/**
 	 * @param filename  the samples filename

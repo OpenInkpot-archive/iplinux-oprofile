@@ -1,6 +1,6 @@
 /**
- * @file parse_cmdline.h
- * A tag:value as described by pp_interface parser
+ * @file profile_spec.h
+ * Contains a PP profile specification
  *
  * @remark Copyright 2003 OProfile authors
  * @remark Read the file COPYING
@@ -8,8 +8,8 @@
  * @author Philippe Elie
  */
 
-#ifndef PARSE_CMDLINE_H
-#define PARSE_CMDLINE_H
+#ifndef PROFILE_SPEC_H
+#define PROFILE_SPEC_H
 
 #include <map>
 #include <vector>
@@ -19,27 +19,56 @@
 #include "filename_spec.h"
 #include "comma_list.h"
 
-
 /**
- * command line parser for tag:value things.
+ * Holds a parsed profile spec composed of tag:value pairs, as given in
+ * pp_interface documentation.
  *
  *  @internal implemented through a map of string, pointer to function member
  *  indexed by tag_name.
- *
- * FIXME: this is either a singleton or a few free function with a bunch of
- * global variable, I prefer a singleton (forced to singleton by documentation
- * only)
  */
-class parse_cmdline
+class profile_spec
 {
 public:
-	parse_cmdline();
+	/**
+	 * @param args  a vector of non options strings
+	 *
+	 * Factory returning a profile_spec instance storing all valid
+	 * tag:value contained in args vector doing also alias
+	 * substitution, non-valid tag:value options are considered
+	 * as image:value
+	 */
+	static profile_spec create(std::vector<std::string> const & args);
+
+	/**
+	 * @param include_dependent  whether to include dependent
+	 * sub-images too
+	 *
+	 * Use the spec to generate the list of candidate sample files.
+	 */
+	std::list<std::string>
+	generate_file_list(bool include_dependent) const;
+
+	/**
+	 * @param filename  the filename to check
+	 *
+	 * return true if filename match the spec. PP:3.24 internal loop
+	 */
+	bool match(std::string const & filename) const;
+
+private:
+	profile_spec();
 
 	/**
 	 * @param tag_value  a "tag:value" to interpret, all error throw an
 	 * invalid_argument exception.
 	 */
-	void set(std::string const & tag_value);
+	void parse(std::string const & tag_value);
+
+	/**
+	 * must be called when parsing is finished to check constraint
+	 * on argument stated in various place of PP:3
+	 */
+	void validate();
 
 	/**
 	 * @param image  an image or a libray name given on command line
@@ -53,25 +82,6 @@ public:
 	 */
 	bool is_valid_tag(std::string const &);
 
-	/**
-	 * must be called when parsing is finished to check constraint
-	 * on argument stated in various place of PP:3
-	 */
-	void validate();
-
-	/**
-	 * getter allowing to create the sample filename candidate list
-	 */
-	std::vector<std::string> get_session() const;
-	std::vector<std::string> get_session_exclude() const;
-
-	/**
-	 * @param filename  the filename to check
-	 *
-	 * return true if filename match the spec. PP:3.24 internal loop
-	 */
-	bool match(std::string const & filename) const;
-private:
 	/**
 	 * implement tag parsing: PP:3.3 to 3.16
 	 */
@@ -90,7 +100,7 @@ private:
 	void parse_tgid(std::string const &);
 	void parse_cpu(std::string const &);
 
-	typedef void (parse_cmdline::*action_t)(std::string const &);
+	typedef void (profile_spec::*action_t)(std::string const &);
 	typedef std::map<std::string, action_t> parse_table_t;
 	parse_table_t parse_table;
 
@@ -135,20 +145,5 @@ private:
 	/// true if samples-file: tag has been seen
 	bool file_spec_set_p;
 };
-
-
-/**
- * @param args  a vector of non options strings
- *
- * return a parser_cmdline instance storing all valid tag:value contained in
- * args vector doing also alias substitution, non valid tag:value options are
- * considered as image:value
- *
- */
-parse_cmdline handle_non_options(std::vector<std::string> const & args);
-
-// FIXME: doc
-std::list<std::string> select_sample_filename(parse_cmdline const & parser,
-					      bool include_dependent);
 
 #endif /* !PARSE_CMDLINE_H */

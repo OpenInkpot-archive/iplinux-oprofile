@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <iterator>
 
-#include "parse_cmdline.h"
+#include "profile_spec.h"
 #include "split_sample_filename.h"
 #include "opreport_options.h"
 #include "popt_options.h"
@@ -198,10 +198,9 @@ void handle_options(vector<string> const & non_options)
 
 	options::symbol_filter = string_filter(include_symbols, exclude_symbols);
 
-	parse_cmdline parser = handle_non_options(non_options);
+	profile_spec spec = profile_spec::create(non_options);
 
-	list<string> sample_files =
-		select_sample_filename(parser, options::include_dependent);
+	list<string> sample_files = spec.generate_file_list(include_dependent);
 
 	cverb << "Matched sample files: " << sample_files.size() << endl;
 	copy(sample_files.begin(), sample_files.end(),

@@ -13,7 +13,7 @@
 #include <list>
 #include <iterator>
 
-#include "parse_cmdline.h"
+#include "profile_spec.h"
 #include "partition_files.h"
 #include "op_exception.h"
 #include "opannotate_options.h"
@@ -96,11 +96,10 @@ void handle_options(vector<string> const & non_options)
 
 	options::file_filter = path_filter(include_file, exclude_file);
 
-	parse_cmdline parser = handle_non_options(non_options);
+	profile_spec spec = profile_spec::create(non_options);
 
 	// FIXME add --include-dependent
-	list<string> sample_files =
-		select_sample_filename(parser, include_dependent);
+	list<string> sample_files = spec.generate_file_list(include_dependent);
 
 	cverb << "Matched sample files: " << sample_files.size() << endl;
 	copy(sample_files.begin(), sample_files.end(),

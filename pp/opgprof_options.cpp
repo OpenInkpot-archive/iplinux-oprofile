@@ -16,7 +16,7 @@
 #include "opgprof_options.h"
 #include "popt_options.h"
 #include "cverb.h"
-#include "parse_cmdline.h"
+#include "profile_spec.h"
 #include "partition_files.h"
 
 using namespace std;
@@ -40,10 +40,9 @@ popt::option options_array[] = {
 
 // FIXME: pass merge_option as parameter and re-use in opreport_options.cpp
 // *probably*
-bool try_partition_file(parse_cmdline const & parser,  bool include_dependent)
+bool try_partition_file(profile_spec const & spec,  bool include_dependent)
 {
-	list<string> sample_files =
-		select_sample_filename(parser, include_dependent);
+	list<string> sample_files = spec.generate_file_list(include_dependent);
 
 	cverb << "Matched sample files: " << sample_files.size() << endl;
 	copy(sample_files.begin(), sample_files.end(),
@@ -101,12 +100,12 @@ void handle_options(vector<string> const & non_options)
 {
 	cverb << "output filename: " << options::gmon_filename << endl;
 
-	parse_cmdline parser = handle_non_options(non_options);
+	profile_spec spec = profile_spec::create(non_options);
 
 	// we do a first try w/o include-dependent if it fails we include
 	// dependent. First try should catch "opgrof /usr/bin/make" whilst
 	// the second catch "opgprof /lib/libc-2.2.5.so"
-	if (!try_partition_file(parser, false)) {
-		try_partition_file(parser, true);
+	if (!try_partition_file(spec, false)) {
+		try_partition_file(spec, true);
 	}
 }

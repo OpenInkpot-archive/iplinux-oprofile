@@ -1,5 +1,22 @@
 2003-05-07  John Levon  <levon@movementarian.org>
 
+	* libpp/Makefile.am:
+	* libpp/parse_cmdline.h:
+	* libpp/parse_cmdline.cpp: rename to ...
+
+	* libpp/profile_spec.h:
+	* libpp/profile_spec.cpp: this. Make handle_nonoptions()
+	be a static factory create() method instead. Make
+	select_sample_filenames() be a member generate_file_list()
+	instead. Concomitant cleanups.
+
+	* libpp/filename_spec.h:
+	* pp/opannotate_options.cpp:
+	* pp/opgprof_options.cpp:
+	* pp/opreport_options.cpp: changes from above
+
+2003-05-07  John Levon  <levon@movementarian.org>
+
 	* libpp/profile.cpp: fix stupid error in last commit
 
 2003-05-07  John Levon  <levon@movementarian.org>
@@ -14,11 +31,11 @@
 
 2003-05-07  John Levon  <levon@movementarian.org>
 
-	* derive_files.h:
-	* derive_files.cpp: rename files as ...
+	* libpp/derive_files.h:
+	* libpp/derive_files.cpp: rename files as ...
 
-	* locate_images.h:
-	* locate_images.cpp: this.
+	* libpp/locate_images.h:
+	* libpp/locate_images.cpp: this.
 
 	* libpp/Makefile.am:
 	* libpp/partition_files.h:

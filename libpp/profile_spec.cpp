@@ -1,6 +1,6 @@
 /**
- * @file parse_cmdline.h
- * A tag:value as described by pp_interface parser
+ * @file profile_spec.cpp
+ * Contains a PP profile specification
  *
  * @remark Copyright 2003 OProfile authors
  * @remark Read the file COPYING
@@ -16,7 +16,7 @@
 
 #include "file_manip.h"
 #include "op_config.h"
-#include "parse_cmdline.h"
+#include "profile_spec.h"
 #include "string_manip.h"
 #include "glob_filter.h"
 
@@ -24,57 +24,57 @@
 using namespace std;
 
 
-parse_cmdline::parse_cmdline()
+profile_spec::profile_spec()
 	:
 	set_p(false),
 	file_spec_set_p(false)
 {
-	parse_table["sample-file"] = &parse_cmdline::parse_sample_file;
-	parse_table["binary"] = &parse_cmdline::parse_binary;
-	parse_table["session"] = &parse_cmdline::parse_session;
+	parse_table["sample-file"] = &profile_spec::parse_sample_file;
+	parse_table["binary"] = &profile_spec::parse_binary;
+	parse_table["session"] = &profile_spec::parse_session;
 	parse_table["session-exclude"] =
-		&parse_cmdline::parse_session_exclude;
-	parse_table["image"] = &parse_cmdline::parse_image;
-	parse_table["image-exclude"] = &parse_cmdline::parse_image_exclude;
-	parse_table["lib-image"] = &parse_cmdline::parse_lib_image;
+		&profile_spec::parse_session_exclude;
+	parse_table["image"] = &profile_spec::parse_image;
+	parse_table["image-exclude"] = &profile_spec::parse_image_exclude;
+	parse_table["lib-image"] = &profile_spec::parse_lib_image;
 	parse_table["lib-image-exclude"] =
-		&parse_cmdline::parse_lib_image_exclude;
-	parse_table["event"] = &parse_cmdline::parse_event;
-	parse_table["count"] = &parse_cmdline::parse_count;
-	parse_table["unit-mask"] = &parse_cmdline::parse_unitmask;
-	parse_table["tid"] = &parse_cmdline::parse_tid;
-	parse_table["tgid"] = &parse_cmdline::parse_tgid;
-	parse_table["cpu"] = &parse_cmdline::parse_cpu;
+		&profile_spec::parse_lib_image_exclude;
+	parse_table["event"] = &profile_spec::parse_event;
+	parse_table["count"] = &profile_spec::parse_count;
+	parse_table["unit-mask"] = &profile_spec::parse_unitmask;
+	parse_table["tid"] = &profile_spec::parse_tid;
+	parse_table["tgid"] = &profile_spec::parse_tgid;
+	parse_table["cpu"] = &profile_spec::parse_cpu;
 }
 
 
-void parse_cmdline::set(string const & tag_value)
+void profile_spec::parse(string const & tag_value)
 {
 	string value;
 	action_t action = get_handler(tag_value, value);
 	if (!action) {
-		throw invalid_argument("parse_cmdline::set(): not "
+		throw invalid_argument("profile_spec::parse(): not "
 				       "a valid tag \"" + tag_value + "\"");
 	}
 
 	(this->*action)(value);
 }
 
-void parse_cmdline::set_image_or_lib_name(string const & str)
+void profile_spec::set_image_or_lib_name(string const & str)
 {
 	set_p = true;
 	image_or_lib_image.push_back(str);
 }
 
 
-bool parse_cmdline::is_valid_tag(string const & tag_value)
+bool profile_spec::is_valid_tag(string const & tag_value)
 {
 	string value;
 	return get_handler(tag_value, value);
 }
 
 
-void parse_cmdline::validate()
+void profile_spec::validate()
 {
 	// 3.3 sample_file can be used only with binary
 	// 3.4 binary can be used only with sample_file
@@ -95,117 +95,105 @@ void parse_cmdline::validate()
 }
 
 
-vector<string> parse_cmdline::get_session() const
-{
-	return session;
-}
-
-
-vector<string> parse_cmdline::get_session_exclude() const
-{
-	return session_exclude;
-}
-
-
-void parse_cmdline::parse_sample_file(string const & str)
+void profile_spec::parse_sample_file(string const & str)
 {
 	file_spec_set_p = true;
 	file_spec.set_sample_filename(str);
 }
 
 
-void parse_cmdline::parse_binary(string const & str)
+void profile_spec::parse_binary(string const & str)
 {
 	binary = str;
 }
 
 
-void parse_cmdline::parse_session(string const & str)
+void profile_spec::parse_session(string const & str)
 {
 	set_p = true;
 	separate_token(session, str, ',');
 }
 
 
-void parse_cmdline::parse_session_exclude(string const & str)
+void profile_spec::parse_session_exclude(string const & str)
 {
 	set_p = true;
 	separate_token(session_exclude, str, ',');
 }
 
 
-void parse_cmdline::parse_image(string const & str)
+void profile_spec::parse_image(string const & str)
 {
 	set_p = true;
 	separate_token(image, str, ',');
 }
 
 
-void parse_cmdline::parse_image_exclude(string const & str)
+void profile_spec::parse_image_exclude(string const & str)
 {
 	set_p = true;
 	separate_token(image_exclude, str, ',');
 }
 
 
-void parse_cmdline::parse_lib_image(string const & str)
+void profile_spec::parse_lib_image(string const & str)
 {
 	set_p = true;
 	separate_token(lib_image, str, ',');
 }
 
 
-void parse_cmdline::parse_lib_image_exclude(string const & str)
+void profile_spec::parse_lib_image_exclude(string const & str)
 {
 	set_p = true;
 	separate_token(lib_image_exclude, str, ',');
 }
 
 
-void parse_cmdline::parse_event(string const & str)
+void profile_spec::parse_event(string const & str)
 {
 	set_p = true;
 	event.set(str);
 }
 
 
-void parse_cmdline::parse_unitmask(string const & str)
+void profile_spec::parse_unitmask(string const & str)
 {
 	set_p = true;
 	unitmask.set(str);
 }
 
 
-void parse_cmdline::parse_count(string const & str)
+void profile_spec::parse_count(string const & str)
 {
 	set_p = true;
 	count.set(str);
 }
 
 
-void parse_cmdline::parse_tid(string const & str)
+void profile_spec::parse_tid(string const & str)
 {
 	set_p = true;
 	tid.set(str, false);
 }
 
 
-void parse_cmdline::parse_tgid(string const & str)
+void profile_spec::parse_tgid(string const & str)
 {
 	set_p = true;
 	tgid.set(str, false);
 }
 
 
-void parse_cmdline::parse_cpu(string const & str)
+void profile_spec::parse_cpu(string const & str)
 {
 	set_p = true;
 	cpu.set(str, false);
 }
 
 
-parse_cmdline::action_t
-parse_cmdline::get_handler(string const & tag_value, string & value)
+profile_spec::action_t
+profile_spec::get_handler(string const & tag_value, string & value)
 {
 	string::size_type pos = tag_value.find_first_of(':');
 	if (pos == string::npos) {
@@ -224,7 +212,7 @@ parse_cmdline::get_handler(string const & tag_value, string & value)
 }
 
 
-bool parse_cmdline::match(string const & filename) const
+bool profile_spec::match(string const & filename) const
 {
 	filename_spec spec(filename);
 
@@ -299,35 +287,35 @@ bool parse_cmdline::match(string const & filename) const
 }
 
 
-bool parse_cmdline::is_empty() const
+bool profile_spec::is_empty() const
 {
 	return !set_p;
 }
 
 
 /* TODO */
-static bool substitute_alias(parse_cmdline & /*parser*/,
+static bool substitute_alias(profile_spec & /*parser*/,
 			     string const & /*arg*/)
 {
 	return false;
 }
 
 
-parse_cmdline handle_non_options(vector<string> const & args)
+profile_spec profile_spec::create(vector<string> const & args)
 {
-	parse_cmdline parser;
+	profile_spec spec;
 
 	for (size_t i = 0 ; i < args.size() ; ++i) {
-		if (parser.is_valid_tag(args[i])) {
-			parser.set(args[i]);
-		} else if (!substitute_alias(parser, args[i])) {
-			parser.set_image_or_lib_name(args[i]);
+		if (spec.is_valid_tag(args[i])) {
+			spec.parse(args[i]);
+		} else if (!substitute_alias(spec, args[i])) {
+			spec.set_image_or_lib_name(args[i]);
 		}
 	}
 
-	parser.validate();
+	spec.validate();
 
-	return parser;
+	return spec;
 }
 
 namespace {
@@ -344,9 +332,9 @@ vector<string> filter_session(vector<string> const & session,
 	for (size_t i = 0 ; i < session_exclude.size() ; ++i) {
 		// FIXME: would we use fnmatch on each item, are we allowed
 		// to --session=current* ?
-		vector<string>::iterator it = find(result.begin(), 
-						   result.end(),
-						   session_exclude[i]);
+		vector<string>::iterator it =
+			find(result.begin(), result.end(), session_exclude[i]);
+
 		if (it != result.end()) {
 			result.erase(it);
 		}
@@ -355,10 +343,11 @@ vector<string> filter_session(vector<string> const & session,
 	return result;
 }
 
-bool valid_candidate(string const & filename, parse_cmdline const & parser,
+
+bool valid_candidate(string const & filename, profile_spec const & spec,
 		     bool include_dependent)
 {
-	if (parser.match(filename)) {
+	if (spec.match(filename)) {
 		if (!include_dependent &&
 		    filename.find("{dep}") != string::npos)
 			return false;
@@ -371,22 +360,18 @@ bool valid_candidate(string const & filename, parse_cmdline const & parser,
 }  // anonymous namespace
 
 
-list<string> select_sample_filename(parse_cmdline const & parser,
-	bool include_dependent)
+list<string> profile_spec::generate_file_list(bool include_dependent) const
 {
+	// FIXME: isn't remove_duplicates faster than doing this, then copy() ?
 	set<string> unique_files;
 
-	vector<string> session_include = parser.get_session();
-	vector<string> session_exclude = parser.get_session_exclude();
+	vector<string> sessions = filter_session(session, session_exclude);
 
-	vector<string> session = filter_session(session_include,
-						session_exclude);
-
-	if (session.empty()) {
+	if (sessions.empty()) {
 		ostringstream os;
 		os << "No session given" << endl;
 		os << "included session was:" << endl;
-		copy(session_include.begin(), session_include.end(),
+		copy(session.begin(), session.end(),
 		     ostream_iterator<string>(os, "\n"));
 		os << "excluded session was:" << endl;
 		copy(session_exclude.begin(), session_exclude.end(),
@@ -396,14 +381,17 @@ list<string> select_sample_filename(parse_cmdline const & parser,
 
 	bool found_file = false;
 
-	for (size_t i = 0; i < session.size(); ++i) {
-		if (session[i].empty())
+	vector<string>::const_iterator cit = sessions.begin();
+	vector<string>::const_iterator end = sessions.end();
+
+	for (; cit != end; ++cit) {
+		if (cit->empty())
 			continue;
 
 		string base_dir;
-		if (session[i][0] != '.' && session[i][0] != '/')
+		if ((*cit)[0] != '.' && (*cit)[0] != '/')
 			base_dir = OP_SAMPLES_DIR;
-		base_dir += session[i];
+		base_dir += *cit;
 
 		base_dir = relative_to_absolute_path(base_dir);
 
@@ -413,16 +401,18 @@ list<string> select_sample_filename(parse_cmdline const & parser,
 		if (!files.empty())
 			found_file = true;
 
-		list<string>::const_iterator it;
-		for (it = files.begin(); it != files.end(); ++it) {
-			if (valid_candidate(*it, parser, include_dependent)) {
+		list<string>::const_iterator it = files.begin();
+		list<string>::const_iterator fend = files.end();
+		for (; it != fend; ++it) {
+			if (valid_candidate(*it, *this, include_dependent)) {
 				unique_files.insert(*it);
 			}
 		}
 	}
 
 	if (!found_file) {
-		// FIXME: must we throw ?
+		// FIXME: must we throw ? (yes, please - exit() shouldn't be
+		// in library code)
 		cerr << "No sample file found: try running opcontrol --dump\n"
 		     << "or specify a session containing sample files" << endl;
 		exit(EXIT_FAILURE);
