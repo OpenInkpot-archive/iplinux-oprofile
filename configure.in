@@ -93,7 +93,7 @@ fi
 AC_SUBST(OPROFILE_25)
 AC_MSG_RESULT($OPROFILE_25)
 
-AM_CONDITIONAL(WITH_KERNEL_SUPPORT, test $OPROFILE_25 = true)
+AM_CONDITIONAL(WITH_KERNEL_SUPPORT, test $OPROFILE_25 = yes)
  
 if test "$OPROFILE_25" = "no"; then
 	if test ! -f $KINC/linux/autoconf.h; then
