@@ -1,7 +1,13 @@
 2003-11-15  Philippe Elie  <phil.el@wanadoo.fr>
 
-	* libpp/profile.h: itertor::vma() must return the full key not only
-	  an usnigned int.
+	* pp/opgprof.cpp: simplify a bit cg handling, we don't need to know
+	  if we retrieved some cg files since the profile_t will be empty
+	  in this case
+
+2003-11-15  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/profile.h: iterator::vma() must return the full key not only
+	  an unsigned int.
 	* pp/opgprof.cpp: implement merging of cg files.
 
 2003-11-15  Philippe Elie  <phil.el@wanadoo.fr>

@@ -123,8 +123,7 @@ void output_cg(FILE * fp, op_bfd const & abfd, profile_t const & cg_db)
 
 
 void output_gprof(op_bfd const & abfd, profile_container const & samples,
-                  profile_t const & cg_db, bool is_cg,
-                  string const & gmon_filename)
+                  profile_t const & cg_db, string const & gmon_filename)
 {
 	static gmon_hdr hdr = { { 'g', 'm', 'o', 'n' }, GMON_VERSION, {0,0,0,},};
 
@@ -202,8 +201,7 @@ void output_gprof(op_bfd const & abfd, profile_container const & samples,
 
 	op_write_file(fp, hist, histsize * sizeof(u16));
 
-	if (is_cg)
-		output_cg(fp, abfd, cg_db);
+	output_cg(fp, abfd, cg_db);
 
 	op_close_file(fp);
 
@@ -230,9 +228,8 @@ void load_samples(op_bfd const & abfd, list<string> const & files,
 }
 
 
-bool load_cg(profile_t & cg_db, list<string> const & files)
+void load_cg(profile_t & cg_db, list<string> const & files)
 {
-	bool found = false;
 	list<string>::const_iterator it = files.begin();
 	list<string>::const_iterator const end = files.end();
 
@@ -248,13 +245,9 @@ bool load_cg(profile_t & cg_db, list<string> const & files)
 
 		string const cg_file = base + "{cg}/" + end;
 
-		if (op_file_readable(cg_file.c_str())) {
+		if (op_file_readable(cg_file.c_str()))
 			cg_db.add_sample_file(cg_file, 0);
-			found = true;
-		}
 	}
-
-	return found;
 }
 
 
@@ -280,10 +273,9 @@ int opgprof(vector<string> const & non_options)
 
 	profile_t cg_db;
 
-	bool const is_cg =
-	   load_cg(cg_db, image_profile.groups[0].begin()->files);
+	load_cg(cg_db, image_profile.groups[0].begin()->files);
 
-	output_gprof(abfd, samples, cg_db, is_cg, options::gmon_filename);
+	output_gprof(abfd, samples, cg_db, options::gmon_filename);
 
 	return 0;
 }
