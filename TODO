@@ -7,6 +7,11 @@ for some pointers and/or read HACKING and doc/CodingStyle.
 -----------
 
  o "finish" and merge BRANCH_CALLGRAPH. Phew.
+ o first quick test show it works but I got in oprofiled.log (possibly when
+  shutdown oprofile)
+	Read buffer of 35253 entries.
+	Read buffer of 35220 entries.
+	Unknown code !
 
 0.9 release
 -----------

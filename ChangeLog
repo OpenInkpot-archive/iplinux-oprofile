@@ -7,7 +7,7 @@
 	* daemon/opd_stats.h:
 	* daemon/liblegacy/opd_24_stats.c:
 	* daemon/liblegacy/opd_24_stats.h:
-	* daemon/liblegacy/opd_proc.c: log sample lost due to sample open
+	* daemon/liblegacy/opd_proc.c: log sample lost due to sample file open
 	  failure
 
 2003-11-12  John Levon  <levon@movementarian.org>
