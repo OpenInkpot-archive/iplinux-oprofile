@@ -47,6 +47,8 @@ After merging with trunk
 
  o look if we must remove help_str support from libopt++
  o implement pp_interface alias
+ o restore stream state when using persistant formating flag like:
+     s/ostream os; os << hex << foo/os << hex << foo << dec/
 
 
 Before 1.0 big stuff
