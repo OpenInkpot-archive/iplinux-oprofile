@@ -46,7 +46,7 @@ vma      samples  %           symbol name             app name
   NOT if opreport <some spec> and it just *happens* to match one image. The
   same idea can be applied to remove the app_name field in output since it's
   annoying to get a report with the same application showed on each line.
-	- difficult one: with -n (to be the default), it's actually useful information.
+	- difficult one: without -x, it's actually useful information.
 	  what to do ?
 
  o merging vmlinux as dependent library and as primary image

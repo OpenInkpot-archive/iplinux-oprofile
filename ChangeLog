@@ -1,5 +1,10 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* pp/opreport.cpp: move some code around that
+	outputs the image summaries
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* libpp/format_output.h:
 	* libpp/format_output.cpp:
 	* pp/opreport.cpp:

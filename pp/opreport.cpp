@@ -46,6 +46,19 @@ string get_filename(string const & filename)
 }
 
 
+/// Output a count and a percentage
+void output_counter(double total_count, size_t count)
+{
+	// FIXME: left or right, op_time was using left
+	// left io manipulator doesn't exist in 2.95
+//	cout.setf(ios::left, ios::adjustfield);
+	cout << setw(9) << count << " ";
+	double ratio = op_ratio(count, total_count);
+	cout << format_double(ratio * 100, percent_int_width,
+			      percent_fract_width) << " ";
+}
+
+
 /// storage for a merged file summary
 struct summary {
 	summary() : count(0) {}
@@ -84,7 +97,73 @@ struct group_summary {
 				: rhs.count < lhs.count;
 		}
 	};
+
+	/// return true if the deps should not be output
+	bool should_hide_deps() const;
+	/// output this summary
+	void output(double total) const;
+	/// show an image summary for the dependent images
+	void output_deps(double total) const;
 };
+
+
+void group_summary::output_deps(double total) const
+{
+	if (should_hide_deps())
+		return;
+
+	vector<summary>::const_iterator cit = files.begin();
+	vector<summary>::const_iterator const end = files.end();
+
+	for (; cit != end; ++cit) {
+		cout << "\t";
+		double tot_count = options::global_percent 
+			? total : count;
+		output_counter(tot_count, cit->count);
+
+		if (cit->lib_image.empty())
+			cout << " " << get_filename(cit->image_name);
+		else
+			cout << " " << get_filename(cit->lib_image);
+		cout << endl;
+	}
+}
+
+
+bool group_summary::should_hide_deps() const
+{
+	string image = image_name;
+	if (options::merge_by.lib && !lib_image.empty())
+		image = lib_image;
+
+	summary const & first = files[0];
+	string const & dep_image = first.lib_image.empty()
+		? first.image_name : first.lib_image;
+
+	bool hidedep = options::exclude_dependent;
+	hidedep |= options::merge_by.lib;
+
+	// If we're only going to show the main image again,
+	// and it's the same image (can be different when
+	// it's a library and there's no samples for the main
+	// application image), then don't show it
+	hidedep |= files.size() == 1 && dep_image == image;
+	return hidedep;
+}
+
+
+void group_summary::output(double total) const
+{
+	output_counter(total, count);
+
+	string image = image_name;
+	if (options::merge_by.lib && !lib_image.empty())
+		image = lib_image;
+
+	cout << get_filename(image) << endl;
+
+	output_deps(total);
+}
 
 
 /**
@@ -146,41 +225,6 @@ double populate_summaries(partition_files const & files,
 }
 
 
-/// Output a count and a percentage
-void output_counter(double total_count, size_t count)
-{
-	// FIXME: left or right, op_time was using left
-	// left io manipulator doesn't exist in 2.95
-//	cout.setf(ios::left, ios::adjustfield);
-	cout << setw(9) << count << " ";
-	double ratio = op_ratio(count, total_count);
-	cout << format_double(ratio * 100, percent_int_width,
-			      percent_fract_width) << " ";
-}
-
-
-/**
- * Show an image summary for the dependent images.
- */
-void output_dep_summaries(group_summary const & group, double total_count)
-{
-	for (size_t i = 0; i < group.files.size(); ++i) {
-		summary const & summ = group.files[i];
-
-		cout << "\t";
-		double tot_count = options::global_percent 
-			? total_count : group.count;
-		output_counter(tot_count, summ.count);
-
-		if (summ.lib_image.empty())
-			cout << " " << get_filename(summ.image_name);
-		else
-			cout << " " << get_filename(summ.lib_image);
-		cout << endl;
-	}
-}
-
-
 /**
  * Display all the given summary information
  */
@@ -194,29 +238,7 @@ output_summaries(vector<group_summary> const & summaries, double total_count)
 		if ((it->count * 100.0) / total_count < options::threshold)
 			continue;
 
-		output_counter(total_count, it->count);
-
-		string image = it->image_name;
-		if (options::merge_by.lib && !it->lib_image.empty())
-			image = it->lib_image;
-
-		cout << get_filename(image) << endl;
-
-		bool hidedep = options::exclude_dependent;
-		hidedep |= options::merge_by.lib;
-
-		summary const & first = it->files[0];
-		string const & dep_image = first.lib_image.empty()
-			? first.image_name : first.lib_image;
-
-		// If we're only going to show the main image again,
-		// and it's the same image (can be different when
-		// it's a library and there's no samples for the main
-		// application image), then don't show it
-		hidedep |= it->files.size() == 1 && dep_image == image;
-
-		if (!hidedep)
-			output_dep_summaries(*it, total_count);
+		it->output(total_count);
 	}
 }
 
