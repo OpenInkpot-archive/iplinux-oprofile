@@ -1,3 +1,9 @@
+2003-05-07  John Levon  <levon@movementarian.org>
+
+	* libpp/Makefile.am:
+	* session.h:
+	* session.cpp: remove session.{h,cpp}
+
 2003-05-07  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* pp/oprofpp.cpp pp/oprofpp_options.cpp pp/oprofpp_options.h:

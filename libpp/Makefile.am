@@ -25,8 +25,6 @@ libpp_a_SOURCES = \
 	profile_container.h \
 	sample_container.cpp \
 	sample_container.h \
-	session.cpp \
-	session.h \
 	split_sample_filename.cpp \
 	split_sample_filename.h \
 	symbol_container.cpp \
