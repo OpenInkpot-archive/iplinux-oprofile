@@ -86,8 +86,7 @@ class op_bfd {
 public:
 	/**
 	 * @param filename the name of the image file
-	 * @param excluded symbol names to exclude
-	 * @param included symbol names to include
+	 * @param symbol_filter  filter to apply to symbols
 	 *
 	 * All errors are fatal.
 	 */

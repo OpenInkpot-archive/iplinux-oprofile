@@ -47,7 +47,7 @@ struct mangle_values {
 
 /**
  * op_mangle_filename - mangle a sample filename
- * @param params  parameters to use as mangling input
+ * @param values  parameters to use as mangling input
  *
  * See also PP:3 for the encoding scheme
  *

@@ -47,7 +47,6 @@ public:
 
 	/**
 	 * accumulate_samples - lookup samples from a range of vma address
-	 * @param counter where to accumulate the samples
 	 * @param start start index of the samples.
 	 * @param end end index of the samples.
 	 *
@@ -62,8 +61,8 @@ public:
 
 	/**
 	 * cumulate sample file to our container of samples
-	 * @param sample_file  sample file name
-	 * @param start_offset the offset for kernel files, \sa start_offset
+	 * @param filename  sample file name
+	 * @param offset the offset for kernel files, \sa start_offset
 	 *
 	 * store samples for one sample file, sample file header is sanitized.
 	 *

@@ -33,6 +33,7 @@ class profile_spec
 public:
 	/**
 	 * @param args  a vector of non options strings
+	 * @param extra extra image paths to search
 	 *
 	 * Factory returning a profile_spec instance storing all valid
 	 * tag:value contained in args vector doing also alias
@@ -43,8 +44,7 @@ public:
 	                           extra_images const & extra);
 
 	/**
-	 * @param include_dependent  whether to include dependent
-	 * sub-images too
+	 * @param exclude_dependent  whether to exclude dependent sub-images
 	 *
 	 * Use the spec to generate the list of candidate sample files.
 	 */

@@ -1,5 +1,5 @@
 /**
- * @file partition_files.h
+ * @file partition_files.cpp
  * Encapsulation for merging and partitioning samples filename list
  *
  * @remark Copyright 2003 OProfile authors

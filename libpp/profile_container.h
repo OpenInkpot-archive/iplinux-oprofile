@@ -56,8 +56,6 @@ public:
 	 * @param profile the samples files container
 	 * @param abfd the associated bfd object
 	 * @param app_name the owning application name of sample
-	 * @param symbol_name if non empty add will record samples only
-	 * for this symbol name else all samples will be recorded
 	 *
 	 * add() is an helper for delayed ctor. Take care you can't safely
 	 * make any call to add after any other member function call.
@@ -106,7 +104,7 @@ public:
 
 	/**
 	 * select_symbols - create a set of symbols sorted by sample count
-	 * @param symbol_choice parameters to use/fill in when selecting
+	 * @param choice  parameters to use/fill in when selecting
 	 */
 	symbol_collection const select_symbols(symbol_choice & choice) const;
 

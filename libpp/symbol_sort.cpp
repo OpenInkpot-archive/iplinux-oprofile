@@ -1,5 +1,5 @@
 /**
- * @file symbol_sort.h
+ * @file symbol_sort.cpp
  * Sorting symbols
  *
  * @remark Copyright 2002, 2003 OProfile authors
@@ -22,7 +22,7 @@ namespace {
 
 
 int compare_by(sort_options::sort_order order,
-	       symbol_entry const * lhs, symbol_entry const * rhs)
+               symbol_entry const * lhs, symbol_entry const * rhs)
 {
 	switch (order) {
 		case sort_options::sample:
@@ -32,7 +32,7 @@ int compare_by(sort_options::sort_order order,
 				return -1;
 			return 0;
 		case sort_options::symbol:
-			// FIXME demangle optionnaly the symbol
+			// FIXME demangle optionally the symbol
 			return lhs->name.compare(rhs->name);
 		case sort_options::image:
 			return lhs->image_name.compare(rhs->image_name);
@@ -61,9 +61,9 @@ int compare_by(sort_options::sort_order order,
 
 
 struct symbol_compare {
-	symbol_compare(vector<sort_options::sort_order> const & _compare_order,
-		       bool _reverse_sort)
-		: compare_order(_compare_order), reverse_sort(_reverse_sort) {}
+	symbol_compare(vector<sort_options::sort_order> const & order,
+	               bool reverse)
+		: compare_order(order), reverse_sort(reverse) {}
 
 	bool operator()(symbol_entry const * lhs,
 			symbol_entry const * rhs) const;

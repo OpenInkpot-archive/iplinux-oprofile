@@ -1,5 +1,5 @@
 /**
- * @file split_sample_filename.h
+ * @file split_sample_filename.cpp
  * Split a sample filename into its constituent parts
  *
  * @remark Copyright 2003 OProfile authors

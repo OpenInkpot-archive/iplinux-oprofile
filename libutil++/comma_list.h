@@ -46,10 +46,10 @@ public:
 	bool match(T value) const;
 
 	/**
-	 * @param spec  the spec to test
+	 * @param value  the value to test
 	 *
-	 * return true if spec.is_all == true or spec match one the stored
-	 * value in items
+	 * return true if value.is_all == true or value match one of the
+	 * stored values in items
 	 */
 	bool match(generic_spec<T> const & value) const;
 private:

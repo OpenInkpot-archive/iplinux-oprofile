@@ -94,7 +94,6 @@ typedef std::multimap<std::string, split_sample_filename const> image_set;
 
 /**
  * @param files a set of sample filename to sort
- * @param merge_lib true if the image name must be derived from lib name
  * @param extra_images container of extra images found
  *
  * return the same set as passed in files but sorted by image name, where
