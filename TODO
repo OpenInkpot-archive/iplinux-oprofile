@@ -49,20 +49,6 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
      prefer it to be done *before* any long-drawn daemon rewrite. A daemon rewrite
      should be an equivalent transformation IMHO otherwise we will have problems...
 
- o in some case (--separate=library and not using --merge=lib) we get multiple
-  time error message "last modified time ... does not match ...". This is because
-  we do mtime checking in output_symbols_count() when we iterate over the
-  partition_files, because we delay the creation of profile_t until then.
-
-  I think what we really want to do is, instead of passing partition_files about
-  is to make a container of profile_t's reflecting a similar structure. BUT instead
-  of add_sample_filename() (we don't want to do that for all the profiles at once)
-  we have a smaller constructor, and we still delay the actual processing of the
-  data until later. Comments phil ?
-  We can do that but I think it's better to sperate the error checking.
-  It will allow more freedom on how to refactorize partition_files and
-  image_set
-  
  o test with 2.95 if cout.rdbuf(os.rdbuf()); work even when there is non
   flushed data in cout buffer. It's also not clear if at exit() we have not
   a problem (who is the owner of the buffer and in what order of and cout will

@@ -16,6 +16,7 @@
 #include "file_manip.h"
 #include "partition_files.h"
 #include "split_sample_filename.h"
+#include "name_storage.h"
 
 using namespace std;
 
@@ -173,6 +174,35 @@ partition_files::filename_set const & partition_files::set(size_t index) const
 
 namespace {
 
+name_storage warned_images;
+
+void not_found(string const & image)
+{
+	static bool warned_already;
+	if (!warned_images.present(image)) {
+		cerr << "warning: couldn't find the binary file "
+		     << image << endl;
+		warned_images.create(image);
+	}
+
+	if (!warned_already) {
+		cerr << "Try adding a search path with the "
+		     << "-p option." << endl;
+		warned_already = true;
+	}
+}
+
+
+void not_readable(string const & image)
+{
+	if (!warned_images.present(image)) {
+		cerr << "warning: couldn't read the binary file "
+		     << image << endl;
+		warned_images.create(image);
+	}
+}
+
+
 struct handle_insert {
 	handle_insert(image_set & o, extra_images const & e)
 		: out(o), extra(e) {}
@@ -184,17 +214,9 @@ struct handle_insert {
 		string const found_name = find_image_path(image_name, extra);
 
 		if (found_name.empty()) {
-			static bool warned_already;
-			cerr << "Couldn't find the binary file " << image_name
-			     << endl;
-			if (!warned_already) {
-				cerr << "Try adding a search path with the "
-				     << "-p option." << endl;
-				warned_already = true;
-			}
+			not_found(image_name);
 		} else if (!op_file_readable(found_name)) {
-			cerr << "Couldn't read the binary file " << image_name
-			     << endl;
+			not_readable(image_name);
 		} else {
 			image_set::value_type value(found_name, profile);
 			out.insert(value);

@@ -1,3 +1,13 @@
+2003-05-17  John Levon  <levon@movementarian.org>
+
+	* libpp/name_storage.h:
+	* libpp/name_storage.cpp: add present()
+
+	* libpp/op_header.cpp:
+	* libpp/partition_files.cpp: use a name store
+	to track what we've warned about, and clean up
+	the warnings a bit
+
 2003-05-16  John Levon  <levon@movementarian.org>
 
 	* libutil++/op_bfd.h:

@@ -39,6 +39,12 @@ name_id name_storage::create(string const & name)
 }
 
 
+bool name_storage::present(string const & name) const
+{
+	return ids.find(name) != ids.end();
+}
+
+
 std::string const & name_storage::name(name_id id) const
 {
 	return (names.find(id))->second.name;

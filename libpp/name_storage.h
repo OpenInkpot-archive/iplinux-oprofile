@@ -28,7 +28,10 @@ public:
 	name_storage();
 
 	/// allocate or re-use an ID for this name
-	name_id create(std::string const & original);
+	name_id create(std::string const & name);
+
+	/// return true if the given name is present
+	bool present(std::string const & name) const;
 
 	/// return the original name for the given ID
 	std::string const & name(name_id id) const;

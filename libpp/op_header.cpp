@@ -18,6 +18,7 @@
 #include "op_file.h"
 #include "op_header.h"
 #include "op_events.h"
+#include "name_storage.h"
 
 using namespace std;
 
@@ -53,6 +54,13 @@ void op_check_header(opd_header const & h1, opd_header const & h2)
 }
 
 
+namespace {
+
+name_storage warned_files;
+
+}
+
+
 void check_mtime(string const & file, opd_header const & header)
 {
 	time_t const newmtime = op_get_mtime(file.c_str());
@@ -60,16 +68,28 @@ void check_mtime(string const & file, opd_header const & header)
 	if (newmtime == header.mtime)
 	       return;
 
+	if (warned_files.present(file))
+		return;
+
+	warned_files.create(file);
+
 	// Files we couldn't get mtime of have zero mtime
 	if (!header.mtime) {
 		cerr << "warning: could not check that the binary file "
-		     << file << "\nhas not been modified since "
+		     << file << " has not been modified since "
 			"the profile was taken. Results may be inaccurate.\n";
 	} else {
-		cerr << "warning: the last modified time of the binary file\n"
-		     << file << "\ndoes not match that of the sample file.\n"
-			"Either this is the wrong binary or the binary "
+		static bool warned_already = false;
+
+		cerr << "warning: the last modified time of the binary file "
+		     " does not match that of the sample file for " << file
+		     << "\n";
+
+		if (!warned_already) {
+			cerr << "Either this is the wrong binary or the binary "
 			"has been modified since the sample file was created.\n";
+			warned_already = true;
+		}
 	}
 }
 
