@@ -25,6 +25,7 @@ namespace options {
 	extern bool hide_dependent;
 	extern bool include_dependent;
 	extern merge_option merge_by;
+	extern bool global_percent;
 }
 
 /**

@@ -1,5 +1,11 @@
 2003-04-25  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* pp/opreport_options.h: export global_percent
+	* pp/opreport.cpp: finish to implement op_time like behavior. Remains
+	  to implement op_time -l
+
+2003-04-25  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libpp/partition_files.cpp: fix a crash when profile spec is empty
 
 	* pp/opreport_options.cpp: bailout if no samples files are found
