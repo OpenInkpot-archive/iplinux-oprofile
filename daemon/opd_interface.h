@@ -1,7 +1,7 @@
 /**
- * @file op_interface_25.h
+ * @file opd_interface.h
  *
- * Module / user space interface for the new OProfile patch
+ * Module / user space interface for 2.6 kernels and above
  *
  * @remark Copyright 2002 OProfile authors
  * @remark Read the file COPYING
@@ -10,11 +10,8 @@
  * @author Philippe Elie
  */
 
-#ifndef OP_INTERFACE_25_H
-#define OP_INTERFACE_25_H
-
-#include "op_config.h"
-#include "op_types.h"
+#ifndef OPD_INTERFACE_H
+#define OPD_INTERFACE_H
 
 #define CTX_SWITCH_CODE			1
 #define CPU_SWITCH_CODE			2
@@ -23,8 +20,6 @@
 #define KERNEL_EXIT_SWITCH_CODE		5
 #define MODULE_LOADED_CODE              6
 #define CTX_TGID_CODE			7
-#define TRACE_BEGIN_CODE		8
-#define TRACE_END_CODE			9
-#define LAST_CODE			10
+#define LAST_CODE			8
  
-#endif /* OP_INTERFACE_25_H */
+#endif /* OPD_INTERFACE_H */

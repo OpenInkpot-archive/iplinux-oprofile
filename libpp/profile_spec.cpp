@@ -31,10 +31,9 @@ namespace {
 // we should maintain the original to maintain the wordexp etc.
 string const fixup_image_spec(string const & str, extra_images const & extra)
 {
-	string const image = find_image_path(str, extra);
-	if (image.empty())
-		return str;
-	return image;
+	// FIXME: what todo if an error in find_image_path() ?
+	image_error error;
+	return find_image_path(str, extra, error);
 }
 
 
@@ -48,7 +47,7 @@ void fixup_image_spec(vector<string> & images, extra_images const & extra)
 	}
 }
 
-}
+}  // anon namespace
 
 
 profile_spec::profile_spec(extra_images const & extra)
@@ -250,8 +249,8 @@ bool profile_spec::match(string const & filename) const
 	if (!image_or_lib_image.empty()) {
 		// Need the path search for the benefit of modules
 		// which have "/oprofile" or similar
-		string simage = find_image_path(spec.image, extra);
-		string slib_image = find_image_path(spec.lib_image, extra);
+		string simage = fixup_image_spec(spec.image, extra);
+		string slib_image = fixup_image_spec(spec.lib_image, extra);
 		glob_filter filter(image_or_lib_image, image_exclude);
 		if (filter.match(simage) || filter.match(slib_image)) {
 			matched_by_image_or_lib_image = true;
@@ -344,13 +343,9 @@ profile_spec profile_spec::create(vector<string> const & args,
 		if (spec.is_valid_tag(args[i])) {
 			spec.parse(args[i]);
 		} else if (!substitute_alias(spec, args[i])) {
-			char * filename = op_get_link(args[i].c_str());
-			string file = filename ? filename : args[i].c_str();
-			file = relative_to_absolute_path(file,
-			                                 dirname(args[i]));
+			string file = op_follow_link(args[i]);
+			file = relative_to_absolute_path(file);
 			spec.set_image_or_lib_name(file);
-			if (filename)
-				free(filename);
 		}
 	}
 

@@ -54,19 +54,23 @@ op_bfd_symbol::op_bfd_symbol(bfd_vma vma, size_t size, string const & name)
 }
 
 
-op_bfd::op_bfd(string const & fname, string_filter const & symbol_filter)
+op_bfd::op_bfd(string const & fname, string_filter const & symbol_filter,
+               bool & ok)
 	:
 	filename(fname),
-	file_size(0),
+	file_size(-1),
 	ibfd(0),
 	text_offset(0),
 	debug_info(false)
 {
-	if (filename.empty()) {
-		ostringstream os;
-		os << "op_bfd() empty image filename.\n";
-		throw op_runtime_error(os.str());
-	}
+	// after creating all symbol it's convenient for user code to access
+	// symbols through a vector. We use an intermediate list to avoid a
+	// O(N²) behavior when we will filter vector element below
+	symbols_found_t symbols;
+
+	// if there's a problem already, don't try to open it
+	if (!ok)
+		goto out_fail;
 
 	op_get_fsize(filename.c_str(), &file_size);
 
@@ -75,17 +79,19 @@ op_bfd::op_bfd(string const & fname, string_filter const & symbol_filter)
 	ibfd = bfd_openr(filename.c_str(), NULL);
 
 	if (!ibfd) {
-		ostringstream os;
-		os << "bfd_openr of " << filename << " failed.";
-		throw op_runtime_error(os.str(), errno);
+		cverb << "bfd_openr failed for " << filename << endl;
+		ok = false;
+		goto out_fail;
 	}
+
+	{
 
 	char ** matching;
 
 	if (!bfd_check_format_matches(ibfd, bfd_object, &matching)) {
-		ostringstream os;
-		os << "BFD format failure for " << filename << endl;
-		throw op_runtime_error(os.str());
+		cverb << "BFD format failure for " << filename << endl;
+		ok = false;
+		goto out_fail;
 	}
 
 	asection const * sect = bfd_get_section_by_name(ibfd, ".text");
@@ -102,19 +108,27 @@ op_bfd::op_bfd(string const & fname, string_filter const & symbol_filter)
 		}
 	}
 
-	// after creating all symbol it's convenient for user code to access
-	// symbols through a vector. We use an intermediate list to avoid a
-	// O(N²) behavior when we will filter vector element below
-	symbols_found_t symbols;
+	}
 
 	get_symbols(symbols);
+
+out:
 	add_symbols(symbols, symbol_filter);
+	return;
+out_fail:
+	if (ibfd)
+		bfd_close(ibfd);
+	ibfd = NULL;
+	// make the fake symbol fit within the fake file
+	file_size = -1;
+	goto out;
 }
 
 
 op_bfd::~op_bfd()
 {
-	bfd_close(ibfd);
+	if (ibfd)
+		bfd_close(ibfd);
 }
 
 
@@ -195,17 +209,6 @@ struct remove_filter {
 } // namespace anon
 
 
-/**
- * get_symbols - op_bfd ctor helper
- *
- * Parse and sort in ascending order all symbols
- * in the file pointed to by abfd that reside in
- * a %SEC_CODE section.
- *
- * The symbols are filtered through
- * the interesting_symbol() predicate and sorted
- * with op_bfd_symbol::operator<() comparator.
- */
 void op_bfd::get_symbols(op_bfd::symbols_found_t & symbols)
 {
 	uint nr_all_syms;
@@ -307,7 +310,7 @@ bfd_vma op_bfd::offset_to_pc(bfd_vma offset) const
 
 
 bool op_bfd::get_linenr(symbol_index_t sym_idx, unsigned int offset,
-			string & filename, unsigned int & linenr) const
+			string & source_filename, unsigned int & linenr) const
 {
 	linenr = 0;
 
@@ -359,9 +362,10 @@ bool op_bfd::get_linenr(symbol_index_t sym_idx, unsigned int offset,
 			// FIXME: enough precise message ? We will get this
 			// message for static C++ function too, must we
 			// warn only if the following check fails ?
-			cerr << "warning: some functions compiled without "
-			     << "debug information may have incorrect source "
-			     << "line attributions" << endl;
+			cerr << "warning: \"" << get_filename() << "\" some "
+			     << "functions compiled without debug information "
+			     << "may have incorrect source line attributions"
+			     << endl;
 			warned = true;
 		}
 		if (sym.name().find(functionname) == string::npos)
@@ -421,9 +425,9 @@ bool op_bfd::get_linenr(symbol_index_t sym_idx, unsigned int offset,
 	}
 
 	if (cfilename) {
-		filename = cfilename;
+		source_filename = cfilename;
 	} else {
-		filename = "";
+		source_filename = "";
 		linenr = 0;
 	}
 
@@ -519,5 +523,9 @@ string op_bfd::get_filename() const
 
 size_t op_bfd::bfd_arch_bits_per_address() const
 {
-	return ::bfd_arch_bits_per_address(ibfd);
+	if (ibfd)
+		return ::bfd_arch_bits_per_address(ibfd);
+	// FIXME: this function should be called only if the underlined ibfd
+	// is ok, must we throw ?
+	return sizeof(bfd_vma);
 }

@@ -12,7 +12,7 @@
 AC_PREREQ(2.13)
 
 AC_INIT(libop/op_config.h)
-AM_INIT_AUTOMAKE(oprofile, 0.7cvs)
+AM_INIT_AUTOMAKE(oprofile, 0.7.1cvs)
 AM_CONFIG_HEADER(config.h)
 
 AC_PROG_RANLIB
@@ -33,7 +33,7 @@ test "$LD" || AC_ERROR(ld not found)
 
 AX_FIND_KERNEL
 
-if test "$OPROFILE_25" = "no"; then
+if test "$OPROFILE_26" = "no"; then
 	AX_CONFIG_MODULE
 fi
 
@@ -55,7 +55,7 @@ dnl some distro have a libiberty.a but does not have a libiberty.h
 AC_CHECK_HEADERS(libiberty.h)
 AC_CHECK_LIB(iberty, cplus_demangle,, AC_MSG_ERROR([liberty library not found]))
 AC_CHECK_FUNCS(xcalloc)
-AC_CHECK_FUNCS(xmemdump)
+AC_CHECK_FUNCS(xmemdup)
 
 ORIG_SAVE_LIBS="$LIBS"
 AC_CHECK_LIB(popt, poptGetContext,, AC_MSG_ERROR([popt library not found]))
@@ -104,9 +104,8 @@ AC_ARG_ENABLE(pch,
 	[  --enable-pch                 enable precompiled header (default is disabled)],
 	enable_pch=$enableval, enable_pch=no)
 if test "$enable_pch" = yes; then
-	AX_CHECK_PRECOMPILED_HEADER(OP_CXXFLAGS, enable_pch)
+	AX_CHECK_PRECOMPILED_HEADER(OP_CXXFLAGS)
 fi
-AM_CONDITIONAL(enable_pch, test "$enable_pch" = yes)
 
 AX_CHECK_DOCBOOK
 
@@ -130,6 +129,7 @@ AX_CXXFLAGS_OPTION(OP_CXXFLAGS,[-Wall])
 AX_CFLAGS_OPTION(OP_CFLAGS,[-fno-common])
 AX_CXXFLAGS_OPTION(OP_CXXFLAGS,[-fno-common])
 AX_CXXFLAGS_OPTION(OP_CXXFLAGS,[-ftemplate-depth-50])
+AX_CFLAGS_OPTION(OP_CFLAGS,[-Wdeclaration-after-statement])
 
 dnl enable option to use GCC test coverage
 AC_ARG_ENABLE(gcov,
@@ -153,33 +153,40 @@ AC_SUBST(OP_CXXFLAGS)
 
 # fixups for config.h
 if test "$prefix" = "NONE"; then
-	prefix="$ac_default_prefix"
+	my_op_prefix="$ac_default_prefix"
+else
+	my_op_prefix="$prefix"
 fi
+my_op_datadir="$my_op_prefix/share"
+
 if test "$exec_prefix" = "NONE"; then
-	exec_prefix="$prefix"
+	my_op_exec_prefix="$my_op_prefix"
+else
+	my_op_exec_prefix="$exec_prefix"
 fi
-if test "$bindir" = "NONE"; then
-	bindir="$prefix/bin"
-fi
-if test "$datadir" = "NONE"; then
-	datadir="$prefix/share"
-fi
-OP_DATADIR=`eval echo "$datadir/$PACKAGE/"`
+my_op_bindir="$my_op_exec_prefix/bin"
+
+OP_DATADIR=`eval echo "$my_op_datadir/$PACKAGE/"`
 AC_DEFINE_UNQUOTED(OP_DATADIR, "$OP_DATADIR", [package data directory])
-OP_BINDIR=`eval echo "$bindir/"`
+OP_BINDIR=`eval echo "$my_op_bindir/"`
 AC_DEFINE_UNQUOTED(OP_BINDIR, "$OP_BINDIR", [package binary directory])
 
 AC_OUTPUT(Makefile \
 	m4/Makefile \
 	libutil/Makefile \
+	libutil/tests/Makefile \
 	libutil++/Makefile \
 	libop/Makefile \
+	libop/tests/Makefile \
 	libopt++/Makefile \
 	libdb/Makefile \
 	libcgdb/Makefile \
+	libdb/tests/Makefile \
 	libabi/Makefile \
 	libregex/Makefile \
+	libregex/tests/Makefile \
 	libregex/stl.pat \
+	libregex/tests/mangled-name \
 	dae/Makefile \
 	daemon/Makefile \
 	events/Makefile \

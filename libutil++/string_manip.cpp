@@ -53,7 +53,6 @@ bool tobool(string const & s)
 }
 
 
-/// split string s by first occurence of char c, returning the second part
 string split(string & s, char c)
 {
 	string::size_type i = s.find_first_of(c);
@@ -140,7 +139,10 @@ string const format_double(double value, size_t int_width, size_t fract_width)
 		   << setprecision(fract_width - 3) << value;
 	}
 
-	return os.str();
+	string formatted = os.str();
+	if (is_prefix(formatted, "100."))
+		formatted.erase(formatted.size() -1);
+	return formatted;
 }
 
 template <>

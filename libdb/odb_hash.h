@@ -67,10 +67,6 @@ typedef struct {
  *  the node array: (descr->size * sizeof(odb_node_t) entries
  *  the hash table: array of odb_index_t indexing the node array 
  *    (descr->size * BUCKET_FACTOR) entries
- *
- * the err_msg field is cleared by odb_clear_error(). This field record
- * the first error encountered. It's a fatal error if an error occur and this
- * field is non NULL
  */
 typedef struct {
 	odb_node_t * node_base;		/**< base memory area of the page */
@@ -81,7 +77,6 @@ typedef struct {
 	unsigned int offset_node;	/**< from base_memory to node array */
 	void * base_memory;		/**< base memory of the maped memory */
 	int fd;				/**< mmaped memory file descriptor */
-	char const * err_msg;		/**< *first* error message */
 } samples_odb_t;
 
 #ifdef __cplusplus
@@ -112,17 +107,13 @@ void odb_init(samples_odb_t * hash);
  * The sizeof_header parameter allows the data file to have a header
  * at the start of the file which is skipped.
  * odb_open() always preallocate a few number of pages.
- * returns EXIT_SUCCESS on success, EXIT_FAILURE on failure
- * on failure hash->err_msg contains a pointer to a malloced string
- * containing an error message.
+ * returns 0 on success, errno on failure
  */
-int odb_open(samples_odb_t * hash, char const * filename, enum odb_rw rw, size_t sizeof_header);
+int odb_open(samples_odb_t * hash, char const * filename,
+             enum odb_rw rw, size_t sizeof_header);
 
 /** Close the given ODB hash */
 void odb_close(samples_odb_t * hash);
-
-/** clear the last occured error */
-void odb_clear_error(samples_odb_t * hash);
 
 /** issue a msync on the used size of the mmaped file */
 void odb_sync(samples_odb_t const * hash);
@@ -130,47 +121,33 @@ void odb_sync(samples_odb_t const * hash);
 /** add a page returning its index. Take care all page pointer can be
  * invalidated by this call !
  * returns the index of the created node on success or
- * ODB_NODE_NR_INVALID on failure
- * on failure hash->err_msg contains a pointer to a malloced string
- * containing an error message.
+ * ODB_NODE_NR_INVALID on failure, in this case this function do nothing
+ * and errno is set by the first libc call failure allowing to retry after
+ * cleanup some program resource.
  */
 odb_node_nr_t odb_hash_add_node(samples_odb_t * hash);
 
 /** "immpossible" node number to indicate an error from odb_hash_add_node() */
 #define ODB_NODE_NR_INVALID ((odb_node_nr_t)-1)
 
-/* odb_debug.c */
+/* db_debug.c */
 /** check than the hash is well build */
 int odb_check_hash(const samples_odb_t * hash);
-/** display the item in hash table */
-void odb_display_hash(samples_odb_t const * hash);
-/** same as above, do not travel through the hash table but display raw node */
-void odb_raw_display_hash(samples_odb_t const * hash);
 
-/* odb_stat.c */
+/* db_stat.c */
 typedef struct odb_hash_stat_t odb_hash_stat_t;
 odb_hash_stat_t * odb_hash_stat(samples_odb_t const * hash);
 void odb_hash_display_stat(odb_hash_stat_t const * stats);
 void odb_hash_free_stat(odb_hash_stat_t * stats);
 
-/* odb_insert.c */
+/* db_insert.c */
 /** insert info at key, if key already exist the info is added to the
  * existing samples
  * returns EXIT_SUCCESS on success, EXIT_FAILURE on failure
- * on failure hash->err_msg contains a pointer to a malloced string
- * containing an error message.
  */
 int odb_insert(samples_odb_t * hash, odb_key_t key, odb_value_t value);
 
-/* odb_travel.c */
-/** the call back type to pass to travel() */
-typedef void (*samples_odb_travel_callback)(odb_key_t key, odb_value_t value, void * data);
-/** iterate through key in range [first, last[ passing it to callback,
- * data is optional user data to pass to the callback */
-/* caller woukd use the more efficient odb_get_iterator() interface. This
- * interface is for debug purpose and is likely to be removed in future */
-void samples_odb_travel(samples_odb_t const * hash, odb_key_t first, odb_key_t last,
-	       samples_odb_travel_callback callback, void * data);
+/* db_travel.c */
 /**
  * return a base pointer to the node array and number of node in this array
  * caller then will iterate through:
@@ -200,11 +177,6 @@ static __inline unsigned int odb_do_hash(samples_odb_t const * hash, odb_key_t v
 	 */
 	return ((value << 0) ^ (value >> 8)) & hash->hash_mask;
 }
-
-/** not a part of the public interface: set error message to error. Fatal error
- * occur if  hash->error_msg != NULL
- */
-void odb_set_error(samples_odb_t * hash, char const * err_msg);
 
 #ifdef __cplusplus
 }

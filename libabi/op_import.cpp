@@ -113,16 +113,14 @@ void import_from_abi(abi const & abi, void const * srcv,
 
 	// begin extracting opd header
 	ext.extract(head->version, src, "sizeof_u32", "offsetof_header_version");
-	ext.extract(head->is_kernel, src, "sizeof_u8", "offsetof_header_is_kernel");
+	ext.extract(head->cpu_type, src, "sizeof_u32", "offsetof_header_cpu_type");
 	ext.extract(head->ctr_event, src, "sizeof_u32", "offsetof_header_ctr_event");
 	ext.extract(head->ctr_um, src, "sizeof_u32", "offsetof_header_ctr_um");
-	ext.extract(head->ctr, src, "sizeof_u32", "offsetof_header_ctr");
-	ext.extract(head->cpu_type, src, "sizeof_u32", "offsetof_header_cpu_type");
 	ext.extract(head->ctr_count, src, "sizeof_u32", "offsetof_header_ctr_count");
-	head->cpu_speed = 0.; // "double" extraction is unlikely to work
+	ext.extract(head->is_kernel, src, "sizeof_u32", "offsetof_header_is_kernel");
+	// "double" extraction is unlikely to work
+	head->cpu_speed = 0.0;
 	ext.extract(head->mtime, src, "sizeof_time_t", "offsetof_header_mtime");
-	ext.extract(head->separate_lib_samples, src, "sizeof_int", "offsetof_header_separate_lib_samples");
-	ext.extract(head->separate_kernel_samples, src, "sizeof_int", "offsetof_header_separate_kernel_samples");
 	src += abi.need("sizeof_struct_opd_header");
 	// done extracting opd header
 
@@ -149,7 +147,7 @@ void import_from_abi(abi const & abi, void const * srcv,
 		ext.extract(val, src, "sizeof_odb_value_t", "offsetof_node_value");
 		int rc = odb_insert(dest, key, val);
 		if (rc != EXIT_SUCCESS) {
-			cerr << dest->err_msg << endl;
+			cerr << strerror(rc) << endl;
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -184,34 +182,34 @@ int main(int argc, char const ** argv)
 		cerr << "input abi is identical to native. "
 		     << "no conversion necessary." << endl;
 		exit(1);
-	} else {
-		int in_fd;
-		struct stat statb;
-		void * in;
-		samples_odb_t dest;
-		int rc;
-
-		assert((in_fd = open(inputs[0].c_str(), O_RDONLY)) > 0);		
-		assert(fstat(in_fd, &statb) == 0);
-		assert((in = mmap(0, statb.st_size, PROT_READ,
-				  MAP_PRIVATE, in_fd, 0)) != (void *)-1);
-
-		rc = odb_open(&dest, output_filename.c_str(), ODB_RDWR,
-			      sizeof(struct opd_header));
-		if (rc != EXIT_SUCCESS) {
-			cerr << "odb_open() fail:\n"
-			     << dest.err_msg << endl;
-			exit(EXIT_FAILURE);
-		}
-
-		try {
-			import_from_abi(input_abi, in, statb.st_size, &dest);
-		} catch (abi_exception & e) {
-			cerr << "caught abi exception: " << e.desc << endl;
-		}
-
-		odb_close(&dest);
-
-		assert(munmap(in, statb.st_size) == 0);
 	}
+
+	int in_fd;
+	struct stat statb;
+	void * in;
+	samples_odb_t dest;
+	int rc;
+
+	assert((in_fd = open(inputs[0].c_str(), O_RDONLY)) > 0);		
+	assert(fstat(in_fd, &statb) == 0);
+	assert((in = mmap(0, statb.st_size, PROT_READ,
+			  MAP_PRIVATE, in_fd, 0)) != (void *)-1);
+
+	rc = odb_open(&dest, output_filename.c_str(), ODB_RDWR,
+		      sizeof(struct opd_header));
+	if (rc) {
+		cerr << "odb_open() fail:\n"
+		     << strerror(rc) << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	try {
+		import_from_abi(input_abi, in, statb.st_size, &dest);
+	} catch (abi_exception & e) {
+		cerr << "caught abi exception: " << e.desc << endl;
+	}
+
+	odb_close(&dest);
+
+	assert(munmap(in, statb.st_size) == 0);
 }

@@ -13,12 +13,14 @@
 #define OPD_MAPPING_H
 
 #include "op_types.h"
+#include "op_list.h"
 
 struct opd_image;
 struct opd_proc;
 struct op_note;
 
 struct opd_map {
+	struct list_head next;
 	struct opd_image * image;
 	unsigned long start;
 	unsigned long offset;
@@ -26,7 +28,7 @@ struct opd_map {
 };
 
 void opd_init_hash_map(void);
-void opd_init_maps(struct opd_proc * proc);
+void opd_cleanup_hash_name(void);
 void opd_handle_mapping(struct op_note const * note);
 void opd_add_mapping(struct opd_proc * proc, struct opd_image *,
 		unsigned long start, unsigned long offset, unsigned long end);

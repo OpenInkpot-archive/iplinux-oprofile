@@ -37,26 +37,28 @@ public:
 	void add_format(format_flags flag);
 
 	/**
-	 * Set the number of collected count groups. Each group
+	 * Set the number of collected profile classes. Each class
 	 * will output sample count and percentage in extra columns.
 	 *
 	 * This class assumes that the profile information has been
-	 * populated with the right number of groups.
+	 * populated with the right number of classes.
 	 */
-	void set_nr_groups(size_t nr_count_groups);
+	void set_nr_classes(size_t nr_classes);
 
 	/** output a vector of symbols to out according to the output format
 	 * specifier previously set by call(s) to add_format() */
 	void output(std::ostream & out, symbol_collection const & v);
 
 	/// set the output_details boolean
-	void show_details();
+	void show_details(bool);
 	/// set the need_header boolean to false
-	void hide_header();
+	void show_header(bool);
 	/// show long (full path) filenames
-	void show_long_filenames();
+	void show_long_filenames(bool);
 	/// format for 64 bit wide VMAs
-	void vma_format_64bit();
+	void vma_format_64bit(bool);
+	/// use global count rather symbol count for details percent
+	void show_global_percent(bool);
 
 private:
 
@@ -64,11 +66,11 @@ private:
 	struct field_datum {
 		field_datum(symbol_entry const & sym,
 		            sample_entry const & s,
-			    size_t group)
-			: symbol(sym), sample(s), count_group(group) {}
+			    size_t pc)
+			: symbol(sym), sample(s), pclass(pc) {}
 		symbol_entry const & symbol;
 		sample_entry const & sample;
-		size_t count_group;
+		size_t pclass;
 	};
  
 	/// format callback type
@@ -133,8 +135,8 @@ private:
 	/// formatting flags set
 	format_flags flags;
  
-	/// count groups
-	size_t nr_groups;
+	/// number of profile classes
+	size_t nr_classes;
 
 	/// container we work from
 	profile_container const & profile;
@@ -149,8 +151,6 @@ private:
 	count_array_t total_count_details;
 	/// detailed percentage so far
 	count_array_t cumulated_percent_details;
-	/// used for outputting header
-	bool first_output;
 	/// true if we need to format as 64 bits quantities
 	bool vma_64;
 	/// true if we need to show details for each symbols
@@ -159,6 +159,9 @@ private:
 	bool need_header;
 	/// false if we use basename(filename) in output rather filename
 	bool long_filenames;
+	/// bool if details percentage are relative to total count rather to
+	/// symbol count
+	bool global_percent;
 };
 
 } // namespace format_output 

@@ -1,7 +1,7 @@
 /**
  * @file op_interface.h
  *
- * Module / user space interface
+ * Module / user space interface for 2.4
  *
  * @remark Copyright 2002 OProfile authors
  * @remark Read the file COPYING
@@ -34,7 +34,8 @@ struct op_sample {
 	unsigned long eip; /**< eip value where occur interrupt */
 	u32 counter; /**< counter nr */
 	u32 pid; /**< 32 bits can hold any pid */
-} __attribute__((__packed__));
+	u32 tgid; /**< always equal to pid for kernel < 2.4.0 */
+};
 
 /** the current kernel-side profiler state */
 enum oprof_state {
@@ -65,6 +66,7 @@ struct op_note {
 	unsigned long   offset;
 	unsigned int    hash;
 	unsigned int	pid;
+	unsigned int    tgid;
 	unsigned short	type;
 };
 

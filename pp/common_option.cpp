@@ -31,7 +31,7 @@ namespace {
 string threshold;
 vector<string> image_path;
 
-popt::option options_array[] = {
+popt::option common_options_array[] = {
 	popt::option(options::verbose, "verbose", 'V',
 		     "verbose output"),
 	popt::option(image_path, "image-path", 'p',
@@ -94,7 +94,7 @@ vector<string> get_options(int argc, char const * argv[])
 	return non_options;
 }
 
-}
+}  // anon namespace
 
 
 int run_pp_tool(int argc, char const * argv[], pp_fct_run_t fct)

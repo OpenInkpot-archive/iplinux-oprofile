@@ -125,17 +125,12 @@ oprof_start::oprof_start()
 		fill_events();
 	}
 
-	bool is_25 = op_get_interface() == OP_INTERFACE_25;
+	bool is_26 = op_get_interface() == OP_INTERFACE_26;
 
-	if (is_25) {
-		pid_filter_label->hide();
-		pid_filter_edit->hide();
-		pgrp_filter_label->hide();
-		pgrp_filter_edit->hide();
+	if (is_26) {
 		note_table_size_edit->hide();
 		note_table_size_label->hide();
-		kernel_only_cb->hide();
-		// FIXME: can adapt to 2.5 ...
+		// FIXME: can adapt to 2.6 ...
 		buffer_size_edit->hide();
 		buffer_size_label->hide();
 	}
@@ -147,18 +142,11 @@ oprof_start::oprof_start()
 
 	buffer_size_edit->setText(QString().setNum(config.buffer_size));
 	note_table_size_edit->setText(QString().setNum(config.note_table_size));
-	if (config.pid_filter)
-		pid_filter_edit->setText(QString().setNum(config.pid_filter));
-	else
-		pid_filter_edit->setText("");
-	if (config.pgrp_filter)
-		pgrp_filter_edit->setText(QString().setNum(config.pgrp_filter));
-	else
-		pgrp_filter_edit->setText("");
 	verbose->setChecked(config.verbose);
-	kernel_only_cb->setChecked(config.kernel_only);
-	separate_lib_samples_cb->setChecked(config.separate_lib_samples);
-	separate_kernel_samples_cb->setChecked(config.separate_kernel_samples);
+	separate_lib_cb->setChecked(config.separate_lib);
+	separate_kernel_cb->setChecked(config.separate_kernel);
+	separate_cpu_cb->setChecked(config.separate_cpu);
+	separate_thread_cb->setChecked(config.separate_thread);
 
 	// the unit mask check boxes
 	hide_masks();
@@ -169,10 +157,6 @@ oprof_start::oprof_start()
 	buffer_size_edit->setValidator(iv);
 	iv = new QIntValidator(OP_MIN_NOTE_TABLE_SIZE, OP_MAX_NOTE_TABLE_SIZE, note_table_size_edit);
 	note_table_size_edit->setValidator(iv);
-	iv = new QIntValidator(pid_filter_edit);
-	pid_filter_edit->setValidator(iv);
-	iv = new QIntValidator(pgrp_filter_edit);
-	pgrp_filter_edit->setValidator(iv);
 
 	// daemon status timer
 	startTimer(5000);
@@ -254,6 +238,24 @@ void oprof_start::fill_events()
 }
 
 
+namespace {
+
+/// find the first item with the given text in column 0 or return NULL
+QListViewItem * findItem(QListView * view, char const * name)
+{
+	// Qt 2.3.1 does not have QListView::findItem()
+	QListViewItem * item = view->firstChild();
+
+	while (item && strcmp(item->text(0).latin1(), name)) {
+		item = item->nextSibling();
+	}
+
+	return item;
+}
+
+};
+
+
 void oprof_start::setup_default_event()
 {
 	struct op_default_event_descr descr;
@@ -264,7 +266,7 @@ void oprof_start::setup_default_event()
 	event_cfgs[descr.name].user_ring_count = 1;
 	event_cfgs[descr.name].os_ring_count = 1;
 
-	QListViewItem * item = events_list->findItem(descr.name, 0);
+	QListViewItem * item = findItem(events_list, descr.name);
 	if (item)
 		item->setSelected(true);
 }
@@ -318,8 +320,7 @@ void oprof_start::read_set_events()
 			event_cfgs[ev_name].os_ring_count = 1;
 		}
 
-		QListViewItem * item =
-			events_list->findItem(ev_name.c_str(), 0);
+		QListViewItem * item = findItem(events_list, ev_name.c_str());
 		if (item)
 			item->setSelected(true);
 	}
@@ -343,7 +344,6 @@ void oprof_start::load_config_file()
 		if (!out) {
 			QMessageBox::warning(this, 0, "Unable to open configuration "
 				"file ~/.oprofile/daemonrc");
-			return;
 		}
 		return;
 	}
@@ -622,12 +622,11 @@ bool oprof_start::record_config()
 	}
 	config.note_table_size = temp;
 
-	config.pid_filter = pid_filter_edit->text().toUInt();
-	config.pgrp_filter = pgrp_filter_edit->text().toUInt();
-	config.kernel_only = kernel_only_cb->isChecked();
 	config.verbose = verbose->isChecked();
-	config.separate_lib_samples = separate_lib_samples_cb->isChecked();
-	config.separate_kernel_samples = separate_kernel_samples_cb->isChecked();
+	config.separate_lib = separate_lib_cb->isChecked();
+	config.separate_kernel = separate_kernel_cb->isChecked();
+	config.separate_cpu = separate_cpu_cb->isChecked();
+	config.separate_thread = separate_thread_cb->isChecked();
 
 	return true;
 }
@@ -915,23 +914,25 @@ bool oprof_start::save_config()
 	}
 
 	if (op_get_interface() == OP_INTERFACE_24) {
-		args.push_back("--kernel-only=" + tostr(config.kernel_only));
-		args.push_back("--pid-filter=" + tostr(config.pid_filter));
-		args.push_back("--pgrp-filter=" + tostr(config.pgrp_filter));
 		args.push_back("--buffer-size=" + tostr(config.buffer_size));
 		args.push_back("--note-table-size=" +
 			       tostr(config.note_table_size));
 	}
-	// opcontrol don't allow multiple setting of --separate option
-	// separate=kernel imply separate=library whilst opcontrol script
-	// reset separate=kernel when separate=library is given so the order
-	// of setting here is meaningfull.
-	if (config.separate_kernel_samples)
-		args.push_back("--separate=kernel");
-	else if (config.separate_lib_samples)
-		args.push_back("--separate=library");
-	else
-		args.push_back("--separate=none");
+
+	string sep = "--separate=";
+
+	if (config.separate_lib)
+		sep += "library,";
+	if (config.separate_kernel)
+		sep += "kernel,";
+	if (config.separate_cpu)
+		sep += "cpu,";
+	if (config.separate_thread)
+		sep += "thread,";
+
+	if (sep == "--separate=")
+		sep += "none";
+	args.push_back(sep);
 
 	// 2.95 work-around, it didn't like return !do_exec_command() 
 	bool ret = !do_exec_command(OP_BINDIR "/opcontrol", args);

@@ -682,54 +682,6 @@
                                             <cstring>note_table_size_edit</cstring>
                                         </property>
                                     </widget>
-                                    <widget row="3"  column="0" >
-                                        <class>QLabel</class>
-                                        <property stdset="1">
-                                            <name>name</name>
-                                            <cstring>pgrp_filter_label</cstring>
-                                        </property>
-                                        <property stdset="1">
-                                            <name>text</name>
-                                            <string>Process group filter</string>
-                                        </property>
-                                        <property>
-                                            <name>buddy</name>
-                                            <cstring>pgrp_filter_edit</cstring>
-                                        </property>
-                                    </widget>
-                                    <widget row="3"  column="1" >
-                                        <class>QLineEdit</class>
-                                        <property stdset="1">
-                                            <name>name</name>
-                                            <cstring>pgrp_filter_edit</cstring>
-                                        </property>
-                                        <property>
-                                            <name>toolTip</name>
-                                            <string>Process group ID to filter samples on</string>
-                                        </property>
-                                    </widget>
-                                    <widget row="2"  column="1" >
-                                        <class>QLineEdit</class>
-                                        <property stdset="1">
-                                            <name>name</name>
-                                            <cstring>pid_filter_edit</cstring>
-                                        </property>
-                                        <property>
-                                            <name>toolTip</name>
-                                            <string>Process ID to filter samples on</string>
-                                        </property>
-                                    </widget>
-                                    <widget row="2"  column="0" >
-                                        <class>QLabel</class>
-                                        <property stdset="1">
-                                            <name>name</name>
-                                            <cstring>pid_filter_label</cstring>
-                                        </property>
-                                        <property stdset="1">
-                                            <name>text</name>
-                                            <string>Process ID filter</string>
-                                        </property>
-                                    </widget>
                                     <widget row="1"  column="0" >
                                         <class>QLabel</class>
                                         <property stdset="1">
@@ -753,7 +705,7 @@
                         <class>QLayoutWidget</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>Layout15</cstring>
+                            <cstring>Layout11</cstring>
                         </property>
                         <hbox>
                             <property stdset="1">
@@ -768,7 +720,7 @@
                                 <class>QLayoutWidget</class>
                                 <property stdset="1">
                                     <name>name</name>
-                                    <cstring>Layout15</cstring>
+                                    <cstring>Layout10</cstring>
                                 </property>
                                 <vbox>
                                     <property stdset="1">
@@ -779,21 +731,6 @@
                                         <name>spacing</name>
                                         <number>6</number>
                                     </property>
-                                    <widget>
-                                        <class>QCheckBox</class>
-                                        <property stdset="1">
-                                            <name>name</name>
-                                            <cstring>kernel_only_cb</cstring>
-                                        </property>
-                                        <property stdset="1">
-                                            <name>text</name>
-                                            <string>Kernel only</string>
-                                        </property>
-                                        <property>
-                                            <name>toolTip</name>
-                                            <string>Profile only the kernel</string>
-                                        </property>
-                                    </widget>
                                     <widget>
                                         <class>QCheckBox</class>
                                         <property stdset="1">
@@ -813,11 +750,26 @@
                                         <class>QCheckBox</class>
                                         <property stdset="1">
                                             <name>name</name>
-                                            <cstring>separate_kernel_samples_cb</cstring>
+                                            <cstring>separate_lib_cb</cstring>
                                         </property>
                                         <property stdset="1">
                                             <name>text</name>
-                                            <string>Per-application kernel samples files</string>
+                                            <string>Per-application profiles</string>
+                                        </property>
+                                        <property>
+                                            <name>toolTip</name>
+                                            <string>Separate samples for each shared library. This increases the time and space overhead of OProfile.</string>
+                                        </property>
+                                    </widget>
+                                    <widget>
+                                        <class>QCheckBox</class>
+                                        <property stdset="1">
+                                            <name>name</name>
+                                            <cstring>separate_kernel_cb</cstring>
+                                        </property>
+                                        <property stdset="1">
+                                            <name>text</name>
+                                            <string>Per-application profiles, including kernel</string>
                                         </property>
                                         <property>
                                             <name>toolTip</name>
@@ -828,15 +780,30 @@
                                         <class>QCheckBox</class>
                                         <property stdset="1">
                                             <name>name</name>
-                                            <cstring>separate_lib_samples_cb</cstring>
+                                            <cstring>separate_cpu_cb</cstring>
                                         </property>
                                         <property stdset="1">
                                             <name>text</name>
-                                            <string>Per-application shared libs samples files</string>
+                                            <string>Per-CPU profiles</string>
                                         </property>
                                         <property>
                                             <name>toolTip</name>
-                                            <string>Separate samples for each shared library. This increases the time and space overhead of OProfile.</string>
+                                            <string>Separate samples for each shared library and kernel samples. This increases the time and space overhead of OProfile.</string>
+                                        </property>
+                                    </widget>
+                                    <widget>
+                                        <class>QCheckBox</class>
+                                        <property stdset="1">
+                                            <name>name</name>
+                                            <cstring>separate_thread_cb</cstring>
+                                        </property>
+                                        <property stdset="1">
+                                            <name>text</name>
+                                            <string>Per-thread/task profiles</string>
+                                        </property>
+                                        <property>
+                                            <name>toolTip</name>
+                                            <string>Separate samples for each shared library and kernel samples. This increases the time and space overhead of OProfile.</string>
                                         </property>
                                     </widget>
                                 </vbox>
@@ -1096,12 +1063,9 @@
     <tabstop>kernel_filename_edit</tabstop>
     <tabstop>no_vmlinux</tabstop>
     <tabstop>buffer_size_edit</tabstop>
-    <tabstop>pid_filter_edit</tabstop>
-    <tabstop>pgrp_filter_edit</tabstop>
     <tabstop>note_table_size_edit</tabstop>
-    <tabstop>kernel_only_cb</tabstop>
     <tabstop>verbose</tabstop>
-    <tabstop>separate_kernel_samples_cb</tabstop>
-    <tabstop>separate_lib_samples_cb</tabstop>
+    <tabstop>separate_kernel_cb</tabstop>
+    <tabstop>separate_lib_cb</tabstop>
 </tabstops>
 </UI>

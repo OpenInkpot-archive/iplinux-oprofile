@@ -79,7 +79,7 @@ popt::option options_array[] = {
 	popt::option(include_symbols, "include-symbols", 'i',
 		     "include these comma separated symbols", "symbols"),
 	popt::option(mergespec, "merge", 'm',
-		     "comma separated list", "cpu,pid,lib"),
+		     "comma separated list", "cpu,lib,tid,tgid,unitmask,all"),
 	popt::option(options::show_header, "no-header", 'n',
 		     "remove all headers from output"),
 	popt::option(options::show_address, "show-address", 'w',
@@ -116,32 +116,46 @@ void handle_sort_option()
 // FIXME: separate file if reused
 void handle_merge_option()
 {
+	using namespace options;
+
+	bool is_all = false;
+
 	vector<string>::const_iterator cit = mergespec.begin();
 	vector<string>::const_iterator end = mergespec.end();
 
 	for (; cit != end; ++cit) {
 		if (*cit == "cpu") {
-			options::merge_by.cpu = true;
+			merge_by.cpu = true;
 		} else if (*cit == "tid") {
-			options::merge_by.tid = true;
+			merge_by.tid = true;
 		} else if (*cit == "tgid") {
 			// PP:5.21 tgid merge imply tid merging.
-			options::merge_by.tgid = true;
-			options::merge_by.tid = true;
+			merge_by.tgid = true;
+			merge_by.tid = true;
 		} else if (*cit == "lib") {
-			options::merge_by.lib = true;
+			merge_by.lib = true;
 		} else if (*cit == "unitmask") {
-			options::merge_by.unitmask = true;
+			merge_by.unitmask = true;
 		} else if (*cit == "all") {
-			options::merge_by.cpu = true;
-			options::merge_by.lib = true;
-			options::merge_by.tid = true;
-			options::merge_by.tgid = true;
-			options::merge_by.unitmask = true;
+			merge_by.cpu = true;
+			merge_by.lib = true;
+			merge_by.tid = true;
+			merge_by.tgid = true;
+			merge_by.unitmask = true;
+			is_all = true;
 		} else {
 			cerr << "unknown merge option: " << *cit << endl;
 			exit(EXIT_FAILURE);
 		}
+	}
+
+	// if --merge all, don't warn about lib merging,
+	// it's not user friendly. Behaviour should still
+	// be correct.
+	if (exclude_dependent && merge_by.lib && !is_all) {
+		cerr << "--merge=lib is meaningless "
+		     << "with --exclude-dependent" << endl;
+		exit(EXIT_FAILURE);
 	}
 }
 
@@ -199,12 +213,10 @@ void check_options()
 		}
 	}
 
-	if (exclude_dependent) {
-		if (merge_by.lib) {
-			cerr << "--merge=lib is meaningless "
-			     << "with --exclude-dependent" << endl;
-			do_exit = true;
-		}
+	if (global_percent && symbols && !details) {
+		cerr << "--global-percent is meaningless "
+		     << "with --symbols and without --details" << endl;
+		do_exit = true;
 	}
 
 	if (do_exit)
@@ -242,8 +254,8 @@ void handle_options(vector<string> const & non_options)
 	classes = arrange_profiles(sample_files, merge_by);
 
 	if (classes.v.empty()) {
-		cerr << "No samples files found: profile specification too "
-		     << "strict ?" << endl;
+		cerr << "error: no sample files found: profile specification "
+		     "too strict ?" << endl;
 		exit(EXIT_FAILURE);
 	}
 }

@@ -19,7 +19,6 @@
 		<year>2000-2003</year>
 		<holder>Victoria University of Manchester, John Levon and others</holder>
 	</copyright>
-
 </bookinfo>
 
 <toc></toc>
@@ -76,14 +75,14 @@ OProfile is not a panacea. OProfile might not be a complete solution when you :
 
 <variablelist>
 	<varlistentry>
-		<term>Linux kernel 2.2/2.4</term>
+		<term>Linux kernel 2.2/2.4/2.6</term>
 		<listitem><para>
 			OProfile uses a kernel module that can be compiled for
 			2.2.11 or later and 2.4. Versions 2.4.10 or above are recommended, and required if you use the
 			boot-time kernel option <option>nosmp</option>. AMD Hammer support requires a recent (&gt;= 2.4.19) kernel
 			with the line <constant>EXPORT_SYMBOL(do_fork);</constant> present in <filename>kernel/ksyms.c</filename>.
 			Such a kernel is present in the <ulink url="http://www.x86-64.org">x86-64.org</ulink> CVS repository.
-			2.5 kernels are supported with the in-kernel OProfile driver.
+			2.6 kernels are supported with the in-kernel OProfile driver.
 <!-- FIXME: do we require always gte 2.4.10 for nosmp ? -->
 		</para></listitem>
 	</varlistentry>
@@ -105,7 +104,7 @@ OProfile is not a panacea. OProfile might not be a complete solution when you :
 			CPU types only support the RTC mode of OProfile; please
 			see later in this manual for details.  Hyper-threaded Pentium IVs
 			are not supported in 2.4. For 2.4 kernels, the Intel
-			IA-64 CPUs are also supported. For 2.5 kernels, there is additionally
+			IA-64 CPUs are also supported. For 2.6 kernels, there is additionally
 			support for Alpha processors, and sparc64, ppc64, and PA-RISC in
 			timer mode.
 		</para></listitem>
@@ -212,14 +211,14 @@ is often all you need, but note these arguments to <command>./configure</command
 			Use this option to specify the location of the kernel source tree you wish
 			to compile against. The kernel module is built against this source and
 			will only work with a running kernel built from the same source with
-			similar options, so it is important you specify this option if you need
+			exact same options, so it is important you specify this option if you need
 			to.
 		</para></listitem>
 	</varlistentry>
 	<varlistentry>
 		<term><option>--with-kernel-support</option></term>
 		<listitem><para>
-			Use this option with 2.5 and above kernels to indicate the 
+			Use this option with 2.6 and above kernels to indicate the 
 	    		kernel provides the OProfile device driver.
 		</para></listitem>
 	</varlistentry>
@@ -257,7 +256,8 @@ is often all you need, but note these arguments to <command>./configure</command
 </variablelist>
 <para>
 You'll need to have a configured kernel source for the current kernel
-to build the module for 2.4 kernels.  It is also recommended that if you have a
+to build the module for 2.4 kernels.  Since all distributions provide different kernels it's unlikely the running kernel match the configured source
+you installed. The safest way is to recompile your own kernel, run it and compile oprofile. It is also recommended that if you have a
 uniprocessor machine, you enable the local APIC / IO_APIC support for
 your kernel (this is automatically enabled for SMP kernels).  On
 machines with power management, such as laptops, the power management
@@ -265,9 +265,9 @@ must be turned off when using OProfile with 2.4 kernels. The power management so
 in the BIOS cannot handle the non-maskable interrupts (NMIs) used by
 OProfile for data collection. If you use the NMI watchdog, be aware that
 the watchdog is disabled when profiling starts, and not re-enabled until the
-OProfile module is removed (or, in 2.5, when OProfile is not running). If you compile OProfile for
+OProfile module is removed (or, in 2.6, when OProfile is not running). If you compile OProfile for
 a 2.2 kernel you must be root to compile the module. If you are using
-2.5 kernels or higher, you do not need kernel source, as long as the
+2.6 kernels or higher, you do not need kernel source, as long as the
 OProfile driver is enabled; additionally, you should not need to disable
 power management.
 </para>
@@ -542,21 +542,7 @@ is required. These settings are stored in <filename>~/.oprofile/daemonrc</filena
 		</para></listitem>
 	</varlistentry>
 	<varlistentry>
-		<term><option>--pid-filter=</option>pid</term>
-		<listitem><para>
-		Only profile the given process PID (only available for 2.4 version). Set to
-		"none" to re-enable profiling of all PIDs.
-		</para></listitem>
-	</varlistentry>
-	<varlistentry>
-		<term><option>--pgrp-filter=</option>pgrp</term>
-		<listitem><para>
-		Only profile the given process tty group (only avilable for 2.4 version). Set
-		to "none" to re-enable profiling of all PGRPs.
-		</para></listitem>
-	</varlistentry>
-	<varlistentry>
-		<term><option>--separate=</option>[none,library,kernel,all]</term>
+		<term><option>--separate=</option>[none,library,kernel,thread,cpu,all]</term>
 		<listitem><para>
 		By default, every profile is stored in a single file. Thus, for example,
 		samples in the C library are all accredited to the <filename>/lib/libc.o</filename>
@@ -569,7 +555,9 @@ is required. These settings are stored in <filename>~/.oprofile/daemonrc</filena
 		<row><entry><option>none</option></entry><entry>No profile separation (default)</entry></row>
 		<row><entry><option>library</option></entry><entry>Create per-application profiles for libraries</entry></row>
 		<row><entry><option>kernel</option></entry><entry>Create per-application profiles for the kernel and kernel modules</entry></row>
-		<row><entry><option>all</option></entry><entry>Both of the above options</entry></row>
+		<row><entry><option>thread</option></entry><entry>Create profiles for each thread and each task</entry></row>
+		<row><entry><option>cpu</option></entry><entry>Create profiles for each CPU</entry></row>
+		<row><entry><option>all</option></entry><entry>All of the above options</entry></row>
 		</tbody>
 		</tgroup>
 		</informaltable>
@@ -584,7 +572,11 @@ is required. These settings are stored in <filename>~/.oprofile/daemonrc</filena
 		<para>
 		On 2.2/2.4 only kernel threads already started when profiling begins are correctly profiled;
 		newly started kernel thread samples are credited to the vmlinux (kernel) profile.
-		On 2.5 there is no kernel thread profiling, all these samples are credited to the vmlinux profile.
+		</para>
+		<para>
+		Using <option>--separate=thread</option> creates a lot
+		of sample files if you leave OProfile running for a while; it's most
+		useful when used for short sessions.
 		</para>
 		</listitem>
 	</varlistentry>
@@ -615,7 +607,7 @@ references are happening most, and also get results for CPU time.
 </para>
 <screen>
 # opcontrol --event=CPU_CLK_UNHALTED:400000 --event=DATA_MEM_REFS:10000
-# opcontrol --vmlinux=/boot/2.5.66/vmlinux
+# opcontrol --vmlinux=/boot/2.6.0/vmlinux
 # opcontrol --start
 </screen>
 </sect3>
@@ -628,7 +620,7 @@ Here, we have an Intel laptop without support for performance counters, running 
 <screen>
 # op_help -r
 CPU with RTC device
-# opcontrol --vmlinux=/boot/2.5.66/vmlinux --event=RTC_INTERRUPTS:1024
+# opcontrol --vmlinux=/boot/2.6.0/vmlinux --event=RTC_INTERRUPTS:1024
 # opcontrol --start
 </screen>
 </sect3>
@@ -636,11 +628,11 @@ CPU with RTC device
 <sect3 id="examplesstartdaemon">
 <title>Starting the daemon separately</title>
 <para>
-If we're running 2.5 kernels, we can use <option>--start-daemon</option> to avoid
+If we're running 2.6 kernels, we can use <option>--start-daemon</option> to avoid
 the profiler startup affecting results.
 </para>
 <screen>
-# opcontrol --vmlinux=/boot/2.5.66/vmlinux
+# opcontrol --vmlinux=/boot/2.6.0/vmlinux
 # opcontrol --start-daemon
 # my_favourite_benchmark --init
 # opcontrol --start ; my_favourite_benchmark --run ; opcontrol --stop
@@ -654,11 +646,10 @@ Here, we want to see a profile of the OProfile daemon itself, including when
 it was running inside the kernel driver, and its use of shared libraries.
 </para>
 <screen>
-# opcontrol --separate=kernel --vmlinux=/boot/2.5.66/vmlinux
+# opcontrol --separate=kernel --vmlinux=/boot/2.6.0/vmlinux
 # opcontrol --start
 # my_favourite_stress_test --run
-<!-- FIXME -->
-# oprofpp -kl -p /lib/modules/2.5.66/kernel /usr/local/bin/oprofiled
+# opreport -l -p /lib/modules/2.6.0/kernel /usr/local/bin/oprofiled
 </screen>
 </sect3>
 
@@ -761,7 +752,7 @@ Your configuration is saved in the same file as <command>opcontrol</command> use
 <note>
 <para>
 Your CPU type may not include the requisite support for hardware performance counters, in which case
-you must use OProfile in RTC mode in 2.4 (see <xref linkend="rtc" />), or timer mode in 2.5 (see <xref linkend="timer" />). 
+you must use OProfile in RTC mode in 2.4 (see <xref linkend="rtc" />), or timer mode in 2.6 (see <xref linkend="timer" />). 
 You do not really need to read this section unless you are interested in using 
 events other than the default event chosen by OProfile.
 </para>
@@ -816,7 +807,7 @@ Specifying too small a value can lead to higher performance overhead.
 <sect2 id="rtc">
 <title>OProfile in RTC mode</title>
 <note><para>
-This section applies to 2.4 kernels only.
+This section applies to 2.2/2.4 kernels only.
 </para></note>
 <para>
 Some CPU types do not provide the needed hardware support to use the hardware performance counters. This includes
@@ -843,10 +834,10 @@ event to <command>opcontrol</command>, e.g. :
 <sect2 id="timer">
 <title>OProfile in timer interrupt mode</title>
 <note><para>
-This section applies to 2.5 kernels only.
+This section applies to 2.6 kernels and above only.
 </para></note>
 <para>
-In 2.5 kernels on CPUs without OProfile support for the hardware performance counters, the driver
+In 2.6 kernels on CPUs without OProfile support for the hardware performance counters, the driver
 falls back to using the timer interrupt for profiling. Like the RTC mode in 2.4 kernels, this is not able to
 profile code that has interrupts disabled. Note that there are no configuration parameters for
 setting this, unlike the RTC and hardware performance counter setup.
@@ -935,14 +926,14 @@ is really dependent on the event type - if ever in doubt, e-mail </para>
 running process, or process tty group. You can set
 the pid/pgrp values via the <filename>--pid-filter</filename> and <filename>--pgrp-filter</filename>
 options to <command>opcontrol</command>, which will make the daemon ignore samples for processes
-that don't match the filter. These options are not available in 2.5 kernels.
+that don't match the filter. These options are not available in 2.6 and above kernels.
 </para>
 </sect2>
 
 <sect2 id="unloadable">
 <title>Unloading the kernel module</title>
 <note><para>
-This section applies to 2.4 kernels only, OProfile in 2.5 can be unloaded safely.
+This section applies to 2.2/2.4 kernels only, OProfile in 2.6 can be unloaded safely.
 </para></note>
 <para>
 The kernel module can be unloaded, but is designed to take very little memory when profiling is not underway.
@@ -993,7 +984,7 @@ $ opreport --long-filenames
 CPU: PIII, speed 863.195 MHz (estimated)
 Counted CPU_CLK_UNHALTED events (clocks processor is not halted) with a unit mask of 0x00 (No unit mask) count 23150
    905898 59.7415 /usr/lib/gcc-lib/i386-redhat-linux/3.2/cc1plus
-   214320 14.1338 /boot/2.5.69/vmlinux
+   214320 14.1338 /boot/2.6.0/vmlinux
    103450  6.8222 /lib/i686/libc-2.3.2.so
     60160  3.9674 /usr/local/bin/madplay
     31769  2.0951 /usr/local/oprofile-pp/bin/oprofiled
@@ -1010,7 +1001,7 @@ If we had specified <option>--symbols</option> in the previous command, we would
 gotten a symbol summary of all the images across the entire system. We can restrict this to only
 part of the system profile; for example,
 below is a symbol summary of the OProfile daemon. Note that as we used
-<command>opcontrol --separate=all</command>, symbols from images that <command>oprofiled</command>
+<command>opcontrol --separate=kernel</command>, symbols from images that <command>oprofiled</command>
 has used are also shown.
 </para>
 <screen>
@@ -1252,7 +1243,7 @@ excepting <filename>boring-test</filename> :
 		<listitem><para>
                 A comma-separated list of image names to resolve. Each entry may be relative
                 path, <command>glob</command>-style name, or full path, e.g.</para>
-		<screen>opreport 'image:/usr/bin/oprofiled,*op*,./oprofpp'</screen>
+		<screen>opreport 'image:/usr/bin/oprofiled,*op*,./opreport'</screen>
 		</listitem>
 	</varlistentry>
 
@@ -1327,7 +1318,6 @@ excepting <filename>boring-test</filename> :
 		</para></listitem>
 	</varlistentry>
 
-<!-- FIXME: introduce when it does  something useful
 	<varlistentry>
 		<term><option>cpu:</option><emphasis>cpulist</emphasis></term>
 		<listitem><para>
@@ -1358,7 +1348,6 @@ excepting <filename>boring-test</filename> :
 		This is only useful when using per-process profile separation.
 		</para></listitem>
 	</varlistentry>
--->
 </variablelist>
 
 </sect2>
@@ -1368,10 +1357,10 @@ excepting <filename>boring-test</filename> :
 <para>
 Each session's sample files can be found in the <filename>/var/lib/oprofile/samples/</filename> directory.
 These are used, along with the binary image files, to produce human-readable data.
-In some circumstances (kernel modules in an initrd, or modules on 2.5 kernels), OProfile
+In some circumstances (kernel modules in an initrd, or modules on 2.6 kernels), OProfile
 will not be able to find the binary images. All the tools have an <option>--image-path</option>
 to which you can pass a comma-separated list of alternate paths to search. For example,
-I can let OProfile find my 2.5 modules by using <command>--image-path /lib/modules/2.5.69/kernel/</command>.
+I can let OProfile find my 2.6 modules by using <command>--image-path /lib/modules/2.6.0/kernel/</command>.
 It is your responsibility to ensure that the correct images are found when using this
 option.
 </para>
@@ -1380,6 +1369,61 @@ Note that if a binary image changes after the sample file was created, you won't
 symbol-based data out. This situation is detected for you. If you replace a binary, you should
 make sure to save the old binary if you need to do comparative profiles.
 </para>
+
+</sect2>
+
+<sect2 id="no-results">
+<title>What to do when you don't get any results</title>
+<para>
+When attempting to get output, you may see the error :
+</para>
+<screen>
+error: no sample files found: profile specification too strict ?
+</screen>
+<para>
+What this is saying is that the profile specification you passed in,
+when matched against the available sample files, resulted in no matches.
+There are a number of reasons this might happen:
+</para>
+<variablelist>
+<varlistentry><term>spelling</term><listitem><para>
+You specified a binary name, but spelt it wrongly. Check your spelling !
+</para></listitem></varlistentry>
+<varlistentry><term>profiler wasn't running</term><listitem><para>
+Make very sure that OProfile was actually up and running when you ran
+the binary.
+</para></listitem></varlistentry>
+<varlistentry><term>binary didn't run long enough</term><listitem><para>
+Remember OProfile is a statistical profiler - you're not guaranteed to
+get samples for short-running programs. You can help this by using a
+lower count for the performance counter, so there are a lot more samples
+taken per second.
+</para></listitem></varlistentry>
+<varlistentry><term>binary spent most of its time in libraries</term><listitem><para>
+Similarly, if the binary spends little time in the main binary image
+itself, with most of it spent in shared libraries it uses, you might
+not see any samples for the binary image itself. You can check this
+by using <command>opcontrol --separate=library</command> before the
+profiling session, so <command>opreport</command> and friends show
+the library profiles on a per-application basis.
+</para></listitem></varlistentry>
+<varlistentry><term>specification was really too strict</term><listitem><para>
+For example, you specified something like <option>tgid:3433</option>,
+but no task with that group ID ever ran the code.
+</para></listitem></varlistentry>
+<varlistentry><term>binary didn't generate any events</term><listitem><para>
+If you're using a particular event counter, for example counting MMX
+operations, the code might simply have not generated any events in the
+first place. Verify the code you're profiling does what you expect it
+to.
+</para></listitem></varlistentry>
+<varlistentry><term>you didn't specify kernel module name correctly</term><listitem><para>
+If you're using 2.6 kernels, and trying to get reports for a kernel
+module, make sure to use the <option>-p</option> option, and specify the
+module name <emphasis>with</emphasis> the <filename>.ko</filename>
+extension. Check if the module is one loaded from initrd.
+</para></listitem></varlistentry>
+</variablelist>
 
 </sect2>
 
@@ -1432,15 +1476,14 @@ used --separate.
 Exclude all the symbols in the given comma-separated list.
 </para></listitem></varlistentry>
 <varlistentry><term><option>--global-percent</option></term><listitem><para>
-Make dependent image summary percentages relative to the whole profile,
-not just the application image.
+Make all percentages relative to the whole profile.
 </para></listitem></varlistentry>
 <varlistentry><term><option>--help / -? / --usage</option></term><listitem><para>
 Show help message.
 </para></listitem></varlistentry>
 <varlistentry><term><option>--image-path / -p [paths]</option></term><listitem><para>
 Comma-separated list of additional paths to search for binaries.
-This is needed to find modules in kernels 2.5 and upwards.
+This is needed to find modules in kernels 2.6 and upwards.
 </para></listitem></varlistentry>
 <varlistentry><term><option>--include-symbols / -i [symbols]</option></term><listitem><para>
 Only include symbols in the given comma-separated list.
@@ -1448,7 +1491,7 @@ Only include symbols in the given comma-separated list.
 <varlistentry><term><option>--long-filenames / -l</option></term><listitem><para>
 Output full paths instead of basenames.
 </para></listitem></varlistentry>
-<varlistentry><term><option>--merge / -m [cpu,pid,lib]</option></term><listitem><para>
+<varlistentry><term><option>--merge / -m [lib,cpu,tid,tgid,unitmask,all]</option></term><listitem><para>
 Merge any profiles separated in a --separate session.
 </para></listitem></varlistentry>
 <varlistentry><term><option>--no-demangle</option></term><listitem><para>
@@ -1517,7 +1560,7 @@ Show help message.
 </para></listitem></varlistentry>
 <varlistentry><term><option>--image-path / -p [paths]</option></term><listitem><para>
 Comma-separated list of additional paths to search for binaries.
-This is needed to find modules in kernels 2.5 and upwards.
+This is needed to find modules in kernels 2.6 and upwards.
 </para></listitem></varlistentry>
 <varlistentry><term><option>--include-file [files]</option></term><listitem><para>
 Only include files in the given comma-separated list of glob patterns.
@@ -1583,7 +1626,7 @@ Give verbose debugging output.
 </para></listitem></varlistentry>
 <varlistentry><term><option>--image-path / -p [paths]</option></term><listitem><para>
 Comma-separated list of additional paths to search for binaries.
-This is needed to find modules in kernels 2.5 and upwards.
+This is needed to find modules in kernels 2.6 and upwards.
 </para></listitem></varlistentry>
 <varlistentry><term><option>--threshold / -t [percentage]</option></term><listitem><para>
 Only output data for symbols that have more than the given percentage
@@ -1701,7 +1744,7 @@ will appear as <function>poll_idle()</function> in your kernel profile.
 <sect2 id="exiting-tasks">
 <title>Exiting tasks</title>
 <para>
-The internal implementation of the 2.5 OProfile code means that tasks that
+The internal implementation of the 2.6 OProfile code means that tasks that
 within the kernel <function>do_exit()</function> routine cannot be profiled.
 </para>
 </sect2>
@@ -1715,7 +1758,7 @@ To get around this, you can use the <option>-p</option> option to the profiling 
 to specify where to look for the kernel modules.
 </para>
 <para>
-In 2.5, the information on where kernel module binaries are located has been removed.
+In 2.6, the information on where kernel module binaries are located has been removed.
 This means OProfile needs guiding with the <option>-p</option> option to find your
 modules. Normally, you can just use your standard module top-level directory for this.
 Note that due to this problem, OProfile cannot check that the modification times match;
@@ -1727,7 +1770,7 @@ If you have run <command>insmod</command> or <command>modprobe</command> to inse
 in a particular directory, it is important that you specify this directory with the 
 <option>-p</option> option first, so that it over-rides an older module binary that might
 exist in other directories you've specified with <option>-p</option>. It is up to you
-to make sure that these values are correct: 2.5 kernels simply do not provide enough
+to make sure that these values are correct: 2.6 kernels simply do not provide enough
 information for OProfile to get this information.
 </para>
 </sect2>

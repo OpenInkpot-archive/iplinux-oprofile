@@ -16,6 +16,8 @@
 #include <map>
 #include <vector>
 
+#include "image_error.h"
+
 /**
  * A class containing mappings from an image basename,
  * such as 'floppy.ko', to locations in the paths passed
@@ -26,7 +28,7 @@
  */
 class extra_images {
 public:
-	extra_images() {};
+	extra_images() {}
 
 	/// add all filenames found in the given paths, recursively
 	void populate(std::vector<std::string> const & paths);	
@@ -59,15 +61,17 @@ private:
 	images_t images;
 };
 
-
 /**
  * @param extra_images container where all extra candidate filenames are stored
  * @param image_name binary image name
+ * @param error errors are flagged in this passed enum ref
  *
  * Locate a (number of) matching absolute paths to the given image name.
- * If we fail to find the file or if it is not readable we provide a warning
- * and return an empty string.
+ * If we fail to find the file we fill in error and return the original string.
  */
-std::string const find_image_path(std::string const & image_name,
-                                  extra_images const & extra_images);
+std::string const
+find_image_path(std::string const & image_name,
+                extra_images const & extra_images,
+                image_error & error);
+
 #endif /* LOCATE_IMAGES_H */

@@ -44,24 +44,6 @@ void op_check_header(opd_header const & h1, opd_header const & h2,
 		throw op_fatal_error(os.str());
 	}
 
-	if (h1.separate_lib_samples != h2.separate_lib_samples) {
-		ostringstream os;
-		os << "header separate_lib_samples are different ("
-		   << h1.separate_lib_samples << ", " 
-		   << h2.separate_lib_samples << ") for "
-		   << filename << "\n";
-		throw op_fatal_error(os.str());
-	}
-
-	if (h1.separate_kernel_samples != h2.separate_kernel_samples) {
-		ostringstream os;
-		os << "header separate_kernel_samples are different ("
-		   << h1.separate_kernel_samples << ", " 
-		   << h2.separate_kernel_samples << ") for"
-		   << filename << "\n";
-		throw op_fatal_error(os.str());
-	}
-
 	// Note that we don't check CPU speed since that can vary
 	// freely on the same machine
 }
@@ -114,11 +96,8 @@ opd_header const read_header(string const & sample_filename)
 	int rc = odb_open(&samples_db, sample_filename.c_str(), ODB_RDONLY,
 		sizeof(struct opd_header));
 
-	if (rc != EXIT_SUCCESS) {
-		ostringstream os;
-		os << samples_db.err_msg << endl;
-		throw op_fatal_error(os.str());
-	}
+	if (rc)
+		throw op_fatal_error(sample_filename + ": " + strerror(rc));
 
 	opd_header head = *static_cast<opd_header *>(samples_db.base_memory);
 

@@ -36,28 +36,31 @@ int main(int argc, char const ** argv)
 {
 	vector<string> rest;
 	popt::parse_options(argc, argv, rest);
-	bool file_processed = false;
 
-	abi curr;
-	if (abi_filename.size() > 0) {
+	if (abi_filename.empty() && db_filename.empty()) {
+		cerr << "error: no file specified to work on" << endl;
+		exit(1);
+	}
+
+
+	if (!abi_filename.empty()) {
 		ofstream file(abi_filename.c_str());
 		if (!file) {
 			cerr << "error: cannot open " << abi_filename
 			     << " for writing" << endl;
 			exit(1);
 		}
-		file << curr;
-		file_processed = true;
+		file << abi();
 	}
 
-	if (db_filename.size() > 0) {
+	if (!db_filename.empty()) {
 		samples_odb_t dest;
 		int rc = odb_open(&dest, db_filename.c_str(), ODB_RDWR,
 		                  sizeof(struct opd_header));
 
-		if (rc != EXIT_SUCCESS) {
+		if (rc) {
 			cerr << "odb_open() fail:\n"
-			     << dest.err_msg << endl;
+			     << strerror(rc) << endl;
 			exit(EXIT_FAILURE);
 		}
 
@@ -69,28 +72,18 @@ int main(int argc, char const ** argv)
 		header->is_kernel = 1;
 		header->ctr_event = 0x80; /* ICACHE_FETCHES */
 		header->ctr_um = 0x0;
-		header->ctr = 0x0; 
 		header->cpu_type = CPU_ATHLON;
 		header->ctr_count = 0xdeadbeef;
 		header->cpu_speed = 0;
 		header->mtime = 1034790063;
-		header->separate_lib_samples = 0;
-		header->separate_kernel_samples = 0;
-
     
 		for (int i = 0; i < 3793; ++i) {
 			int rc = odb_insert(&dest, ((i*i) ^ (i+i)), ((i*i) ^ i));
 			if (rc != EXIT_SUCCESS) {
-				cerr << dest.err_msg << endl;
+				cerr << strerror(rc) << endl;
 				exit(EXIT_FAILURE);
 			}
 		}
 		odb_close(&dest);
-		file_processed = true;
-	}
-
-	if (!file_processed) {
-		cerr << "error: no file processed" << endl;
-		exit(1);
 	}
 }

@@ -72,7 +72,7 @@ static int opd_add_ascii_map(struct opd_proc * proc, char const * line,
 	if (!*cp)
 		return 0;
 
-	image = opd_get_image(cp, -1, image_name, 0);
+	image = opd_get_image(cp, image_name, 0, proc->tid, proc->tgid);
 	if (!image)
 		return 0;
 
@@ -96,9 +96,9 @@ static void opd_get_ascii_maps(struct opd_proc * proc)
 	char * line;
 	char exe_name[20];
 	char * image_name;
-	unsigned int map_nr;
+	struct list_head * pos;
 
-	snprintf(mapsfile + 6, 6, "%hu", proc->pid);
+	snprintf(mapsfile + 6, 6, "%hu", proc->tid);
 
 	strcpy(exe_name, mapsfile);
 
@@ -116,7 +116,7 @@ static void opd_get_ascii_maps(struct opd_proc * proc)
 		 * completeness we record them in proc struct */
 		image_name = xstrdup(exe_name);
 
-	verbprintf("image name %s for pid %u\n", image_name, proc->pid);
+	verbprintf("image name %s for pid %u %u\n", image_name, proc->tid, proc->tgid);
 
 	while (1) {
 		line = op_get_line(fp);
@@ -127,23 +127,23 @@ static void opd_get_ascii_maps(struct opd_proc * proc)
 		free(line);
 	}
 
-	/* dae assume than maps[0] is the primary image name, this is always
-	 * true at exec time but not for /proc/pid so reorder maps if necessary
+	/* dae assume than the first map added is the primary image name, this
+	 * is always true at exec time but not for /proc/pid so restore
+	 * the primary image name
 	 */
-	for (map_nr = 0 ; map_nr < proc->nr_maps ; ++map_nr) {
-		if (!strcmp(proc->maps[map_nr].image->name, image_name)) {
-			if (map_nr != 0) {
-				struct opd_map temp = proc->maps[0];
-				proc->maps[0] = proc->maps[map_nr];
-				proc->maps[map_nr] = temp;
-
-				fprintf(stderr, "swap map for image %s\n", image_name);
+	list_for_each(pos, &proc->maps) {
+		struct opd_map * map = list_entry(pos, struct opd_map, next);
+		if (!strcmp(map->image->name, image_name)) {
+			if (pos != proc->maps.next) {
+				fprintf(stderr, "swap map for image %s from %s to %s\n", image_name, proc->name, map->image->name);
+				free((char *)proc->name);
+				proc->name = xstrdup(map->image->name);
 			}
 			break;
 		}
 	}
 
-	if (proc->nr_maps == 0) {
+	if (list_empty(&proc->maps)) {
 		/* we always need a valid proc->maps[0], we artificially give
 		 * a map of length zero so on no samples will never go to this
 		 * map. This is used only with --separate-samples and kernel
@@ -151,7 +151,8 @@ static void opd_get_ascii_maps(struct opd_proc * proc)
 		 */
 		/* FIXME: use the first field of /proc/pid/status as proc name
 		 * for now we use /proc/%pid/exe as name */
-		struct opd_image * image = opd_get_image(image_name, -1, image_name, 0);
+		struct opd_image * image = opd_get_image(image_name,
+                                       image_name, 0, proc->tid, proc->tgid);
 		if (image) {
 			opd_add_mapping(proc, image, 0, 0, 0);
 		}
@@ -161,6 +162,39 @@ static void opd_get_ascii_maps(struct opd_proc * proc)
 		free(image_name);
 
 	op_close_file(fp);
+}
+
+static u32 read_tgid(u32 tid)
+{
+	char status_file[30] = "/proc/";
+	char * line;
+	FILE * fp;
+	u32 tgid;
+
+	snprintf(status_file + 6, 6, "%hu", tid);
+
+	strcat(status_file,"/status");
+
+	fp = op_try_open_file(status_file, "r");
+	if (!fp)
+		return 0;
+
+	while (1) {
+		line = op_get_line(fp);
+		if (!line)
+			break;
+
+		if (sscanf(line, "Tgid: %u", &tgid) == 1) {
+			free(line);
+			op_close_file(fp);
+			return tgid;
+		}
+		free(line);
+	}
+
+	op_close_file(fp);
+
+	return 0;
 }
 
 /**
@@ -183,8 +217,11 @@ void opd_get_ascii_procs(void)
 
 	while ((dirent = readdir(dir))) {
 		if (sscanf(dirent->d_name, "%u", &pid) == 1) {
-			verbprintf("ASCII added %u\n", pid);
-			proc = opd_add_proc(pid);
+			u32 tgid = read_tgid(pid);
+			verbprintf("ASCII added %u %u\n", pid, tgid);
+			proc = opd_get_proc(pid, tgid);
+			if (!proc)
+				proc = opd_new_proc(pid, tgid);
 			opd_get_ascii_maps(proc);
 		}
 	}

@@ -28,4 +28,3 @@ libutil___a_SOURCES = \
 	unique_storage.h \
 	utility.h \
 	comma_list.h
-

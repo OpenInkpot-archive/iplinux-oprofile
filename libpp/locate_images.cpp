@@ -11,6 +11,7 @@
 
 #include "file_manip.h"
 #include "locate_images.h"
+#include "image_error.h"
 
 #include <cerrno>
 #include <iostream>
@@ -66,7 +67,7 @@ namespace {
 
 /**
  * Function object for matching a module filename, which
- * has its own special mangling rules in 2.5 kernels.
+ * has its own special mangling rules in 2.6 kernels.
  */
 struct module_matcher : public extra_images::matcher {
 public:
@@ -90,64 +91,42 @@ public:
 	}
 };
 
-
-/**
- * @param extra_images container where all candidate filename are stored
- * @param image_name binary image name
- *
- * helper for find_image_path either return image name on success or an empty
- * string, output also a warning if we failt to retrieve the image name. All
- * this handling is special for 2.5/2.6 module where daemon are no way to know
- * full path name of module
- */
-string const find_module_path(string const & module_name,
-                              extra_images const & extra_images)
-{
-	vector<string> result =
-		extra_images.find(module_matcher(module_name));
-
-	if (result.empty()) {
-		return string();
-	}
-
-	if (result.size() > 1) {
-		cerr << "The image name " << module_name
-		     << " matches more than one filename." << endl;
-	        cerr << "I have used " << result[0] << endl;
-	}
-
-	return result[0];
-}
-
 } // anon namespace
 
 
 string const find_image_path(string const & image_name,
-                             extra_images const & extra_images)
+                             extra_images const & extra_images,
+                             image_error & error)
 {
 	string const image = relative_to_absolute_path(image_name);
 
 	// simplest case
-	if (op_file_readable(image))
-		return image;
+	if (op_file_readable(image)) {
+		error = image_ok;
+		return image_name;
+	}
 
-	if (errno == EACCES)
-		return string();
+	if (errno == EACCES) {
+		error = image_unreadable;
+		return image_name;
+	}
 
 	string const base = basename(image);
 
 	vector<string> result = extra_images.find(base);
 
 	// not found, try a module search
+	if (result.empty())
+		result = extra_images.find(module_matcher(base + ".ko"));
+
 	if (result.empty()) {
-		return find_module_path(base + ".ko", extra_images);
+		error = image_not_found;
+		return image_name;
 	}
 
 	if (result.size() > 1) {
-		cerr << "The image name " << image_name
-		     << " matches more than one filename, "
-		     << "and will be ignored." << endl;
-		return string();
+		error = image_multiple_match;
+	        return image_name;
 	}
 
 	return result[0];

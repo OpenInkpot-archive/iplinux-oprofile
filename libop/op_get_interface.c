@@ -14,11 +14,6 @@
 
 #include "op_cpu_type.h"
 
-/**
- * op_get_interface - determine which kernel interface used
- *
- * returns %OP_INTERFACE_NO_GOOD if the interface could not be identified
- */
 op_interface op_get_interface(void)
 {
 	static op_interface current_interface = OP_INTERFACE_NO_GOOD;
@@ -35,11 +30,11 @@ op_interface op_get_interface(void)
 		return current_interface;
 	}
 
-	/* Try 2.5's oprofilefs one instead. */
+	/* Try 2.6's oprofilefs one instead. */
 	fp = fopen("/dev/oprofile/cpu_type", "r");
 	if (fp) {
 		fclose (fp);
-		current_interface = OP_INTERFACE_25;
+		current_interface = OP_INTERFACE_26;
 		return current_interface;
 	}
 

@@ -39,12 +39,11 @@ config_setting::config_setting()
 	buffer_size(OP_DEFAULT_BUF_SIZE),
 	note_table_size(OP_DEFAULT_NOTE_SIZE),
 	no_kernel(false),
-	kernel_only(false),
 	verbose(false),
-	pgrp_filter(0),
-	pid_filter(0),
-	separate_lib_samples(false),
-	separate_kernel_samples(false)
+	separate_lib(false),
+	separate_kernel(false),
+	separate_cpu(false),
+	separate_thread(false)
 {
 	struct utsname info;
 
@@ -77,10 +76,6 @@ void config_setting::load(istream & in)
 			note_table_size = touint(val);
 			if (note_table_size < OP_DEFAULT_NOTE_SIZE)
 				note_table_size = OP_DEFAULT_NOTE_SIZE;
-		} else if (str == "PID_FILTER") {
-			pid_filter = touint(val);
-		} else if (str == "PGRP_FILTER") {
-			pgrp_filter = touint(val);
 		} else if (str == "VMLINUX") {
 			if (val == "none") {
 				kernel_filename = "";
@@ -89,12 +84,14 @@ void config_setting::load(istream & in)
 				no_kernel = false;
 				kernel_filename = val;
 			}
-		} else if (str == "SEPARATE_LIB_SAMPLES") {
-			separate_lib_samples = tobool(val);
-		} else if (str == "SEPARATE_KERNEL_SAMPLES") {
-			separate_kernel_samples = tobool(val);
-		} else if (str == "KERNEL_ONLY") {
-			kernel_only = tobool(val);
+		} else if (str == "SEPARATE_LIB") {
+			separate_lib = tobool(val);
+		} else if (str == "SEPARATE_KERNEL") {
+			separate_kernel = tobool(val);
+		} else if (str == "SEPARATE_CPU") {
+			separate_cpu = tobool(val);
+		} else if (str == "SEPARATE_THREAD") {
+			separate_thread = tobool(val);
 		}
 	}
 }

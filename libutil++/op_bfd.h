@@ -80,13 +80,15 @@ private:
 class op_bfd {
 public:
 	/**
-	 * @param filename the name of the image file
+	 * @param filename  the name of the image file
 	 * @param symbol_filter  filter to apply to symbols
-	 *
-	 * All errors are fatal.
+	 * @param ok in-out parameter: on in, if not set, don't
+	 * open the bfd (because it's not there or whatever). On out,
+	 * it's set to false if the bfd couldn't be loaded.
 	 */
 	op_bfd(std::string const & filename,
-	       string_filter const & symbol_filter);
+	       string_filter const & symbol_filter,
+	       bool & ok);
 
 	/// close an opened bfd image and free all related resources
 	~op_bfd();
@@ -178,10 +180,13 @@ private:
 	typedef std::list<op_bfd_symbol> symbols_found_t;
 
 	/**
-	 * Collect the symbols excluding any in the given vector.
+	 * Parse and sort in ascending order all symbols
+	 * in the file pointed to by abfd that reside in
+	 * a %SEC_CODE section.
 	 *
-	 * Returns false if there were no symbols in the binary
-	 * before filtering.
+	 * The symbols are filtered through
+	 * the interesting_symbol() predicate and sorted
+	 * with op_bfd_symbol::operator<() comparator.
 	 */
 	void get_symbols(symbols_found_t & symbols);
 

@@ -19,10 +19,24 @@
 /// return true if dir is an existing directory
 bool is_directory(std::string const & dirname);
 
-/// return true if the two files are the same file
+/**
+ * is_file_identical - check for identical files
+ * @param file1  first filename
+ * @param file2  scond filename
+ *
+ * return true if the two filenames belong to the same file
+ */
 bool is_files_identical(std::string const & file1, std::string const & file2);
-/// return the contents of a symbolic link or an empty string on failure
-std::string op_read_link(std::string const & name);
+
+/**
+ * op_follow_link - follow a symbolic link
+ * @param name the file name
+ *
+ * Resolve a symbolic link as far as possible.
+ * Returns the original string on failure.
+ */
+std::string const op_follow_link(std::string const & name);
+
 /// return true if the given file is readable
 bool op_file_readable(std::string const & file);
 
@@ -52,9 +66,20 @@ bool create_file_list(std::list<std::string> & file_list,
 std::string relative_to_absolute_path(std::string const & path,
 				std::string const & base_dir = std::string());
 
-/** return the base name of file_name as basename(1) */
+/**
+ * dirname - get the path component of a filename
+ * @param file_name  filename
+ *
+ * Returns the path name of a filename with trailing '/' removed.
+ */
 std::string dirname(std::string const & file_name);
-/** return the dir name of path_name as dirname(1) */
+
+/**
+ * basename - get the basename of a path
+ * @param path_name  path
+ *
+ * Returns the basename of a path with trailing '/' removed.
+ */
 std::string basename(std::string const & path_name);
 
 #endif /* !FILE_MANIP_H */

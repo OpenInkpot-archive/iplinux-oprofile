@@ -48,12 +48,11 @@ op_cpu op_get_cpu_type(void)
 {
 	int cpu_type = CPU_NO_GOOD;
 	char str[100];
-	size_t i;
 	FILE * fp;
 
 	fp = fopen("/proc/sys/dev/oprofile/cpu_type", "r");
 	if (!fp) {
-		/* Hmm. Not there. Try 2.5's oprofilefs one instead. */
+		/* Try 2.6's oprofilefs one instead. */
 		fp = fopen("/dev/oprofile/cpu_type", "r");
 		if (!fp) {
 			fprintf(stderr, "Unable to open cpu_type file for reading\n");
@@ -67,27 +66,41 @@ op_cpu op_get_cpu_type(void)
 		return CPU_NO_GOOD;
 	}
 
-	for (i = 0; i < nr_cpu_descrs; ++i) {
-		if (!strcmp(cpu_descrs[i].name, str)) {
-			cpu_type = cpu_descrs[i].cpu;
-			break;
-		}
-	}
-
-	if (i == nr_cpu_descrs)
-		sscanf(str, "%d\n", &cpu_type);
+	cpu_type = op_get_cpu_number(str);
 
 	fclose(fp);
 
 	return cpu_type;
 }
 
- 
+
+op_cpu op_get_cpu_number(char const * cpu_string)
+{
+	int cpu_type = CPU_NO_GOOD;
+	size_t i;
+	
+	for (i = 0; i < nr_cpu_descrs; ++i) {
+		if (!strcmp(cpu_descrs[i].name, cpu_string)) {
+			cpu_type = cpu_descrs[i].cpu;
+			break;
+		}
+	}
+
+	/* Attempt to convert into a number */
+	if (cpu_type == CPU_NO_GOOD)
+		sscanf(cpu_string, "%d\n", &cpu_type);
+	
+	if (cpu_type <= CPU_NO_GOOD || cpu_type >= MAX_CPU_TYPE)
+		cpu_type = CPU_NO_GOOD;
+
+	return cpu_type;
+}
+
+
 char const * op_get_cpu_type_str(op_cpu cpu_type)
 {
-	if (cpu_type < 0 || cpu_type >= MAX_CPU_TYPE) {
+	if (cpu_type <= CPU_NO_GOOD || cpu_type >= MAX_CPU_TYPE)
 		return "invalid cpu type";
-	}
 
 	return cpu_descrs[cpu_type].pretty;
 }
@@ -95,9 +108,8 @@ char const * op_get_cpu_type_str(op_cpu cpu_type)
 
 char const * op_get_cpu_name(op_cpu cpu_type)
 {
-	if (cpu_type < 0 || cpu_type >= MAX_CPU_TYPE) {
+	if (cpu_type <= CPU_NO_GOOD || cpu_type >= MAX_CPU_TYPE)
 		return "invalid cpu type";
-	}
 
 	return cpu_descrs[cpu_type].name;
 }
@@ -105,7 +117,7 @@ char const * op_get_cpu_name(op_cpu cpu_type)
 
 int op_get_nr_counters(op_cpu cpu_type)
 {
-	if (cpu_type < 0 || cpu_type >= MAX_CPU_TYPE)
+	if (cpu_type <= CPU_NO_GOOD || cpu_type >= MAX_CPU_TYPE)
 		return 0;
 
 	return cpu_descrs[cpu_type].nr_counters;

@@ -13,6 +13,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <map>
+#include <set>
 
 #include "string_manip.h"
 #include "op_header.h"
@@ -26,6 +27,10 @@ using namespace std;
 
 namespace {
 
+/**
+ * The "axis" says what we've used to split the sample
+ * files into the classes. Only one is allowed.
+ */
 enum axis_types {
 	AXIS_EVENT,
 	AXIS_UNITMASK,
@@ -40,26 +45,71 @@ struct axis_t {
 	string suggestion;
 } axes[AXIS_MAX] = {
 	{ "event", "specify event: or count:" },
-	{ "unitmask", "specify unitmask: or -m unitmask" },
-	{ "tgid", "specify tgid: or -m tgid" },
-	{ "tid", "specify tid: or -m tid" },
-	{ "cpu", "specify cpu: or -m cpu" },
+	{ "unitmask", "specify unitmask: or --merge unitmask" },
+	{ "tgid", "specify tgid: or --merge tgid" },
+	{ "tid", "specify tid: or --merge tid" },
+	{ "cpu", "specify cpu: or --merge cpu" },
 };
 
-/**
- * We have more than axis of classification, tell the user.
- */
-void
-report_error(int axis, int newaxis)
+
+/// We have more than one axis of classification, tell the user.
+void report_error(profile_classes const & classes,
+                  axis_types axis, axis_types newaxis)
 {
-	string str = "attempted to display results for parameter ";
-	str += axes[newaxis].name;
-	str += " but already displaying results for parameter ";
+	string str = "Already displaying results for parameter ";
 	str += axes[axis].name;
-	str += "\n";
-	str += "suggestion: ";
-	str += axes[newaxis].suggestion;
+	str += " with values:\n";
+	vector<profile_class>::const_iterator it = classes.v.begin();
+	vector<profile_class>::const_iterator const end = classes.v.end();
+
+	size_t i = 5;
+
+	for (; it != end && i; ++it) {
+		str += it->name + ",";
+		--i;
+	}
+
+	if (!i) {
+		str += " and ";
+		str += tostr(classes.v.size() - 5);
+		str += " more,";
+	}
+
+	str += "\nwhich conflicts with parameter ";
+	str += axes[newaxis].name += ".\n";
+	str += "Suggestion: ";
+	str += axes[axis].suggestion;
 	throw op_fatal_error(str);
+}
+
+
+/**
+ * check that two different axes are OK - this is only
+ * allowed if they are TGID,TID and for each class,
+ * tid == tgid
+ */
+bool allow_axes(profile_classes const & classes,
+                axis_types oldaxis, axis_types newaxis)
+{
+	// No previous axis - OK
+	if (oldaxis == AXIS_MAX)
+		return true;
+
+	if (oldaxis != AXIS_TID && oldaxis != AXIS_TGID)
+		return false;
+
+	if (newaxis != AXIS_TID && newaxis != AXIS_TGID)
+		return false;
+
+	vector<profile_class>::const_iterator it = classes.v.begin();
+	vector<profile_class>::const_iterator const end = classes.v.end();
+
+	for (; it != end; ++it) {
+		if (it->ptemplate.tgid != it->ptemplate.tid)
+			return false;
+	}
+
+	return true;
 }
 
 
@@ -188,45 +238,20 @@ void identify_classes(profile_classes & classes,
 	axis_types axis = AXIS_MAX;
 
 	for (size_t i = 0; i < AXIS_MAX; ++i) {
-		if (changed[i]) {
-			if (axis != AXIS_MAX)
-				report_error(axis, i);
-			axis = axis_types(i);
-		}
+		if (!changed[i])
+			continue;
+
+		if (!allow_axes(classes, axis, axis_types(i)))
+			report_error(classes, axis, axis_types(i));
+		axis = axis_types(i);
+		/* do this early for report_error */
+		name_classes(classes, axis);
 	}
 
 	if (axis == AXIS_MAX) {
 		cerr << "Internal error - no equivalence class axis" << endl;
 		abort();
 	}
-
-	name_classes(classes, axis);
-}
-
-
-/**
- * Check if a profile can fit into an equivalence class.
- * This is the heart of the merging and classification process.
- */
-bool class_match(profile_template const & ptemplate,
-                 parsed_filename const & parsed)
-{
-	if (ptemplate.event != parsed.event)
-		return false;
-	if (ptemplate.count != parsed.count)
-		return false;
-		
-	// remember that if we're merging on any of
-	// these, the template value will be empty
-	if (!ptemplate.unitmask.empty() && ptemplate.unitmask != parsed.unitmask)
-		return false;
-	if (!ptemplate.tgid.empty() && ptemplate.tgid != parsed.tgid)
-		return false;
-	if (!ptemplate.tid.empty() && ptemplate.tid != parsed.tid)
-		return false;
-	if (!ptemplate.cpu.empty() && ptemplate.cpu != parsed.cpu)
-		return false;
-	return true;
 }
 
 
@@ -255,23 +280,20 @@ template_from_profile(parsed_filename const & parsed,
 /**
  * Find a matching class the sample file could go in, or generate
  * a new class if needed.
+ * This is the heart of the merging and classification process.
+ * The returned value is non-const reference but the ptemplate member
+ * must be considered as const
  */
-profile_class & find_class(vector<profile_class> & classes,
+profile_class & find_class(set<profile_class> & classes,
                            parsed_filename const & parsed,
                            merge_option const & merge_by)
 {
-	vector<profile_class>::iterator it = classes.begin();
-	vector<profile_class>::iterator const end = classes.end();
+	profile_class cls;
+	cls.ptemplate = template_from_profile(parsed, merge_by);
 
-	for (; it != end; ++it) {
-		if (class_match(it->ptemplate, parsed))
-			return *it;
-	}
+	pair<set<profile_class>::iterator, bool> ret = classes.insert(cls);
 
-	profile_class pclass;
-	pclass.ptemplate = template_from_profile(parsed, merge_by);
-	classes.push_back(pclass);
-	return classes.back();
+	return const_cast<profile_class &>(*ret.first);
 }
 
 
@@ -341,7 +363,7 @@ int numeric_compare(string const & lhs, string const & rhs)
 	return 1;
 }
 
-};
+}  // anon namespace
 
 
 bool operator<(profile_class const & lhs,
@@ -375,7 +397,7 @@ bool operator<(profile_class const & lhs,
 profile_classes const
 arrange_profiles(list<string> const & files, merge_option const & merge_by)
 {
-	profile_classes classes;
+	set<profile_class> temp_classes;
 
 	list<string>::const_iterator it = files.begin();
 	list<string>::const_iterator const end = files.end();
@@ -394,9 +416,13 @@ arrange_profiles(list<string> const & files, merge_option const & merge_by)
 			parsed.image = parsed.lib_image;
 
 		profile_class & pclass =
-			find_class(classes.v, parsed, merge_by);
+			find_class(temp_classes, parsed, merge_by);
 		add_profile(pclass, parsed);
 	}
+
+	profile_classes classes;
+	copy(temp_classes.begin(), temp_classes.end(),
+	     back_inserter(classes.v));
 
 	if (classes.v.empty())
 		return classes;
@@ -451,18 +477,13 @@ verify_and_fill(app_map_t & app_map, list<inverted_profile> & plist,
 	app_map_t::iterator const end = app_map.end();
 
 	for (; it != end; ++it) {
-		string image = it->second.image;
-		it->second.image = find_image_path(image, extra);
-		if (!it->second.image.length()) {
-			cerr << "warning: " << image
-			     << " could not be read.\n";
-		} else {
-			plist.push_back(it->second);
-		}
+		plist.push_back(it->second);
+		inverted_profile & ip = plist.back();
+		ip.image = find_image_path(ip.image, extra, ip.error);
 	}
 }
 
-};
+} // anon namespace
 
 
 list<inverted_profile> const

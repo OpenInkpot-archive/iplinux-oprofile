@@ -18,10 +18,21 @@
 
 #include "op_cpu_type.h"
 
+struct op_event;
+
 #ifdef __cplusplus
 extern "C" {
 #endif
 
+/**
+ * @param pev  array of selected event we want to bind to counter
+ * @param nr_events  size of pev array
+ * @param cpu_type  cpu type
+ *
+ * Try to calculate a binding between passed event in pev and counter number.
+ * The binding is returned in a size_t * where returned ptr[i] is the counter
+ * number bound to pev[i]
+ */
 size_t * map_event_to_counter(struct op_event const * pev[], int nr_events,
                               op_cpu cpu_type);
 

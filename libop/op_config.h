@@ -2,7 +2,7 @@
  * @file op_config.h
  *
  * Parameters a user may want to change. See
- * also the relevant op_config_2[45].h
+ * also op_config_24.h
  *
  * @remark Copyright 2002 OProfile authors
  * @remark Read the file COPYING
@@ -23,9 +23,6 @@
 #define OP_DUMP_STATUS OP_BASE_DIR "complete_dump"
 
 #define OPD_MAGIC "DAE\n"
-#define OPD_VERSION 0x8
-
-/** maximum number of profilable kernel modules */
-#define OPD_MAX_MODULES 64
+#define OPD_VERSION 0x9
 
 #endif /* OP_CONFIG_H */

@@ -26,9 +26,8 @@ namespace format_output {
 formatter::formatter(profile_container const & profile_)
 	:
 	flags(ff_none),
-	nr_groups(1),
+	nr_classes(1),
 	profile(profile_),
-	first_output(true),
 	vma_64(false),
 	need_details(false),
 	need_header(true),
@@ -40,44 +39,50 @@ formatter::formatter(profile_container const & profile_)
 	format_map[ff_vma] = field_description(9, "vma", &formatter::format_vma);
 	format_map[ff_nr_samples] = field_description(9, "samples", &formatter::format_nr_samples);
 	format_map[ff_nr_samples_cumulated] = field_description(14, "cum. samples", &formatter::format_nr_cumulated_samples);
-	format_map[ff_percent] = field_description(12, "%", &formatter::format_percent);
+	format_map[ff_percent] = field_description(9, "%", &formatter::format_percent);
 	format_map[ff_percent_cumulated] = field_description(11, "cum. %", &formatter::format_cumulated_percent);
 	format_map[ff_linenr_info] = field_description(28, "linenr info", &formatter::format_linenr_info);
 	format_map[ff_image_name] = field_description(25, "image name", &formatter::format_image_name);
 	format_map[ff_app_name] = field_description(25, "app name", &formatter::format_app_name);
 	format_map[ff_symb_name] = field_description(30, "symbol name", &formatter::format_symb_name);
-	format_map[ff_percent_details] = field_description(12, "%", &formatter::format_percent_details);
+	format_map[ff_percent_details] = field_description(9, "%", &formatter::format_percent_details);
 	format_map[ff_percent_cumulated_details] = field_description(10, "cum. %", &formatter::format_cumulated_percent_details);
 }
 
  
-void formatter::show_details()
+void formatter::show_details(bool on_off)
 {
-	need_details = true;
+	need_details = on_off;
 }
 
 
-void formatter::hide_header()
+void formatter::show_header(bool on_off)
 {
-	need_header = false;
+	need_header = on_off;
 }
 
 
-void formatter::show_long_filenames()
+void formatter::show_long_filenames(bool on_off)
 {
-	long_filenames = true;
+	long_filenames = on_off;
 }
  
 
-void formatter::vma_format_64bit()
+void formatter::vma_format_64bit(bool on_off)
 {
-	vma_64 = true;
+	vma_64 = on_off;
 }
 
 
-void formatter::set_nr_groups(size_t nr)
+void formatter::show_global_percent(bool on_off)
 {
-	nr_groups = nr;
+	global_percent = on_off;
+}
+
+
+void formatter::set_nr_classes(size_t nr)
+{
+	nr_classes = nr;
 }
 
 
@@ -99,6 +104,8 @@ void formatter::output(ostream & out, symbol_entry const * symb)
 
 void formatter::output(ostream & out, symbol_collection const & symbols)
 {
+	output_header(out);
+
 	symbol_collection::const_iterator it = symbols.begin();
 	symbol_collection::const_iterator end = symbols.end();
 	for (; it != end; ++it) {
@@ -164,16 +171,17 @@ void formatter::output_details(ostream & out, symbol_entry const * symb)
 	temp_cumulated_samples = cumulated_samples;
 	temp_cumulated_percent = cumulated_percent;
 
-	total_count = symb->sample.counts;
+	if (!global_percent)
+		total_count = symb->sample.counts;
 	cumulated_percent_details -= symb->sample.counts;
-	// FIXME: need a .reset() member or is it enough understandable ?
+	// cumulated percent are relative to current symbol.
 	cumulated_samples = count_array_t();
 	cumulated_percent = count_array_t();
 
 	sample_container::samples_iterator it = profile.begin(symb);
 	sample_container::samples_iterator end = profile.end(symb);
 	for (; it != end; ++it) {
-		out << ' ';
+		out << "  ";
 		do_output(out, *symb, it->second, true);
 	}
 
@@ -186,9 +194,6 @@ void formatter::output_details(ostream & out, symbol_entry const * symb)
 void formatter::do_output(ostream & out, symbol_entry const & symb,
 			  sample_entry const & sample, bool hide_immutable)
 {
-	// FIXME: weird place to put this
-	output_header(out);
-
 	size_t padding = 0;
 
 	// first output the vma field
@@ -196,9 +201,9 @@ void formatter::do_output(ostream & out, symbol_entry const & symb,
 	if (flags & ff_vma)
 		padding = output_field(out, datum, ff_vma, padding, false);
 
-	// repeated fields for each count group
-	for (size_t group = 0 ; group < nr_groups; ++group) {
-		field_datum datum(symb, sample, group);
+	// repeated fields for each profile class
+	for (size_t pclass = 0 ; pclass < nr_classes; ++pclass) {
+		field_datum datum(symb, sample, pclass);
 
 		if (flags & ff_nr_samples)
 			padding = output_field(out, datum,
@@ -248,11 +253,6 @@ void formatter::do_output(ostream & out, symbol_entry const & symb,
 
 void formatter::output_header(ostream & out)
 {
-	if (!first_output)
-		return;
-
-	first_output = false;
-
 	if (!need_header)
 		return;
 
@@ -262,8 +262,8 @@ void formatter::output_header(ostream & out)
 	if (flags & ff_vma)
 		padding = output_header_field(out, ff_vma, padding);
 
-	// the field repeated for each count group
-	for (size_t group = 0 ; group < nr_groups; ++group) {
+	// the field repeated for each profile class
+	for (size_t pclass = 0 ; pclass < nr_classes; ++pclass) {
 		if (flags & ff_nr_samples)
 			padding = output_header_field(out,
 			      ff_nr_samples, padding);
@@ -366,7 +366,7 @@ string formatter::format_linenr_info(field_datum const & f)
 string formatter::format_nr_samples(field_datum const & f)
 {
 	ostringstream out;
-	out << f.sample.counts[f.count_group];
+	out << f.sample.counts[f.pclass];
 	return out.str();
 }
 
@@ -374,8 +374,8 @@ string formatter::format_nr_samples(field_datum const & f)
 string formatter::format_nr_cumulated_samples(field_datum const & f)
 {
 	ostringstream out;
-	cumulated_samples[f.count_group] += f.sample.counts[f.count_group];
-	out << cumulated_samples[f.count_group];
+	cumulated_samples[f.pclass] += f.sample.counts[f.pclass];
+	out << cumulated_samples[f.pclass];
 	return out.str();
 }
 
@@ -383,8 +383,8 @@ string formatter::format_nr_cumulated_samples(field_datum const & f)
 string formatter::format_percent(field_datum const & f)
 {
 	ostringstream out;
-	double ratio = op_ratio(f.sample.counts[f.count_group],
-	                        total_count[f.count_group]);
+	double ratio = op_ratio(f.sample.counts[f.pclass],
+	                        total_count[f.pclass]);
 
 	return format_double(ratio * 100, percent_int_width,
 	                     percent_fract_width);
@@ -394,9 +394,9 @@ string formatter::format_percent(field_datum const & f)
 string formatter::format_cumulated_percent(field_datum const & f)
 {
 	ostringstream out;
-	cumulated_percent[f.count_group] += f.sample.counts[f.count_group];
-	double ratio = op_ratio(cumulated_percent[f.count_group],
-	                        total_count[f.count_group]);
+	cumulated_percent[f.pclass] += f.sample.counts[f.pclass];
+	double ratio = op_ratio(cumulated_percent[f.pclass],
+	                        total_count[f.pclass]);
 
 	return format_double(ratio * 100, percent_int_width,
 	                     percent_fract_width);
@@ -406,8 +406,8 @@ string formatter::format_cumulated_percent(field_datum const & f)
 string formatter::format_percent_details(field_datum const & f)
 {
 	ostringstream out;
-	double ratio = op_ratio(f.sample.counts[f.count_group],
-	                        total_count_details[f.count_group]);
+	double ratio = op_ratio(f.sample.counts[f.pclass],
+	                        total_count_details[f.pclass]);
 
 	return format_double(ratio * 100, percent_int_width,
 	                     percent_fract_width);
@@ -417,11 +417,11 @@ string formatter::format_percent_details(field_datum const & f)
 string formatter::format_cumulated_percent_details(field_datum const & f)
 {
 	ostringstream out;
-	cumulated_percent_details[f.count_group]
-		+= f.sample.counts[f.count_group];
+	cumulated_percent_details[f.pclass]
+		+= f.sample.counts[f.pclass];
 
-	double ratio = op_ratio(cumulated_percent_details[f.count_group],
-	                        total_count_details[f.count_group]);
+	double ratio = op_ratio(cumulated_percent_details[f.pclass],
+	                        total_count_details[f.pclass]);
 
 	return format_double(ratio * 100, percent_int_width,
 			     percent_fract_width);

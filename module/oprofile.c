@@ -105,10 +105,12 @@ inline static void evict_op_entry(uint cpu, struct _oprof_data * data, long irq_
 	}
 }
 
-inline static void fill_op_entry(struct op_sample * ops, long eip, pid_t pid, int ctr)
+inline static void
+fill_op_entry(struct op_sample * ops, long eip, pid_t pid, pid_t tgid, int ctr)
 {
 	ops->eip = eip;
 	ops->pid = pid;
+	ops->tgid = tgid;
 	ops->counter = ctr;
 }
 
@@ -116,11 +118,12 @@ void op_do_profile(uint cpu, long eip, long irq_enabled, int ctr)
 {
 	struct _oprof_data * data = &oprof_data[cpu];
 	pid_t const pid = current->pid;
+	pid_t const tgid = op_get_tgid();
 	struct op_sample * samples = &data->buffer[data->nextbuf];
 
 	data->nr_irq++;
 
-	fill_op_entry(samples, eip, pid, ctr);
+	fill_op_entry(samples, eip, pid, tgid, ctr);
 	evict_op_entry(cpu, data, irq_enabled);
 }
 
@@ -513,8 +516,7 @@ static int oprof_start(void)
 		goto out;
 	}
 
-	if (!sysctl.kernel_only)
-		op_intercept_syscalls();
+	op_intercept_syscalls();
 
 	int_ops->start();
 
@@ -527,15 +529,16 @@ out:
 
 /*
  * stop interrupts being generated and notes arriving.
- * This needs to be idempotent.
+ * This is idempotent.
  */
 static void oprof_partial_stop(void)
 {
 	BUG_ON(state == STOPPED);
 
-	op_restore_syscalls();
-
-	int_ops->stop();
+	if (state == RUNNING) {
+		op_restore_syscalls();
+		int_ops->stop();
+	}
 
 	state = STOPPING;
 }
@@ -597,7 +600,6 @@ static struct file_operations oprof_fops = {
  *                        notesize
  *                        dump
  *                        dump_stop
- *                        kernel_only
  *                        nr_interrupts
  *                        #ctr/
  *                          event
@@ -720,13 +722,12 @@ out:
 	return err;
 }
 
-static int const nr_oprof_static = 7;
+static int const nr_oprof_static = 6;
 
 static ctl_table oprof_table[] = {
 	{ 1, "bufsize", &sysctl_parms.buf_size, sizeof(int), 0644, NULL, &lproc_dointvec, NULL, },
 	{ 1, "dump", &sysctl_parms.dump, sizeof(int), 0666, NULL, &sysctl_do_dump, NULL, },
 	{ 1, "dump_stop", &sysctl_parms.dump_stop, sizeof(int), 0644, NULL, &sysctl_do_dump_stop, NULL, },
-	{ 1, "kernel_only", &sysctl_parms.kernel_only, sizeof(int), 0644, NULL, &lproc_dointvec, NULL, },
 	{ 1, "nr_interrupts", &sysctl.nr_interrupts, sizeof(int), 0444, NULL, &get_nr_interrupts, NULL, },
 	{ 1, "notesize", &sysctl_parms.note_size, sizeof(int), 0644, NULL, &lproc_dointvec, NULL, },
 	{ 1, "cpu_type", &sysctl.cpu_type, sizeof(int), 0444, NULL, &lproc_dointvec, NULL, },

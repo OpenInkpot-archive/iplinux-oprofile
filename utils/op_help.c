@@ -22,21 +22,30 @@
 #include "op_hw_config.h"
 #include "op_string.h"
 #include "op_alloc_counter.h"
+#include "op_parse_event.h"
 
 static char const ** chosen_events;
 
-struct parsed_event {
-	char * name;
-	int count;
-	int unit_mask;
-	int kernel;
-	int user;
-} parsed_events[OP_MAX_COUNTERS];
-
+struct parsed_event parsed_events[OP_MAX_COUNTERS];
 
 static op_cpu cpu_type = CPU_NO_GOOD;
-
+static char * cpu_string;
 static poptContext optcon;
+
+
+/// return the Hamming weight (number of set bits)
+static size_t hweight(size_t mask)
+{
+	size_t count = 0;
+
+	while (mask) {
+		mask &= mask - 1;
+		count++;
+	}
+
+	return count;
+}
+
 
 /**
  * help_for_event - output event name and description
@@ -49,17 +58,23 @@ static void help_for_event(struct op_event * event)
 	uint i, j;
 	uint mask;
 
+	size_t nr_counters = op_get_nr_counters(cpu_type);
+
 	printf("%s", event->name);
 
 	printf(": (counter: ");
 
 	mask = event->counter_mask;
-	for (i = 0; i < CHAR_BIT * sizeof(event->counter_mask); ++i) {
-		if (mask & (1 << i)) {
-			printf("%d", i);
-			mask &= ~(1 << i);
-			if (mask)
-				printf(", ");
+	if (hweight(mask) == nr_counters) {
+		printf("all");
+	} else {
+		for (i = 0; i < CHAR_BIT * sizeof(event->counter_mask); ++i) {
+			if (mask & (1 << i)) {
+				printf("%d", i);
+				mask &= ~(1 << i);
+				if (mask)
+					printf(", ");
+			}
 		}
 	}
 
@@ -76,95 +91,6 @@ static void help_for_event(struct op_event * event)
 			       event->unit->um[j].desc);
 		}
 	}
-}
-
-
-static char * next_part(char const ** str)
-{
-	char const * c;
-	char * ret;
-
-	if ((*str)[0] == '\0')
-		return NULL;
-
-	if ((*str)[0] == ':')
-		++(*str);
-
-	c = *str;
-
-	while (*c != '\0' && *c != ':')
-		++c;
-
-	if (c == *str)
-		return NULL;
-
-	ret = op_xstrndup(*str, c - *str);
-	*str += c - *str;
-	return ret;
-}
-
-
-static int parse_events(void)
-{
-	int i = 0;
-
-	while (chosen_events[i]) {
-		int nr_counters = op_get_nr_counters(cpu_type);
-		char const * cp = chosen_events[i];
-		char * part = next_part(&cp);
-
-		if (i >= nr_counters) {
-			fprintf(stderr, "Too many events specified: CPU "
-			        "only has %d counters.\n", nr_counters);
-			exit(EXIT_FAILURE);
-		}
-
-		if (!part) {
-			fprintf(stderr, "Invalid event %s\n", cp);
-			exit(EXIT_FAILURE);
-		}
-
-		parsed_events[i].name = part;
-
-		part = next_part(&cp);
-
-		if (!part) {
-			fprintf(stderr, "Invalid event %s\n",
-			        chosen_events[i]);
-			exit(EXIT_FAILURE);
-		}
-
-		parsed_events[i].count = strtoul(part, NULL, 0);
-		free(part);
-
-		parsed_events[i].unit_mask = 0;
-		part = next_part(&cp);
-
-		if (part) {
-			parsed_events[i].unit_mask = strtoul(part, NULL, 0);
-			free(part);
-		}
-
-		parsed_events[i].kernel = 1;
-		part = next_part(&cp);
-
-		if (part) {
-			parsed_events[i].kernel = strtoul(part, NULL, 0);
-			free(part);
-		}
-
-		parsed_events[i].user = 1;
-		part = next_part(&cp);
-
-		if (part) {
-			parsed_events[i].user = strtoul(part, NULL, 0);
-			free(part);
-		}
-	
-		++i;
-	}
-
-	return i;
 }
 
 
@@ -196,14 +122,15 @@ static void check_event(struct parsed_event * pev,
 }
 
 
-static void resolve_events()
+static void resolve_events(void)
 {
-	int count = parse_events();
-	int i, j;
+	size_t count;
+	size_t i, j;
 	size_t * counter_map;
-	int nr_counters = op_get_nr_counters(cpu_type);
+	size_t nr_counters = op_get_nr_counters(cpu_type);
 	struct op_event const * selected_events[OP_MAX_COUNTERS];
 
+	count = parse_events(parsed_events, OP_MAX_COUNTERS, chosen_events);
 	if (count > nr_counters) {
 		fprintf(stderr, "Not enough hardware counters.\n");
 		exit(EXIT_FAILURE);
@@ -249,11 +176,12 @@ static void resolve_events()
 }
 
 
-static void show_unit_mask()
+static void show_unit_mask(void)
 {
 	struct op_event * event;
-	int count = parse_events();
+	size_t count;
 
+	count = parse_events(parsed_events, OP_MAX_COUNTERS, chosen_events);
 	if (count > 1) {
 		fprintf(stderr, "More than one event specified.\n");
 		exit(EXIT_FAILURE);
@@ -270,7 +198,7 @@ static void show_unit_mask()
 }
 
 
-static void show_default_event()
+static void show_default_event(void)
 {
 	struct op_default_event_descr descr;
 
@@ -290,8 +218,8 @@ static int unit_mask;
 static int get_default_event;
 
 static struct poptOption options[] = {
-	{ "cpu-type", 'c', POPT_ARG_INT, &cpu_type, 0,
-	  "use the given numerical CPU type", "cpu type", },
+	{ "cpu-type", 'c', POPT_ARG_STRING, &cpu_string, 0,
+	  "use the given CPU type", "cpu type", },
 	{ "check-events", 'e', POPT_ARG_NONE, &check_events, 0,
 	  "check the given event descriptions for validity", NULL, },
 	{ "unit-mask", 'u', POPT_ARG_NONE, &unit_mask, 0,
@@ -329,7 +257,7 @@ static void get_options(int argc, char const * argv[])
 
 
 /** make valgrind happy */
-static void cleanup()
+static void cleanup(void)
 {
 	int i;
 	for (i = 0; i < op_get_nr_counters(cpu_type); ++i) {
@@ -354,11 +282,14 @@ int main(int argc, char const *argv[])
 
 	/* usefull for testing purpose to allow to force the cpu type
 	 * with --cpu-type */
-	if (cpu_type == CPU_NO_GOOD)
+	if (cpu_string){
+		cpu_type = op_get_cpu_number(cpu_string);
+	} else {
 		cpu_type = op_get_cpu_type();
+	}
 
-	if (cpu_type < 0 || cpu_type >= MAX_CPU_TYPE) {
-		fprintf(stderr, "cpu_type '%d' is not valid\n", cpu_type);
+	if (cpu_type == CPU_NO_GOOD) {
+		fprintf(stderr, "cpu_type '%s' is not valid\n", cpu_string);
 		exit(EXIT_FAILURE);
 	}
 

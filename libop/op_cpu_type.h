@@ -48,6 +48,14 @@ typedef enum {
 op_cpu op_get_cpu_type(void);
 
 /**
+ * get the cpu number based on string
+ * @param cpu_string with either the cpu type identifier or cpu type number
+ *
+ * The function returns CPU_NO_GOOD if no matching string was found.
+ */
+op_cpu op_get_cpu_number(char const * cpu_string);
+
+/**
  * get the cpu string.
  * @param cpu_type the cpu type identifier
  *
@@ -76,7 +84,7 @@ int op_get_nr_counters(op_cpu cpu_type);
 typedef enum {
 	OP_INTERFACE_NO_GOOD = -1,
 	OP_INTERFACE_24,
-	OP_INTERFACE_25
+	OP_INTERFACE_26
 } op_interface;
 
 /**

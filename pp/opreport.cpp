@@ -28,12 +28,13 @@
 #include "profile_container.h"
 #include "symbol_sort.h"
 #include "format_output.h"
+#include "image_errors.h"
 
 using namespace std;
 
 namespace {
 
-static size_t nr_groups;
+static size_t nr_classes;
 
 /// storage for a merged file summary
 struct summary {
@@ -46,11 +47,11 @@ struct summary {
 	}
 
 	/// add a set of files to a summary
-	size_t add_files(list<string> const & files, size_t count_group);
+	size_t add_files(list<string> const & files, size_t pclass);
 };
 
 
-size_t summary::add_files(list<string> const & files, size_t count_group)
+size_t summary::add_files(list<string> const & files, size_t pclass)
 {
 	size_t subtotal = 0;
 
@@ -59,7 +60,7 @@ size_t summary::add_files(list<string> const & files, size_t count_group)
 
 	for (; it != end; ++it) {
 		size_t count = profile_t::sample_count(*it);
-		counts[count_group] += count;
+		counts[pclass] += count;
 		subtotal += count;
 	}
 
@@ -81,7 +82,7 @@ struct app_summary {
 	vector<summary> deps;
 
 	/// construct and fill in the data
-	size_t add_profile(profile_set const & profile, size_t count_group);
+	size_t add_profile(profile_set const & profile, size_t pclass);
 
 	bool operator<(app_summary const & rhs) const {
 		return options::reverse_sort 
@@ -111,14 +112,14 @@ summary & app_summary::find_summary(string const & image)
 
 
 size_t app_summary::add_profile(profile_set const & profile,
-                                size_t count_group)
+                                size_t pclass)
 {
 	size_t group_total = 0;
 
 	// first the main image
 	summary & summ = find_summary(profile.image);
-	size_t app_count = summ.add_files(profile.files, count_group);
-	counts[count_group] += app_count;
+	size_t app_count = summ.add_files(profile.files, pclass);
+	counts[pclass] += app_count;
 	group_total += app_count;
 
 	// now all dependent images if any
@@ -127,8 +128,8 @@ size_t app_summary::add_profile(profile_set const & profile,
 
 	for (; it != end; ++it) {
 		summary & summ = find_summary(it->lib_image);
-		size_t lib_count = summ.add_files(it->files, count_group);
-		counts[count_group] += lib_count;
+		size_t lib_count = summ.add_files(it->files, pclass);
+		counts[pclass] += lib_count;
 		group_total += lib_count;
 	}
 
@@ -215,10 +216,10 @@ string get_filename(string const & filename)
 /// Output a count and a percentage
 void output_count(double total_count, size_t count)
 {
-	cout << setw(9) << count << " ";
+	cout << setw(9) << count << ' ';
 	double ratio = op_ratio(count, total_count);
 	cout << format_double(ratio * 100, percent_int_width,
-			      percent_fract_width) << " ";
+			      percent_fract_width) << ' ';
 }
 
 
@@ -292,7 +293,7 @@ output_deps(summary_container const & summaries,
 
 		cout << '\t';
 
-		for (size_t i = 0; i < nr_groups; ++i) {
+		for (size_t i = 0; i < nr_classes; ++i) {
 			double tot_count = options::global_percent
 				? summaries.total_counts[i] : app.counts[i];
 
@@ -320,7 +321,7 @@ void output_summaries(summary_container const & summaries)
 			continue;
 		}
 
-		for (size_t j = 0; j < nr_groups; ++j) {
+		for (size_t j = 0; j < nr_classes; ++j) {
 			output_count(summaries.total_counts[j],
 			             app.counts[j]);
 		}
@@ -366,16 +367,13 @@ void output_symbols(profile_container const & samples, bool multiple_apps)
 
 	format_output::formatter out(samples);
 
-	out.set_nr_groups(nr_groups);
+	out.set_nr_classes(nr_classes);
 
-	if (options::details)
-		out.show_details();
-	if (options::long_filenames)
-		out.show_long_filenames();
-	if (!options::show_header)
-		out.hide_header();
-	if (choice.hints & cf_64bit_vma)
-		out.vma_format_64bit();
+	out.show_details(options::details);
+	out.show_long_filenames(options::long_filenames);
+	out.show_header(options::show_header);
+	out.vma_format_64bit(choice.hints & cf_64bit_vma);
+	out.show_global_percent(options::global_percent);
 
 	format_flags flags = get_format_flags(choice.hints);
 	if (multiple_apps)
@@ -390,7 +388,7 @@ int opreport(vector<string> const & non_options)
 {
 	handle_options(non_options);
 
-	nr_groups = classes.v.size();
+	nr_classes = classes.v.size();
 
 	if (!options::symbols) {
 		summary_container summaries(classes.v);
@@ -411,8 +409,10 @@ int opreport(vector<string> const & non_options)
 	list<inverted_profile> iprofiles
 		= invert_profiles(classes, options::extra_found_images);
 
-	list<inverted_profile>::const_iterator it = iprofiles.begin();
-	list<inverted_profile>::const_iterator const end = iprofiles.end();
+	report_image_errors(iprofiles);
+
+	list<inverted_profile>::iterator it = iprofiles.begin();
+	list<inverted_profile>::iterator const end = iprofiles.end();
 
 	for (; it != end; ++it)
 		populate_for_image(samples, *it);

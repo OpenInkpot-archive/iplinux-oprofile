@@ -3,15 +3,10 @@ This is an (incomplete) list of some of the stuff we want to look at doing.
 If you're interested in hacking on any of these, please contact the list first
 for some pointers and/or read HACKING and doc/CodingStyle.
 
-0.7 release
------------
+0.7.1 release
+-------------
 
- o sample-file: / binary: don't work in any useful way - can we fix this
-   by peeking at binary: value and faking the split_sample_file somehow ?
- o side-by-side opreport output (--compare - needs UI spec)
- o thread profiling (Ka is on this)
- o per-cpu profiling
- o output column shortname headers for opreport -l
+ o image filtering: --image /foo/bar/myapp (needs UI spec). For -s thread
 
 0.8 release
 -----------
@@ -24,28 +19,40 @@ Before 1.0 big stuff
  o add support for samples not belonging to any symbols probably through
    artificially created symbols (do we still need/want this ??)
  o opdiff
+ o side-by-side opreport output (--compare - needs UI spec) ???
  
 Before 1.0 little stuff
 -----------------------
 
+ o x86_64 and 2.4 kernel: test the needed change
+ o odb_insert() can fail on ftruncate or mremap() in db_manage.c but we don't
+  try to recover gracefully.
+ o dae/opd_image.h: struct opd_sfile * sfiles[OP_MAX_COUNTERS][NR_CPUS]; 
+   this use too many memory.
+ o we allow op_help --cpu-type=xx but with 16 it segfault on x86, alpha ev67
+  need OP_MAX_COUNTERS > 8 but we compile all tools with OP_MAX_COUNTERS==8
+  (see libop/op_hw_config.h). We should remove this #define
+ o can we log samples going to anonymous mapping by using
+  - 2.6 one fake sample for all anonymous sample, cookie == 0 mean use this
+  special sample file. (cookie == -1 or -2 as magic value ?)
+  - 2.4 we must pass to daemon note about exec anon mapping and create one
+  fake samples file by anon mapping specially named like 
+  /{root}/path/to/appli/anon_mapping-0B8000-0BA0000/...
+ o why rel_to_abs_path in locate_images ??
+ o we can add lots more unit tests yet
+ o output column shortname headers for opreport -l
+ o better sharing of dae daemon: share dae /daemon need to create a libdaemon/
+   subdir and this lib must be self contained (not include anything in dae/*.h
+   daemon/*.h) (<movewent> not really worth a whole new lib dir imho)
  o separate debug info stuff
- o debian build stuff
- o opgprof always merges even if we provide a profile spec that's minimal
-   enough - you can't get "cpu:0"
- o we're not following symlinks for opreport etc. binary resolving. FIXED 
- in pp/profile_spec.cpp, I'm unsure if it remains some other place to fix
+ o opgprof/opannotate always merges even if we provide a profile spec that's
+   minimal enough - you can't get "cpu:0"
  o is relative_to_absolute_path guaranteeing a trailing '/' documented ?
  o create_path API is weird
  o opannotate should error out with a msg if no debug symbols are found at all
- o oprof_start dialog size is too small initially
- o oprof_start key movement through events doesn't change help text
- o add -Wdeclaration-after-statement for $CC
  o GUI still has a physical-counter interface, should have a general one
    like opcontrol --event
- o implement pp_interface alias
- o look if we must remove help_str support from libopt++
  o move oprofiled.log to OP_SAMPLE_DIR/current ?
- o OPD_MAX_MODULES is stupid, use a list instead
  o lib-image: and image: behavior depend on --separate=, if --separate=library
   opreport "lib-image:*libc*" --merge=lib works but not
   opreport "image:*libc*" --merge=lib whilst the behavior is reversed if
@@ -53,17 +60,26 @@ Before 1.0 little stuff
  o improve the *non* verbose daemon log to be a bit more informative
  o --buffer-size is useless on 2.5 without tuning of watershed
  o oprof_start: check lib samples when kernel samples checkbox is checked
- o mask SIGTERM over critical daemon operations that could corrupt sample files
  o pp tools must handle samples count overflow (marked as (unsigned)-1)
- o daemon needs setrlimit(RLIMIT_NOFILE, ...)
  o when we dump stats for oprofiled, dump kernel-side values too (for 2.5)
  o lookup_dcookie can return ENAMETOOLONG but we can't hack it
-   - a C++ rewrite can handle this, and also the rlimit problem via caching name id's
-     and opening when necessary etc.
+ o daemon needs to handle -EMFILE failures in all files opened (including
+   complete_dump !) by closing sample files
  o remove 2.2 / gcc 2.91 support ?
  o the way we show kernel modules in 2.5 is not very obvious - "/oprofile"
- o gcc-cvs -include stdc++ doesn't use precompiled header, when it'll work
-  we can remove pch-c++.h from cvs
+ o sample-file: / binary: don't work in any useful way - can we fix this
+   by peeking at binary: value and faking the split_sample_file somehow ?
+
+Kernel
+------
+ o error out of the vma list search early if we go past the EIP - list is
+   vma-start-ordered I think
+ o move the unmap hook to the callers and do a check before unmapping to avoid
+   losing samples - a bit more expensive but saves on lots of lost samples.
+   this would move the hint hook up into sys_munmap, sys_mremap and maybe
+   other places ?
+ o replace the exit hook crap with pinning the task struct in place with a
+   two-list destruction of task_struct
 
 Documentation
 -------------
@@ -103,10 +119,12 @@ vma      samples  cum. samples  %           cum. %     symbol name             i
   mention in the xxx option help string than the --no-xxx is allowed. Not
   really usefull if we have a little number of --no.
  o should we make the sighup handler re-read counter config and re-start profiling too ?
+ o implement pp_interface alias (is it worth it ?)
  o improve --smart-demangle
 	o allow user to add it's own pattern in user.pat, document it.
 	o hard code ${typename} regular definition to remove all current limitations (difficult, perhaps after 1.0 ?).
- o allow --event to take event numbers. (is it worth ?)
+ o oprof_start dialog size is too small initially
+ o oprof_start key movement through events doesn't change help text
  o i18n. We need a good formatter, and also remember format_percent()
  o opannotate --source --output-dir=~moz/op/ /usr/bin/oprofiled
    will fail because the ~ is not expanded (no space around it) (popt bug I say)

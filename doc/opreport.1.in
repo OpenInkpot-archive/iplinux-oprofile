@@ -40,8 +40,7 @@ Exclude all the symbols in the given comma-separated list.
 .br
 .TP
 .BI "--global-percent"
-Make dependent image summary percentages relative to the whole profile,
-not just the application image.
+Make all percentages relative to the whole profile.
 .br
 .TP
 .BI "--help / -? / --usage"
@@ -50,7 +49,7 @@ Show help message.
 .TP
 .BI "--image-path / -p [paths]"
 Comma-separated list of additional paths to search for binaries.
-This is needed to find modules in kernels 2.5 and upwards.
+This is needed to find modules in kernels 2.6 and upwards.
 .br
 .TP
 .BI "--include-symbols / -i [symbols]"
@@ -61,7 +60,7 @@ Only include symbols in the given comma-separated list.
 Output full paths instead of basenames.
 .br
 .TP
-.BI "--merge / -m [cpu,pid,lib]"
+.BI "--merge / -m [lib,cpu,tid,tgid,unitmask,all]"
 Merge any profiles separated in a --separate session.
 .br
 .TP
@@ -79,6 +78,10 @@ Output to the given file instead of stdout.
 .TP
 .BI "--reverse-sort / -r"
 Reverse the sort from the default.
+.br
+.TP
+.BI "--show-address / -w"
+Show each symbol's VMA address.
 .br
 .TP
 .BI "--smart-demangle / -D"

@@ -20,6 +20,7 @@
 #include "file_manip.h"
 #include "profile_container.h"
 #include "arrange_profiles.h"
+#include "image_errors.h"
 #include "opgprof_options.h"
 #include "cverb.h"
 #include "ocg_hash.h"
@@ -51,7 +52,7 @@ void op_write_vma(FILE * fp, op_bfd const & abfd, bfd_vma vma)
 			op_write_u64(fp, vma);
 			break;
 		default:
-			cerr << "oprofile: unknwon vma size for this binary\n";
+			cerr << "oprofile: unknown vma size for this binary\n";
 			exit(EXIT_FAILURE);
 	}
 }
@@ -139,9 +140,7 @@ void output_gprof(op_bfd const & abfd, profile_container const & samples,
 	bfd_vma low_pc;
 	bfd_vma high_pc;
 
-	/* FIXME worth to try more multiplier ? is ia64 with its chunk of
-	 * instructions can get sample inside a chunck or always at chunk
-	 * boundary ? */
+	/* FIXME worth to try more multiplier ?	*/
 	int multiplier = 2;
 	if (aligned_samples(samples, 4))
 		multiplier = 8;
@@ -262,14 +261,24 @@ int opgprof(vector<string> const & non_options)
 
 	profile_container samples(false, true);
 
+	bool ok = image_profile.error == image_ok;
 	// FIXME: symbol_filter would be allowed through option
-	op_bfd abfd(profiles.image, string_filter());
+	op_bfd abfd(image_profile.image, string_filter(), ok);
+	if (!ok && image_profile.error == image_ok)
+		image_profile.error = image_format_failure;
 
-	load_samples(abfd, profiles.files, profiles.image, samples);
+	if (image_profile.error != image_ok) {
+		report_image_error(image_profile, true);
+		exit(EXIT_FAILURE);
+	}
+
+	load_samples(abfd, image_profile.groups[0].begin()->files,
+	             image_profile.image, samples);
 
 	samples_ocg_t cg_db;
 
-	bool const is_cg = load_cg(cg_db, *(profiles.files.begin()));
+	bool const is_cg = load_cg(cg_db,
+		*(image_profile.groups[0].begin()->files.begin()));
 
 	output_gprof(abfd, samples, cg_db, is_cg, options::gmon_filename);
 
