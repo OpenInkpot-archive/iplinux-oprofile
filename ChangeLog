@@ -1,3 +1,15 @@
+2003-11-14  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* daemon/opd_mangling.c: oops, it's better to really open the cg file
+
+	* daemon/opd_sfile.c:
+	* daemon/opd_stats.c:
+	* daemon/opd_stats.h:
+	* daemon/liblegacy/opd_24_stats.c:
+	* daemon/liblegacy/opd_24_stats.h:
+	* daemon/liblegacy/opd_proc.c: log sample lost due to sample open
+	  failure
+
 2003-11-12  John Levon  <levon@movementarian.org>
 
 	* configure.in: bump to 0.8cvs

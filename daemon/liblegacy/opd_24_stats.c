@@ -31,6 +31,8 @@ void opd_print_24_stats(void)
 	printf("Nr. modules samples lost: %lu\n", opd_24_stats[OPD_LOST_MODULE]);
 	printf("Nr. samples lost due to no process information: %lu\n",
 		opd_24_stats[OPD_LOST_PROCESS]);
+	printf("Nr. samples lost due to sample file open failure: %lu\n",
+		opd_24_stats[OPD_LOST_SAMPLEFILE]);
 	printf("Nr. process samples in user-space: %lu\n", opd_24_stats[OPD_PROCESS]);
 	printf("Nr. samples lost due to no map information: %lu\n",
 		opd_24_stats[OPD_LOST_MAP_PROCESS]);

@@ -103,6 +103,8 @@ int opd_open_sample_file(struct sfile * sf, int counter, int cg)
 	int err;
 
 	file = &sf->files[counter];
+	if (cg)
+		file = &sf->cg_files[counter];
 
 	mangled = mangle_filename(sf, counter, cg);
 

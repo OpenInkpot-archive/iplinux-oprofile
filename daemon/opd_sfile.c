@@ -240,8 +240,10 @@ static void sfile_log_arc(struct transient const * trans)
 		verbose_sample(sf, pc, counter);
 #endif
 
-	if (!file)
+	if (!file) {
+		opd_stats[OPD_LOST_SAMPLEFILE]++;
 		return;
+	}
 
 #if 0
 	opd_stats[OPD_SAMPLES]++;
@@ -290,8 +292,10 @@ void sfile_log_sample(struct transient const * trans)
 	if (verbose)
 		verbose_sample(trans->current, pc, trans->event);
 
-	if (!file)
+	if (!file) {
+		opd_stats[OPD_LOST_SAMPLEFILE]++;
 		return;
+	}
 
 	opd_stats[OPD_SAMPLES]++;
 	opd_stats[trans->current->kernel ? OPD_KERNEL : OPD_PROCESS]++;

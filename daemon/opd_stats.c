@@ -29,6 +29,8 @@ void opd_print_stats(void)
 	printf("Nr. kernel samples: %lu\n", opd_stats[OPD_KERNEL]);
 	printf("Nr. lost samples (no kernel/user): %lu\n", opd_stats[OPD_NO_CTX]);
 	printf("Nr. lost kernel samples: %lu\n", opd_stats[OPD_LOST_KERNEL]);
+	printf("Nr. samples lost due to sample file open failure: %lu\n",
+		opd_stats[OPD_LOST_SAMPLEFILE]);
 	printf("Nr. incomplete code structs: %lu\n", opd_stats[OPD_DANGLING_CODE]);
 	fflush(stdout);
 }
