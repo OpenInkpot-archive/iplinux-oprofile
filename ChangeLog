@@ -1,3 +1,8 @@
+2002-04-21  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* oprof_report/Makefile.in:
+	* oprof_report/oprof_report.cpp: use db
+
 2002-04-20  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* dae/opd_proc.c: OPD_KERNEL_OFFSET thing

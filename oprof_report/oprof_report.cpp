@@ -71,7 +71,6 @@ void oprof_report::load_samples_files(const string & filename)
 		opp_samples_files samples_file(temp_filename, counter);
 
 		opp_bfd abfd(samples_file.first_header(), 
-			     samples_file.nr_samples, 
 			     demangle_filename(app_name));
 
 		// we defer clearing the view after ensuring than nothing
