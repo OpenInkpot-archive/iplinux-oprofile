@@ -29,25 +29,29 @@ inline unsigned int add_counts(unsigned int count, sample_entry const * s)
 
 } // namespace anon
 
-sample_entry const & sample_container::operator[](sample_index_t index) const
+
+sample_entry const & sample_container::operator[](sample_container::size_type index) const
 {
 	return samples[index];
 }
 
-sample_index_t sample_container::size() const
+
+sample_container::size_type sample_container::size() const
 {
 	return samples.size();
 }
+
 
 void sample_container::push_back(sample_entry const & sample)
 {
 	samples.push_back(sample);
 }
 
-unsigned int sample_container::accumulate_samples(
-			string const & filename) const
+
+unsigned int
+sample_container::accumulate_samples(string const & filename) const
 {
-	flush_input_counter();
+	build_by_loc();
 
 	sample_entry lower, upper;
 
@@ -55,13 +59,14 @@ unsigned int sample_container::accumulate_samples(
 	lower.file_loc.linenr = 0;
 	upper.file_loc.linenr = INT_MAX;
 
-	typedef set_sample_entry_t::const_iterator iterator;
+	typedef samples_by_loc_t::const_iterator iterator;
 
-	iterator it1 = samples_by_file_loc.lower_bound(&lower);
-	iterator it2 = samples_by_file_loc.upper_bound(&upper);
+	iterator it1 = samples_by_loc.lower_bound(&lower);
+	iterator it2 = samples_by_loc.upper_bound(&upper);
 
 	return accumulate(it1, it2, 0, add_counts);
 }
+
 
 sample_entry const * sample_container::find_by_vma(bfd_vma vma) const
 {
@@ -69,7 +74,7 @@ sample_entry const * sample_container::find_by_vma(bfd_vma vma) const
 
 	value.vma = vma;
 
-	vector<sample_entry>::const_iterator it =
+	samples_t::const_iterator it =
 		lower_bound(samples.begin(), samples.end(), value,
 			    less_sample_entry_by_vma());
 
@@ -79,30 +84,34 @@ sample_entry const * sample_container::find_by_vma(bfd_vma vma) const
 	return 0;
 }
 
-unsigned int sample_container::accumulate_samples(
-	string const & filename, size_t linenr) const
+
+unsigned int
+sample_container::accumulate_samples(string const & filename,
+		size_t linenr) const
 {
-	flush_input_counter();
+	build_by_loc();
 
 	sample_entry sample;
 
 	sample.file_loc.filename = filename;
 	sample.file_loc.linenr = linenr;
 
-	typedef pair<set_sample_entry_t::const_iterator,
-		set_sample_entry_t::const_iterator> p_it_t;
+	typedef pair<samples_by_loc_t::const_iterator,
+		samples_by_loc_t::const_iterator> it_pair;
 
-	p_it_t p_it = samples_by_file_loc.equal_range(&sample);
+	it_pair itp = samples_by_loc.equal_range(&sample);
 
-	return accumulate(p_it.first, p_it.second, 0, add_counts);
+	return accumulate(itp.first, itp.second, 0, add_counts);
 }
 
-void sample_container::flush_input_counter() const
+
+void sample_container::build_by_loc() const
 {
-	if (!samples.size() || !samples_by_file_loc.empty())
+	if (!samples_by_loc.empty())
 		return;
 
-	for (sample_index_t i = 0 ; i < samples.size() ; ++i) {
-		samples_by_file_loc.insert(&samples[i]);
-	}
+	samples_t::const_iterator cit = samples.begin();
+	samples_t::const_iterator end = samples.end();
+	for (; cit != end; ++cit)
+		samples_by_loc.insert(&*cit);
 }

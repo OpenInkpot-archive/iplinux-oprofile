@@ -1,5 +1,18 @@
 2003-04-24  John Levon  <levon@movementarian.org>
 
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp: pedantry for sample_container
+	indices.
+
+	* libpp/sample_container.h:
+	* libpp/sample_container.cpp: various cleanups and docs. Add
+	and use size_type.
+
+	* libpp/symbol_container.h:
+	* libpp/symbol_container.cpp: renamings. Add and use size_type.
+
+2003-04-24  John Levon  <levon@movementarian.org>
+
 	* libpp/symbol_container.h:
 	* libpp/symbol_container.cpp: remove unused operator[].
 	Add some docs. Some small cleanups

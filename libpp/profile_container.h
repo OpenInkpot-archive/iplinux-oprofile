@@ -78,7 +78,7 @@ public:
 	sample_entry const * find_sample(bfd_vma vma) const;
 
 	/// Return a sample_entry by its index, index must be valid
-	sample_entry const & get_samples(sample_index_t idx) const;
+	sample_entry const & get_samples(sample_index_t index) const;
 
 	/// a collection of sorted symbols
 	typedef std::vector<symbol_entry const *> symbol_collection;

@@ -20,7 +20,7 @@
 
 using namespace std;
 
-symbol_index_t symbol_container::size() const
+symbol_container::size_type symbol_container::size() const
 {
 	return symbols.size();
 }
@@ -35,16 +35,16 @@ void symbol_container::push_back(symbol_entry const & symbol)
 symbol_entry const *
 symbol_container::find(string filename, size_t linenr) const
 {
-	build_by_file_loc();
+	build_by_loc();
 
 	symbol_entry symbol;
 	symbol.sample.file_loc.filename = filename;
 	symbol.sample.file_loc.linenr = linenr;
 
-	set_symbol_by_file_loc::const_iterator it =
-		symbol_entry_by_file_loc.find(&symbol);
+	symbols_by_loc_t::const_iterator it =
+		symbols_by_loc.find(&symbol);
 
-	if (it != symbol_entry_by_file_loc.end())
+	if (it != symbols_by_loc.end())
 		return *it;
 
 	return 0;
@@ -67,15 +67,15 @@ vector<symbol_entry const *> symbol_container::find(string name) const
 }
 
 
-void symbol_container::build_by_file_loc() const
+void symbol_container::build_by_loc() const
 {
-	if (!symbol_entry_by_file_loc.empty())
+	if (!symbols_by_loc.empty())
 		return;
 
 	symbols_t::const_iterator cit = symbols.begin();
 	symbols_t::const_iterator end = symbols.end();
 	for (; cit != end; ++cit)
-		symbol_entry_by_file_loc.insert(&*cit);
+		symbols_by_loc.insert(&*cit);
 }
 
 

@@ -200,7 +200,7 @@ vector<string> const profile_container_t::select_filename(
 	// contain sample does not work: a symbol can contain samples and this
 	// symbol is in a source file that contain zero sample because only
 	// inline function in this source file contains samples.
-	for (size_t i = 0 ; i < samples->size() ; ++i) {
+	for (sample_container::size_type i = 0; i < samples->size(); ++i) {
 		filename_set.insert((*samples)[i].file_loc.filename);
 	}
 
@@ -274,9 +274,11 @@ unsigned int profile_container_t::samples_count(string const & filename,
 	return samples->accumulate_samples(filename, linenr);
 }
 
-sample_entry const & profile_container_t::get_samples(sample_index_t idx) const
+sample_entry const & profile_container_t::get_samples(sample_index_t index) const
 {
-	return (*samples)[idx];
+	sample_container::size_type i =
+		static_cast<sample_container::size_type>(index);
+	return (*samples)[i];
 }
 
 bool add_samples(profile_container_t & samples,

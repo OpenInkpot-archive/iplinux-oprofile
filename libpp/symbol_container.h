@@ -27,8 +27,13 @@
  */
 class symbol_container {
 public:
+	/// container type
+	typedef std::vector<symbol_entry> symbols_t;
+
+	typedef symbols_t::size_type size_type;
+
 	/// return the number of symbols stored
-	symbol_index_t size() const;
+	size_type size() const;
 
 	/**
 	 * Add a symbol. Can only be done before any file-location
@@ -51,25 +56,28 @@ public:
 
 private:
 	/// build the symbol by file-location cache
-	void build_by_file_loc() const;
+	void build_by_loc() const;
 
-	/// container type
-	typedef std::vector<symbol_entry> symbols_t;
-
-	/// the main container of symbols. multiple symbols with the same
-	/// name are allowed.
+	/**
+	 * The main container of symbols. Multiple symbols with the same
+	 * name are allowed.
+	 */
 	symbols_t symbols;
 
-	/// different named symbol at same file location are allowed e.g.
-	/// template instanciation
+	/**
+	 * Differently-named symbol at same file location are allowed e.g.
+	 * template instantiation.
+	 */
 	typedef std::multiset<symbol_entry const *, less_by_file_loc>
-		set_symbol_by_file_loc;
+		symbols_by_loc_t;
 
 	// must be declared after the vector to ensure a correct life-time.
 
-	/// symbol_entry sorted by location order lazily build when necessary
-	/// from const function so mutable
-	mutable set_symbol_by_file_loc symbol_entry_by_file_loc;
+	/**
+	 * Symbols sorted by location order. Lazily built on request,
+	 * so mutable.
+	 */
+	mutable symbols_by_loc_t symbols_by_loc;
 };
 
 #endif /* SYMBOL_CONTAINER_H */
