@@ -1,6 +1,30 @@
+2003-06-18  John Levon  <levon@movementarian.org>
+
+	* pp/opannotate_options.c: hide the unhandled
+	--base-dir option
+
+2003-06-18  John Levon  <levon@movementarian.org>
+
+	* pp/Makefile.am: don't build opdiff
+
+2003-06-17  Will Cohen  <wcohen@redhat.com>
+
+	* daemon/opd_cookie.h: Add s390 syscall value.
+	
+2003-06-17  John Levon  <levon@movementarian.org>
+
+	* utils/opcontrol: don't accept "-r" - it's too easy to typo
+
+2003-06-17  John Levon  <levon@movementarian.org>
+
+	* doc/srcdoc/Doxyfile: removed
+
+	* doc/srcdoc/Doxyfile.in:
+	* configure.in: generate doxygen version nr. automatically
+
 2003-06-17  Philippe Elie  <phil.el@wanadoo.fr>
 
-	* libdb/db_insert.c: missing initialization of error message on
+	* libdb/db_insert.cpp: missing initialization of error message on
 	  error path
 
 2003-06-17  John Levon  <levon@movementarian.org>
