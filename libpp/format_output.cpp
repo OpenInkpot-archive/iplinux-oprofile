@@ -22,73 +22,8 @@
 
 using namespace std;
 
-namespace options {
-	extern bool demangle;
-}
 
-struct output_option {
-	char option;
-	outsymbflag flag;
-	string help_string;
-};
-
-static output_option const output_options[] = {
-	{ 'v', osf_vma, "vma offset" },
-	{ 's', osf_nr_samples, "nr samples" },
-	{ 'S', osf_nr_samples_cumulated, "nr cumulated samples" },
-	{ 'p', osf_percent, "nr percent samples" },
-	{ 'P', osf_percent_cumulated, "nr cumulated percent samples" },
-	{ 'q', osf_percent_details, "nr percent samples details" },
-	{ 'Q', osf_percent_cumulated_details, "nr cumulated percent samples details" },
-	{ 'n', osf_symb_name, "symbol name" },
-	{ 'l', osf_linenr_info, "source file name and line nr" },
-	{ 'i', osf_image_name, "image name" },
-	{ 'e', osf_app_name, "owning application name" },
-};
-
-size_t const nr_output_option = sizeof(output_options) / sizeof(output_options[0]);
-
-namespace {
-
-output_option const * find_option(char ch)
-{
-	for (size_t i = 0 ; i < nr_output_option ; ++i) {
-		if (ch == output_options[i].option) {
-			return &output_options[i];
-		}
-	}
-
-	return 0;
-}
-
-}
-
- 
 namespace format_output {
-
-outsymbflag parse_format(string const & option)
-{
-	size_t flag = 0;
-	for (size_t i = 0 ; i < option.length() ; ++i) {
-		output_option const * opt = find_option(option[i]);
-		if (!opt)
-			return osf_none;
-		flag |= opt->flag;
-	}
-
-	return static_cast<outsymbflag>(flag);
-}
-
-
-void show_help(ostream & out)
-{
-	out << "--output format string:\n";
-	for (size_t i = 0 ; i < nr_output_option ; ++i) {
-		out << output_options[i].option << "\t"
-		    << output_options[i].help_string << endl;
-	}
-}
-
 
 formatter::formatter(profile_container const & profile_)
 	:
@@ -167,6 +102,7 @@ void formatter::show_header()
 {
 	need_header = true;
 }
+
 
 void formatter::show_short_filename()
 {
@@ -315,7 +251,7 @@ string formatter::format_symb_name(field_datum const & f)
 {
 	if (f.name[0] == '?')
 		return "(no symbol)";
-	return options::demangle ? demangle_symbol(f.name) : f.name;
+	return demangle_symbol(f.name);
 }
 
  

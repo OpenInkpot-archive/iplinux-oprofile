@@ -1,5 +1,19 @@
 2003-04-27  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* libpp/format_output.h:
+	* libpp/format_output.cpp: remove all string based output format flag
+
+	* libpp/format_output.cpp: move options::demangle handling ...
+	* libregx/demangle_symbol.cpp: here
+
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp:
+	* pp/opreport_options.h:
+	* pp/opreport_options.cpp:
+	* pp/opreport.cpp: handle --include-symbols
+
+2003-04-27  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* pp/opreport_options.h:
 	* pp/opreport_options.cpp:
 	* pp/opreport.cpp: handle --threshold, remove --ignore-symbols

@@ -69,16 +69,12 @@ profile_container::~profile_container()
 //  the samples_by_file_loc member var is correctly setup.
 void profile_container::add(profile_t const & profile,
                             op_bfd const & abfd,
-                            string const & app_name,
-                            string const & symbol_name)
+                            string const & app_name)
 {
 	string const image_name = abfd.get_filename();
 	bool const need_linenr = flags & osf_linenr_info;
 
 	for (symbol_index_t i = 0; i < abfd.syms.size(); ++i) {
-
-		if (!symbol_name.empty() && abfd.syms[i].name() != symbol_name)
-			continue;
 
 		u32 start, end;
 		string filename;
@@ -307,16 +303,16 @@ bool add_samples(profile_container & samples,
 		 string const & image_name,
 		 string const & app_name,
 		 vector<string> const & excluded_symbols,
-		 string const & symbol)
+		 std::vector<std::string> const & included_symbols)
 {
 	profile_t profile(sample_filename);
 
-	op_bfd abfd(image_name, excluded_symbols, vector<string>());
+	op_bfd abfd(image_name, excluded_symbols, included_symbols);
 
 	profile.check_mtime(image_name);
 	profile.set_start_offset(abfd.get_start_offset());
 	
-	samples.add(profile, abfd, app_name, symbol);
+	samples.add(profile, abfd, app_name);
 
 	return abfd.have_debug_info();
 }

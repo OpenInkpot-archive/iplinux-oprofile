@@ -27,13 +27,6 @@ class symbol_entry;
 
 namespace format_output {
  
-/// output to out the formatting options available
-void show_help(std::ostream & out);
-
-/** return osf_none if the option string is ill formed, so you can call
- * output_symbol::show_help() to notify user on available options */
-outsymbflag parse_format(std::string const & option);
-
 /// class to output in a columned format symbols and associated samples
 class formatter {
 public:

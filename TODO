@@ -21,7 +21,6 @@ Before merging with trunk
   a vector of symbol to consider, we can perhaps sort in format_output
  o implement pp_interface alias
  o opreport unhandled option (probably not exhaustive) 
-  --include-symbols=symbol1,symbol2
   --accumulated
   --sort= (?)
   --no-header

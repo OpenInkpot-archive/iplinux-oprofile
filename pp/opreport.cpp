@@ -224,7 +224,8 @@ void output_symbols_count(partition_files const & files)
 				// multiple time the same binary file open bfd
 				// openened
 				add_samples(samples, *it, image_name, app_name,
-					    options::exclude_symbols);
+					    options::exclude_symbols,
+					    options::include_symbols);
 			}
 		}
 	}

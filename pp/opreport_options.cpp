@@ -42,6 +42,7 @@ namespace options {
 	bool sort_by_debug;
 	bool sort_by_image;
 	vector<string> exclude_symbols;
+	vector<string> include_symbols;
 	vector<string> image_path;
 	merge_option merge_by;
 	bool no_header;
@@ -77,6 +78,8 @@ popt::option options_array[] = {
 		     "sort by", "vma,sample,symbol,debug,image"),
 	popt::option(options::exclude_symbols, "exclude-symbols", 'e',
 		     "exclude these comma separated symbols", "symbols"),
+	popt::option(options::include_symbols, "include-symbols", 'i',
+		     "include these comma separated symbols", "symbols"),
 	popt::option(options::image_path, "image-path", 'p',
 		     "comma separated path to search missing binaries","path"),
 	popt::option(merge, "merge", 'm',

@@ -27,10 +27,14 @@ using namespace std;
 
 namespace options {
 	extern bool smart_demangle;
+	extern bool demangle;
 }
 
 string const demangle_symbol(string const & name)
 {
+	if (!options::demangle)
+		return name;
+
 	// Do not try to strip leading underscore, this leads to many
 	// C++ demangling failures.
 	char * unmangled = cplus_demangle(name.c_str(), DMGL_PARAMS | DMGL_ANSI);

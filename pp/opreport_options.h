@@ -31,6 +31,7 @@ namespace options {
 	extern bool global_percent;
 	extern bool short_filename;
 	extern std::vector<std::string> exclude_symbols;
+	extern std::vector<std::string> include_symbols;
 	extern std::vector<std::string> image_path;
 	extern double threshold;
 }

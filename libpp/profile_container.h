@@ -63,8 +63,7 @@ public:
 	 * sampling rate, same events etc.)
 	 */
 	void add(profile_t const & profile, op_bfd const & abfd,
-		 std::string const & app_name,
-		 std::string const & symbol_name = std::string());
+		 std::string const & app_name);
 
 	/// Find a symbol from its vma, return zero if no symbol at this vma
 	symbol_entry const * find_symbol(bfd_vma vma) const;
@@ -187,6 +186,7 @@ bool add_samples(profile_container & samples,
 		 std::string const & app_name,
 		 std::vector<std::string> const & excluded_symbols =
 		 	std::vector<std::string>(),
-		 std::string const & symbol = std::string());
+		 std::vector<std::string> const & included_symbols =
+		 	std::vector<std::string>());
 
 #endif /* !PROFILE_CONTAINER_H */
