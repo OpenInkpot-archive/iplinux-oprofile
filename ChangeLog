@@ -1,3 +1,9 @@
+2003-04-27  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* pp/opreport_options.h:
+	* pp/opreport_options.cpp:
+	* pp/opreport.cpp: handle --threshold, remove --ignore-symbols
+
 2003-04-27  John Levon  <levon@movementarian.org>
 
 	* libpp/<various>: minor spacing etc.
@@ -9,7 +15,7 @@
 	* libpp/format_output.cpp: replace osf_short_xxx by a boolean
 	* libpp/profile_container.cpp: update according
 
-	* pp/opreport_options.h: export short_filename options
+	* pp/opreport_options.h: export short_filename option
 	* pp/opreport.cpp: use short_filename
 
 2003-04-27  Philippe Elie  <phil.el@wanadoo.fr>

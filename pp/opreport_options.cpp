@@ -34,7 +34,6 @@ namespace options {
 	bool debug_info;
 	bool details;
 	double threshold;
-	bool percent_threshold;
 	bool include_dependent;
 	bool hide_dependent;
 	bool sort_by_vma;
@@ -42,7 +41,6 @@ namespace options {
 	bool sort_by_symbol;
 	bool sort_by_debug;
 	bool sort_by_image;
-	vector<string> ignore_symbols;
 	vector<string> exclude_symbols;
 	vector<string> image_path;
 	merge_option merge_by;
@@ -77,8 +75,6 @@ popt::option options_array[] = {
 		     "include libs, modules in %-age count but hide them in output"),
 	popt::option(sort_by, "sort", 's',
 		     "sort by", "vma,sample,symbol,debug,image"),
-	popt::option(options::ignore_symbols, "ignore-symbols", 'i',
-		     "ignore these comma separated symbols", "symbols"),
 	popt::option(options::exclude_symbols, "exclude-symbols", 'e',
 		     "exclude these comma separated symbols", "symbols"),
 	popt::option(options::image_path, "image-path", 'p',
@@ -106,15 +102,20 @@ void handle_threshold()
 		istringstream ss(threshold);
 		if (ss >> value) {
 			options::threshold = value;
-			char ch;
-			if (ss >> ch && ch == '%') {
-				options::percent_threshold = true;
-			}
+		} else {
+			cerr << "illegal threshold value: " << threshold
+			     << " allowed range: [0-100]" << endl;
+			exit(EXIT_FAILURE);
+		}
+
+		if (options::threshold < 0.0 || options::threshold > 100.0) {
+			cerr << "illegal threshold value: " << threshold
+			     << " allowed range: [0-100]" << endl;
+			exit(EXIT_FAILURE);
 		}
 	}
 
-	cverb << options::threshold << (options::percent_threshold ? "%" : "")
-	      << endl;;
+	cverb << options::threshold << endl;;
 }
 
 // FIXME: separate file if reused

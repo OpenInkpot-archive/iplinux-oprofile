@@ -6,7 +6,6 @@ for some pointers and/or read HACKING and doc/CodingStyle.
 Before merging with trunk
 -------------------------
 
- o <movement> percent of opreport -l /usr/bin/make is relative to all dependent samples not just /usr/bin/make FIXME: exact command line used ?
  o move oprofiled.log to OP_SAMPLE_DIR/current ?
  o mtime checking in dae is in the wrong place: we must check at each
   samples files open not at image opening
@@ -21,7 +20,13 @@ Before merging with trunk
  o consider to do the symbol (details too ?) sort at output, format_output receive
   a vector of symbol to consider, we can perhaps sort in format_output
  o implement pp_interface alias
- o add --symbol-list=symbol,symbol to opreport
+ o opreport unhandled option (probably not exhaustive) 
+  --include-symbols=symbol1,symbol2
+  --accumulated
+  --sort= (?)
+  --no-header
+  --image-path
+
  o fix John movement on 2.5: odb_insert failure (and message error corrupted ?)
 
 After merging with trunk
