@@ -1,3 +1,16 @@
+2003-05-21  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/profile.cpp:
+	* libpp/op_header.h:
+	* libpp/op_header.cpp: when sample file differ ouput the sample
+	  filename
+
+	* pp/opannotate.cpp: remove spurious output
+
+	* */Makefile.am:
+	* configure.in: handle our own OP_CFLAGS, OP_CXXFLAGS to let user
+	  free to use make CFLAGS=
+
 2003-05-20  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libpp/profile_spec.h:
