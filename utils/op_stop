@@ -18,6 +18,8 @@
 
 # FIXME: support different base dir ??
  
+echo "Note: op_stop is deprecated. Please use opcontrol --stop or opcontrol --shutdown" >&2
+ 
 if [ "$UID" != "0" ]; then
 	echo "Must be root to stop oprofile." >&2
 	exit 1
