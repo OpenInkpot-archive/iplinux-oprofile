@@ -112,11 +112,11 @@ public:
 	/// return the total number of samples
 	unsigned int samples_count() const;
 
-	/// Get the samples count which belongs to filename. Return false if
+	/// Get the samples count which belongs to filename. Return 0 if
 	/// no samples found.
 	unsigned int samples_count(std::string const & filename) const;
 	/// Get the samples count which belongs to filename, linenr. Return
-	/// false if no samples found.
+	/// 0 if no samples found.
 	unsigned int samples_count(std::string const & filename,
 			   size_t linenr) const;
 private:

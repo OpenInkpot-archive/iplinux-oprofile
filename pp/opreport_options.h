@@ -12,6 +12,7 @@
 #define OPREPORT_OPTIONS_H
 
 #include <string>
+#include <vector>
 
 #include "common_option.h"
 #include "utility.h"
@@ -21,11 +22,16 @@ class merge_option;
 
 namespace options {
 	extern bool symbols;
+	extern bool debug_info;
+	extern bool details;
 	extern bool reverse_sort;
 	extern bool hide_dependent;
 	extern bool include_dependent;
 	extern merge_option merge_by;
 	extern bool global_percent;
+	extern std::vector<std::string> exclude_symbols;
+	extern std::vector<std::string> ignore_symbols;
+	extern std::vector<std::string> image_path;
 }
 
 /**

@@ -1,3 +1,10 @@
+2003-04-26  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/profile_container.h: comment
+
+	* pp/opreport_options.h: more options export
+	* pp/opreport.cpp: implement -l. Doen't works correctly: --merge=lib
+
 2003-04-25  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* pp/opreport_options.h: export global_percent

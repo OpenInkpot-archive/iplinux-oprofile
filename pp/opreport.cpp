@@ -13,18 +13,20 @@
 #include <iomanip>
 #include <vector>
 #include <algorithm>
+#include <sstream>
 
 #include "string_manip.h"
+#include "file_manip.h"
 #include "split_sample_filename.h"
 #include "opreport_options.h"
 #include "profile.h"
 #include "partition_files.h"
+#include "profile_container.h"
+#include "format_output.h"
 
 using namespace std;
 
 namespace {
-
-const int percent_width = 7;
 
 struct merged_file_count {
 	merged_file_count() : count(0) {}
@@ -95,15 +97,27 @@ files_count counts(partition_files::filename_set const & files)
 }
 
 
+// FIXME: intended to replace format_percent
+string const format_double(double value, size_t int_width, size_t frac_width)
+{
+	ostringstream os;
+
+	// os << fixed << value unsupported by gcc 2.95
+	os.setf(ios::fixed, ios::floatfield);
+	os << setw(int_width + frac_width + 1)
+	   << setprecision(frac_width) << value;
+
+	return os.str();
+}
+
+
 void output_counter(double total_count, size_t count)
 {
+	// FIXME: left or right, op_time was using left
 	// left io manipulator doesn't exist in 2.95
-	cout.setf(ios::left, ios::adjustfield);
 	cout << setw(9) << count << " ";
-	// FIXME: decimal point mis-aligned
-	// FIXME: with fixed size colummed output showing % is not good
 	double ratio = op_ratio(count, total_count);
-	cout << format_percent(ratio * 100, percent_width) << " ";
+	cout << format_double(ratio * 100, 3, 4) << " ";
 }
 
 
@@ -163,6 +177,60 @@ void output_files_count(partition_files const & files)
 	}
 }
 
+
+void output_symbols_count(partition_files const & files)
+{
+	// FIXME: we probably don't want to show application name if
+	// we report samples about only one application
+	outsymbflag flags = outsymbflag(osf_vma | osf_nr_samples | osf_percent | osf_symb_name | osf_short_app_name);
+
+	if (options::include_dependent && !options::merge_by.merge_lib)
+		flags = outsymbflag(flags | osf_short_image_name);
+
+	if (options::debug_info)
+		flags = outsymbflag(flags | osf_linenr_info);
+
+	profile_container samples(false, flags, options::details);
+
+	for (size_t i = 0 ; i < files.nr_set(); ++i) {
+		partition_files::filename_set const & file_set = files.set(i);
+
+		partition_files::filename_set::const_iterator it;
+		for (it = file_set.begin(); it != file_set.end(); ++it) {
+			split_sample_filename sp = split_sample_file(*it);
+
+			string app_name = sp.image;
+			string image_name = sp.lib_image.empty() ?
+				sp.image : sp.lib_image;
+
+			if (options::merge_by.merge_lib) {
+				app_name = image_name;
+			}
+
+			// FIXME
+			// if the image files does not exist try to retrieve it
+//			image_name = check_image_name(options::alternate_filename, image_name, samples_filename);
+			if (op_file_readable(image_name)) {
+				// FIXME: inneficient since we can have
+				// multiple time the same binary file open bfd
+				// openened
+				add_samples(samples, *it, image_name, app_name,
+					    options::exclude_symbols);
+			}
+		}
+	}
+
+	// FIXME options::ignore_symbols
+	vector<symbol_entry const *> symbols =
+		samples.select_symbols(0.0, false);
+
+	bool need_vma64 = vma64_p(symbols.begin(), symbols.end());
+
+	format_output::formatter out(samples);
+	out.add_format(flags);
+	out.output(cout, symbols, !options::reverse_sort, need_vma64);
+}
+
 }  // anonymous namespace
 
 
@@ -171,7 +239,7 @@ int opreport(int argc, char const * argv[])
 	get_options(argc, argv);
 
 	if (options::symbols) {
-		cerr << "N/A\n";
+		output_symbols_count(*sample_file_partition);
 	} else {
 		output_files_count(*sample_file_partition);
 	}
