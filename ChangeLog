@@ -1,5 +1,11 @@
 2003-05-26  John Levon  <levon@movementarian.org>
 
+	* doc/opgprof.1.in:
+	* doc/opannotate.1.in:
+	* doc/op_help.1.in: complete
+
+2003-05-26  John Levon  <levon@movementarian.org>
+
 	* configure.in:
 	* doc/Makefile.am:
 	* doc/oprofile.1.in:

@@ -8,7 +8,7 @@ opgprof \- produce gprof-format profile data
 [
 .I options
 ]
-[event name]
+[profile specification]
 .SH DESCRIPTION
 
 .B opgprof
@@ -23,6 +23,24 @@ Show help message.
 .TP
 .BI "--version / -v"
 Show version.
+.br
+.TP
+.BI "--verbose / -V"
+Give verbose debugging output.
+.br
+.TP
+.BI "--image-path / -p [paths]"
+Comma-separated list of additional paths to search for binaries.
+This is needed to find modules in kernels 2.5 and upwards.
+.br
+.TP
+.BI "--threshold / -t [percentage]"
+Only output data for symbols that have more than the given percentage
+of total samples.
+.br
+.TP
+.BI "--output-filename / -o [file]"
+Output to the given file instead of the default, gmon.out
 
 .SH ENVIRONMENT
 No special environment variables are recognised by opgprof.
