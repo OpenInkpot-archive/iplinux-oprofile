@@ -566,7 +566,7 @@ void output_source(path_filter const & filter, bool output_separate_file)
 		output_info(cout);
 
 	vector<string> filenames =
-		samples->select_filename(options::threshold / 100.0, false);
+		samples->select_filename(options::threshold);
 
 	for (size_t i = 0 ; i < filenames.size() ; ++i) {
 		if (!filter.match(filenames[i]))

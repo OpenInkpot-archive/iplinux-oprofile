@@ -189,18 +189,21 @@ profile_container::select_symbols(double threshold, string const & image_name,
 }
 
 
-vector<string> const profile_container::select_filename(
-	double threshold, bool until_threshold) const
+vector<string> const profile_container::select_filename(double threshold) const
 {
 	vector<string> result;
 	set<string> filename_set;
+
+	threshold /= 100.0;
 
 	// Trying to iterate on symbols to create the set of filenames which
 	// contain sample does not work: a symbol can contain samples and this
 	// symbol is in a source file that contain zero sample because only
 	// inline function in this source file contains samples.
-	sample_container::samples_iterator sit;
-	for (sit = samples->begin(); sit != samples->end(); ++sit) {
+	sample_container::samples_iterator sit = samples->begin();
+	sample_container::samples_iterator const send = samples->end();
+
+	for (; sit != send; ++sit) {
 		filename_set.insert(sit->second.file_loc.filename);
 	}
 
@@ -220,16 +223,16 @@ vector<string> const profile_container::select_filename(
 	// now sort the file_by_samples entry.
 	sort(file_by_samples.begin(), file_by_samples.end());
 
-	vector<filename_by_samples>::const_iterator cit = file_by_samples.begin();
-	vector<filename_by_samples>::const_iterator const cend = file_by_samples.end();
-	for (; cit != cend && threshold >= 0; ++cit) {
+	vector<filename_by_samples>::const_iterator cit
+		= file_by_samples.begin();
+	vector<filename_by_samples>::const_iterator const cend
+		= file_by_samples.end();
+
+	for (; cit != cend; ++cit) {
 		filename_by_samples const & s = *cit;
 
-		if (until_threshold || s.percent >= threshold)
+		if (s.percent >= threshold)
 			result.push_back(s.filename);
-
-		if (until_threshold)
-			threshold -=  s.percent;
 	}
 
 	return result;

@@ -1,5 +1,12 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* profile_container.h:
+	* profile_container.cpp:
+	* opannotate.cpp: clean up select_filename() in a
+	similar fashion
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* libpp/profile_container.h:
 	* libpp/profile_container.cpp:
 	* pp/opreport.cpp:

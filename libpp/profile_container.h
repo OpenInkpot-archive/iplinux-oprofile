@@ -107,8 +107,7 @@ public:
 		bool sort_by_vma = false) const;
 
 	/// Like select_symbols for filename without allowing sort by vma.
-	std::vector<std::string> const select_filename(
-		double threshold, bool until_threshold) const;
+	std::vector<std::string> const select_filename(double threshold) const;
 
 	/// return the total number of samples
 	unsigned int samples_count() const;
