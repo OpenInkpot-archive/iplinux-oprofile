@@ -396,7 +396,6 @@ void output_objdump_asm(vector<symbol_entry const *> const & output_symbols,
 	// a medium number of times, I dunno if the used threshold is optimal
 	// but it is a conservative value.
 	size_t const max_objdump_exec = 50;
-	cerr << app_name << " " << output_symbols.size() << endl;
 	if (output_symbols.size() <= max_objdump_exec) {
 		for (size_t i = 0 ; i < output_symbols.size() ; ++i) {
 			bfd_vma start = output_symbols[i]->sample.vma;
@@ -567,7 +566,7 @@ void output_source(path_filter const & filter, bool output_separate_file)
 		output_info(cout);
 
 	vector<string> filenames =
-		samples->select_filename(0.0, false);
+		samples->select_filename(options::threshold / 100.0, false);
 
 	for (size_t i = 0 ; i < filenames.size() ; ++i) {
 		if (!filter.match(filenames[i]))
