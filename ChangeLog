@@ -338,6 +338,12 @@
 
 	* libop/op_hw_config.h: remove unused OP_COUNT_MAX
 
+2003-06-03  John Levon  <levon@movementarian.org>
+
+	* libdb/odb_hash.h:
+	* libdb/db_manage.c:
+	* libdb/db_insert.c: namespace safety
+
 2003-06-03  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libpp/op_header.cpp:
