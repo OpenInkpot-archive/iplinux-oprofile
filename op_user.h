@@ -110,9 +110,6 @@ typedef enum {
 
 /*@}*/
 
-/** kernel image entries are offset by this many entries */
-#define OPD_KERNEL_OFFSET 524288
-
 /** maximum number of counters, up to 4 for Athlon (18 for P4). The primary
  * use of this variable is for static/local array dimension. Never use it in 
  * loop or in array index access/index checking unless you know what you
