@@ -10,13 +10,12 @@ Before merging with trunk
  o write the man page and xml doc (i'll do this right at the end - john)
  o we show "app name" when --separate=none. Don't
 
+ o some option shortcut conflict, try $ pp_tools_name --help | sort
  o test opannotate -s -a on an application containing relative path debug
   info and profiled in another directory than the application build once.
   can objdump retrieve the source file and if no can we work-around ?
  o opannotate unhandled option (probably not exhaustive) 
    --base-dir
- o opd_mangle_filename() in dae/ daemon/ use create_path blindly and try to
-  recreate from /var.
  o inhibit build of opdiff in pp/Makefile.am
  o disallow --accumulated without -l. Generally disable meaningless combinations
  o merging vmlinux as dependent library and as primary image
