@@ -1,5 +1,13 @@
 2003-05-10  John Levon  <levon@movementarian.org>
 
+	* libop++/Makefile.am:
+	* libop++/op_header.cpp:
+	* libop++/op_print_event.h:
+	* libop++/op_print_event.cpp: remove op_print_event
+	files, making it a function local to op_header.cpp
+
+2003-05-10  John Levon  <levon@movementarian.org>
+
 	* libop++/op_header.h:
 	* libop++/op_header.cpp: make output_header() be
 	an operator<<

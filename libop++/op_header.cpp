@@ -11,12 +11,13 @@
 
 #include <iostream>
 #include <cstdlib>
+#include <iomanip>
 
 #include "odb_hash.h"
 #include "op_cpu_type.h"
-#include "op_print_event.h"
 #include "op_file.h"
 #include "op_header.h"
+#include "op_events.h"
 
 using namespace std;
 
@@ -95,6 +96,39 @@ opd_header read_header(string const & sample_filename)
 	odb_close(&samples_db);
 
 	return head;
+}
+
+
+namespace {
+
+void op_print_event(ostream & out, op_cpu cpu_type, u8 type, u16 um, u32 count)
+{
+	if (cpu_type == CPU_TIMER_INT) {
+		out << "Profiling through timer interrupt\n";
+		return;
+	}
+
+	struct op_event * event = op_find_event(cpu_type, type);
+
+	char const * um_desc = 0;
+
+	for (size_t i = 0; i < event->unit->num; ++i) {
+		if (event->unit->um[i].value == um)
+			um_desc = event->unit->um[i].desc;
+	}
+
+	out << "Counted " << event->name << " events (" << event->desc << ")";
+	if (cpu_type != CPU_RTC) {
+		int old_width = out.width();
+		char old_fill = out.fill();
+		out << " with a unit mask of 0x"
+		    << hex << setw(2) << setfill('0') << unsigned(um) << " ("
+		    << um_desc << ")";
+		out << setfill(old_fill) << setw(old_width) << dec;
+	}
+	out << " count " << dec << count << endl;
+}
+
 }
 
 
