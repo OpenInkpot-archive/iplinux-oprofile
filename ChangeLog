@@ -1,5 +1,11 @@
 2003-05-18  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* libpp/partition_files.cpp: merge partition entry when neccessary
+	  fixing a corner case when a binary can be a dependent or a primary
+	  image and was not merged
+
+2003-05-18  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* pp/opreport_options.cpp:
 	* pp/opannotate_options.cpp: remove conflicting options shortcut
 

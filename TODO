@@ -16,23 +16,6 @@ Before merging with trunk
    --base-dir
  o inhibit build of opdiff in pp/Makefile.am
  o disallow --accumulated without -l. Generally disable meaningless combinations
- o merging vmlinux as dependent library and as primary image
-   $ pp/opreport --merge=lib | more
-   194561  40.1204 /boot/2.5.66/vmlinux
-    62102  12.8060 /boot/2.5.66/vmlinux
-  The first is the dependent and merged vmlinux from all application the
-  second is the default vmlinux (where we put samples when we have no owning
-  application)
-  I looked and got problem to fix it, I suspect by adding this constraint we
-  have no longer a strict weak ordering relation and either partition_files
-  must be rewritten or we must fix it in dae. It make sense to fix it in dae by
-  encoding primary image as {root}/usr/bin/make/{dep}/{root}/usr/bin/make. If
-  we fix it in this way I defer the fix after daemon rewrite
-
-   - this fix is fine for me (probably better for call stacks anyway) but I'd
-     prefer it to be done *before* any long-drawn daemon rewrite. A daemon rewrite
-     should be an equivalent transformation IMHO otherwise we will have problems...
-
  o test with 2.95 if cout.rdbuf(os.rdbuf()); work even when there is non
   flushed data in cout buffer. It's also not clear if at exit() we have not
   a problem (who is the owner of the buffer and in what order of and cout will

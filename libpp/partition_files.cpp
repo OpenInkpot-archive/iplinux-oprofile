@@ -152,6 +152,44 @@ partition_files::partition_files(list<string> const & filename,
 		copy(fit->begin(), fit->end(), 
 		     ostream_iterator<split_sample_filename>(cverb, ""));
 	}
+
+	// In some case a primary image can be dependent such:
+	// {root}vmlinux and {root}/bin/bash/{dep}/{root}/vmlinux,
+	// merge_compare() is unable to handle this properly so we must fix it
+
+	if (!merge_by.lib) {
+		return;
+	}
+
+	// FIXME: this would be handled in merge_compare() but, until we 'fix'
+	// daemon to encode primary image as {root}/binary/{dep}/{root}/binary,
+	// we can't.
+	// FIXME O(nr_set()*nr_set())
+	filename_partition::iterator fend = filenames.end();
+	filename_partition::iterator cur;
+	for (cur = filenames.begin(); cur != fend; ++cur) {
+		filename_partition::iterator candidate = cur;
+		for (++candidate; candidate != fend;) {
+			string image_name;
+
+			// assert(!cur->empty() && !candidate->empty())
+
+			if (cur->begin()->image ==
+			    candidate->begin()->lib_image) {
+				image_name = cur->begin()->image;
+			} else if (cur->begin()->lib_image ==
+				   candidate->begin()->image) {
+				image_name = candidate->begin()->image;
+			}
+
+			if (!image_name.empty()) {
+				cur->splice(cur->end(), *candidate);
+				candidate = filenames.erase(candidate);
+			} else {
+				++candidate;
+			}
+		}
+	}
 }
 
 
