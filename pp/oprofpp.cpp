@@ -388,8 +388,7 @@ int main(int argc, char const *argv[])
 	opp_get_options(argc, argv, image_file, sample_file, counter);
 
 	opp_samples_files samples_files(sample_file, counter);
-	opp_bfd abfd(samples_files.first_header(),
-		     samples_files.nr_samples, image_file);
+	opp_bfd abfd(samples_files.first_header(), image_file);
 
 	if (!gproffile)
 		samples_files.output_header();

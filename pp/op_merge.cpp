@@ -203,8 +203,9 @@ static void output_files(const std::string & filename,
 	ofstream out(filename.c_str());
 
 	// reinterpret's required by gcc 3, that's the standard :/
-	out.write(reinterpret_cast<char*>(samples_files[0]->header), sizeof(opd_header));
+	out.write(reinterpret_cast<char*>(samples_files[0]->header()), sizeof(opd_header));
 
+#if 0
 	// All size of samples has been checked and must be identical
 	size_t nr_samples = samples_files[0]->nr_samples;
 	for (size_t i = 0 ; i < nr_samples ; ++i) {
@@ -213,6 +214,10 @@ static void output_files(const std::string & filename,
 			count += samples_files[j]->samples[i].count;
 		out.write(reinterpret_cast<char*>(&count), sizeof(count));
 	}
+#else
+	fprintf(stderr, "N/A");
+	exit(EXIT_FAILURE);
+#endif
 }
 
 //---------------------------------------------------------------------------

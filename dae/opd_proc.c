@@ -407,7 +407,6 @@ static void opd_check_image_mtime(struct opd_image * image)
  */
 void opd_put_image_sample(struct opd_image *image, u32 offset, u16 count)
 {
-	struct opd_fentry *fentry;
 	struct opd_sample_file* sample_file;
 	int counter;
 

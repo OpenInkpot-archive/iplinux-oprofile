@@ -1,3 +1,18 @@
+2002-04-20  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* dae/opd_proc.c: minor warning suppression
+
+	* pp/Makefile.in:
+	* pp/oprofpp.cpp:
+	* pp/op_time.cpp:
+	* pp/opf_container.cpp:
+	* pp/opf_filter.cpp:
+	* pp/oprofpp.h: handle the new db file format, this stuff is
+	  not yet extensively tested
+
+	* pp/op_merge.c: not already updated, exit at run time
+	  with an error message
+
 2002-04-19  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* dae/opd_proc.h:
