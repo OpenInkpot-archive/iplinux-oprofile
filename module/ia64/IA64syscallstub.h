@@ -1,4 +1,13 @@
-/* Assembly language file macros */
+/**
+ * @file IA64syscallstub.h
+ * Assembly language file macros
+ *
+ * @remark Copyright 2002 OProfile authors
+ * @remark Read the file COPYING
+ *
+ * @author Bob Montgomery
+ */
+
 /* $Id$ */
 
 #define SYSCALLSTUB_POST(name)		\
