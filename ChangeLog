@@ -1,3 +1,10 @@
+2003-05-01  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libutil++/op_bfd.cpp: remove _init from excluded symbol
+	* libpp/profile_container.cpp: tidy
+
+	* pp/opgprof.cpp: fix capping samples
+
 2003-04-30  John Levon  <levon@movementarian.org>
 
 	* pp/opgprof.cpp:

@@ -106,6 +106,10 @@ Before 1.0 little stuff
  o must we do setrlimit(RLIMIT_NOFILE, ...) for daemon ? Isn't already limited
   by the kernel itself ?
  o allow --ctr0-event to take event numbers. (is it worth ?)
+ o better treatment of section /wo symbol, actually we rely on _init being
+  the first symbol in the first CODE section, we would rather lookup all CODE
+  section and create a symbol from the start of the section to the fist symbol
+  in this section (if its size is zero don't create it)
 
 Documentation
 -------------
