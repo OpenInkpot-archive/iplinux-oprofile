@@ -314,7 +314,7 @@ format_flags const get_format_flags(column_flags const & cf)
 		flags = format_flags(flags | ff_percent_cumulated);
 	}
 
-	if (!(cf & cf_image_name))
+	if (cf & cf_image_name)
 		flags = format_flags(flags | ff_image_name);
 
 	return flags;

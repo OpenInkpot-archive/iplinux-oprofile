@@ -185,7 +185,7 @@ profile_container::select_symbols(symbol_choice & choice) const
 					choice.hints | cf_multiple_apps);
 			}
 
-			if (it->image_name.id) {
+			if (it->app_name.id != it->image_name.id) {
 				choice.hints = column_flags(
 					choice.hints | cf_image_name);
 			}
