@@ -17,10 +17,14 @@
 #include "utility.h"
 
 class partition_files;
+class merge_option;
 
 namespace options {
 	extern bool symbols;
 	extern bool reverse_sort;
+	extern bool hide_dependent;
+	extern bool include_dependent;
+	extern merge_option merge_by;
 }
 
 /**

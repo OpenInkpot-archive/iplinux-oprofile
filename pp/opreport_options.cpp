@@ -36,6 +36,7 @@ namespace options {
 	double threshold;
 	bool percent_threshold;
 	bool include_dependent;
+	bool hide_dependent;
 	bool sort_by_vma;
 	bool sort_by_sample;
 	bool sort_by_symbol;
@@ -72,6 +73,8 @@ popt::option options_array[] = {
 		     "count or percent"),
 	popt::option(options::include_dependent, "include-dependent", 'n',
 		     "include libs, modules etc."),
+	popt::option(options::hide_dependent, "hide-dependent", 'n',
+		     "include libs, modules in %-age count but hide them in output"),
 	popt::option(sort_by, "sort", 's',
 		     "sort by", "vma,sample,symbol,debug,image"),
 	popt::option(options::ignore_symbols, "ignore-symbols", 'i',
@@ -143,11 +146,6 @@ void handle_sort_option()
 // FIXME: separate file if reused
 void handle_merge_option()
 {
-	if (merge.empty()) {
-		// PP:5.21 merge default to all.
-		merge.push_back("all");
-	}
-
 	for (size_t i = 0; i < merge.size(); ++i) {
 		if (merge[i] == "cpu") {
 			options::merge_by.merge_cpu = true;

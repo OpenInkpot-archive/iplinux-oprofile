@@ -10,6 +10,7 @@
  */
 
 #include <iostream>
+#include <iomanip>
 #include <vector>
 #include <algorithm>
 
@@ -22,9 +23,18 @@ using namespace std;
 
 namespace {
 
-struct files_count {
+struct merged_file_count {
+	merged_file_count() : count(0) {}
 	size_t count;
 	string filename;
+};
+
+struct files_count {
+	files_count() : count(0) {}
+	size_t count;
+	string image_name;
+	string sample_filename;
+	vector<merged_file_count> files;
 };
 
 struct compare_files_count {
@@ -39,15 +49,24 @@ bool compare_files_count::operator()(files_count const & lhs,
 		: rhs.count < lhs.count;
 }
 
-size_t counts(partition_files::filename_set const & files)
+files_count counts(partition_files::filename_set const & files)
 {
-	size_t count = 0;
+	files_count count;
+
+	count.sample_filename = *files.begin();
+	split_sample_filename sp = split_sample_file(count.sample_filename);
+	count.image_name = sp.image;
 
 	partition_files::filename_set::const_iterator it;
 	for (it = files.begin(); it != files.end(); ++it) {
-		profile_t samples(*it);
+		merged_file_count sub_count;
 
-		count += samples.accumulate_samples(0, ~0);
+		sub_count.filename = *it;
+		profile_t samples(*it);
+		sub_count.count = samples.accumulate_samples(0, ~0);
+
+		count.count += sub_count.count;
+		count.files.push_back(sub_count);		
 	}
 
 	return count;
@@ -60,11 +79,7 @@ void output_files_count(partition_files const & files)
 	for (size_t i = 0 ; i < files.nr_set(); ++i) {
 		partition_files::filename_set const & file_set = files.set(i);
 
-		files_count temp;
-		temp.count = counts(file_set);
-		temp.filename = *file_set.begin();
-
-		set_file_count.push_back(temp);
+		set_file_count.push_back(counts(file_set));
 	}
 
 	sort(set_file_count.begin(), set_file_count.end(),
@@ -72,22 +87,31 @@ void output_files_count(partition_files const & files)
 
 	vector<files_count>::const_iterator it;
 	for (it = set_file_count.begin(); it != set_file_count.end(); ++it) {
-		split_sample_filename sp = split_sample_file(it->filename);
-
-		// FIXME: the way we must show or if we need to show lib_image
-		// depends on --merge=lib --include-dependent
-
-		// FIXME: do we need a new option in pp_interface like -k
-		// option of op_time ? This option is not compatible with
-		// --merge=lib and have no effect if !--include-dependent
-		// this option will allow three way output, e.g. for /bin/bash:
-		// show only /bin/bash count (!--include-dependent && !-k)
-		// show only /bin/bash count but this count include shared
-		// libs (--include-dependent && !-k)
-		// show count for /bin/bash and sub-count for each shared
-		// library (--include-dependent -k)
-		cout << it->count << " " << sp.image << " " 
-		     << sp.lib_image << endl;
+		cout << setw(6) << it->count << " ";
+		if (!options::merge_by.merge_lib) {
+			cout << it->image_name;
+		} else {
+			split_sample_filename sp =
+					split_sample_file(it->sample_filename);
+			if (sp.lib_image.empty())
+				cout << it->image_name;
+			else
+				cout << sp.lib_image;
+		}
+		cout << endl;
+		if (!options::hide_dependent && !options::merge_by.merge_lib) {
+			for (size_t i = 0; i < it->files.size(); ++i) {
+				merged_file_count const & count = it->files[i];
+				split_sample_filename sp =
+				 split_sample_file(count.filename);
+				cout << "\t" << setw(6) << count.count << " ";
+				if (sp.lib_image.empty())
+					cout << " " << sp.image;
+				else
+					cout << " " << sp.lib_image;
+				cout << endl;
+			}
+		}
 	}
 }
 
