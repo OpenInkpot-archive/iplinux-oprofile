@@ -150,7 +150,7 @@ do_init() {
 	IS_RTC=0
  
 	case "$CPUTYPE" in
-		4) 	IS_RTC=1
+		5) 	IS_RTC=1
 			;;
 	esac
 
