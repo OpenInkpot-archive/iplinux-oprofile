@@ -1,3 +1,35 @@
+2003-07-21  John Levon  <levon@movementarian.org>
+
+	* gui/oprof_start.cpp: select "No event" when switching counter
+	if needed
+
+2003-07-21  John Levon  <levon@movementarian.org>
+
+	* gui/oprof_start.cpp: fix default event choosing when
+	daemonrc exists
+
+2003-07-21  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* gui/oprof_start.cpp: thinko in has_unique_event(), don't warn for
+	  no counter with CPU_TIMER_INT
+
+2003-07-21  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* gui/oprof_start.cpp: allow to de-select a counter
+
+2003-07-21  John Levon  <levon@movementarian.org>
+
+	* gui/oprof_start.cpp:
+	* gui/oprof_start_util.h:
+	* gui/oprof_start_util.cpp: remove uptime pretty printing.
+	It's broken for 2.5 and ugly code
+
+2003-07-21  John Levon  <levon@movementarian.org>
+
+	* gui/oprof_start.h:
+	* gui/oprof_start.cpp: use a default event if no
+	events are set yet
+
 2003-07-20  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* m4/compileroption.m4: fix for autoconf 2.13
