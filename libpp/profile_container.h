@@ -36,12 +36,13 @@ public:
 	 * symbols with zero samples count
 	 * @param flags optimize hint to add samples. The flags is a promise
 	 * on what will be required as information in future. Avoid to pass
-	 * osf_linenr_info greatly improve performance of add. Avoiding
-	 * osf_details is also an improvement.
+	 * osf_linenr_info greatly improve performance of add.
 	 * @param counter_mask which counter we must record
+	 * @param need details true if we need to record all samples or to
+	 * to record them at symbol level. This is an optimization hint
 	 */
 	profile_container_t(bool add_zero_samples_symbols, outsymbflag flags,
-			     int counter_mask);
+			    int counter_mask, bool need_details);
 
 	~profile_container_t();
  
@@ -163,6 +164,10 @@ private:
 	bool add_zero_samples_symbols;
 	outsymbflag flags;
 	int counter_mask;
+
+	/// optimization hint to add_samples, true if we need to record
+	/// at symbol level or vma level
+	bool need_details;
 };
 
 /**

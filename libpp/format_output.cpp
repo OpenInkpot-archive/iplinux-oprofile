@@ -45,9 +45,7 @@ static output_option const output_options[] = {
 	{ 'i', osf_image_name, "image name" },
 	{ 'I', osf_short_image_name, "base name of image name" },
 	{ 'e', osf_app_name, "owning application name" },
-	{ 'E', osf_short_app_name, "base name of owning application" },
-	{ 'h', osf_header, "header" },
-	{ 'd', osf_details, "detailed samples for each selected symbol" }
+	{ 'E', osf_short_app_name, "base name of owning application" }
 };
 
 size_t const nr_output_option = sizeof(output_options) / sizeof(output_options[0]);
@@ -94,8 +92,14 @@ void show_help(ostream & out)
 
 
 formatter::formatter(profile_container_t const & profile_container_, int counter_)
-	: flags(osf_none), profile_container(profile_container_),
-	  counter(counter_), first_output(true), vma_64(false)
+	:
+	flags(osf_none),
+	profile_container(profile_container_),
+	counter(counter_),
+	first_output(true),
+	vma_64(false),
+	need_details(false),
+	need_header(false)
 {
 	for (size_t i = 0 ; i < profile_container.get_nr_counters() ; ++i) {
 		total_count[i] = profile_container.samples_count(i);
@@ -127,6 +131,45 @@ formatter::formatter(profile_container_t const & profile_container_, int counter
 void formatter::add_format(outsymbflag flag)
 {
 	flags = static_cast<outsymbflag>(flags | flag);
+}
+
+void formatter::output(ostream & out, symbol_entry const * symb, bool vma_64_)
+{
+	vma_64 = vma_64_;
+	do_output(out, symb->name, symb->sample, false);
+
+	if (need_details) {
+		output_details(out, symb);
+	}
+}
+
+void formatter::output(ostream & out,
+			  vector<symbol_entry const *> const & symbols,
+			  bool reverse, bool vma_64_)
+{
+	if (reverse) {
+		vector<symbol_entry const *>::const_reverse_iterator it;
+		for (it = symbols.rbegin(); it != symbols.rend(); ++it) {
+			output(out, *it, vma_64_);
+		}
+	} else {
+		vector<symbol_entry const *>::const_iterator it;
+		for (it = symbols.begin(); it != symbols.end(); ++it) {
+			output(out, *it, vma_64_);
+		}
+	}
+}
+
+
+void formatter::show_details()
+{
+	need_details = true;
+}
+
+
+void formatter::show_header()
+{
+	need_header = true;
 }
  
 
@@ -172,17 +215,6 @@ size_t formatter::output_header_field(ostream & out, outsymbflag fl,
 }
  
 
-void formatter::output(ostream & out, symbol_entry const * symb, bool vma_64_)
-{
-	vma_64 = vma_64_;
-	do_output(out, symb->name, symb->sample, flags);
-
-	if (flags & osf_details) {
-		output_details(out, symb);
-	}
-}
- 
-
 void formatter::output_details(ostream & out, symbol_entry const * symb)
 {
 	// We need to save the accumulated count and to restore it on
@@ -206,7 +238,7 @@ void formatter::output_details(ostream & out, symbol_entry const * symb)
 		out << ' ';
 
 		do_output(out, symb->name, profile_container.get_samples(cur),
-			 static_cast<outsymbflag>(flags & osf_details_mask));
+			 true);
 	}
 
 	for (size_t i = 0 ; i < profile_container.get_nr_counters() ; ++i) {
@@ -218,21 +250,22 @@ void formatter::output_details(ostream & out, symbol_entry const * symb)
 
  
 void formatter::do_output(ostream & out, string const & name,
-			    sample_entry const & sample, outsymbflag flag)
+			  sample_entry const & sample,
+			  bool hide_imutable_field)
 {
 	output_header(out);
 
 	size_t padding = 0;
 
 	// first output the vma field
-	if (flag & osf_vma) {
+	if (flags & osf_vma) {
 		padding = output_field(out, name, sample, osf_vma, 0, padding);
 	}
 
 	// now the repeated field.
 	for (size_t ctr = 0 ; ctr < profile_container.get_nr_counters(); ++ctr) {
 		if ((counter & (1 << ctr)) != 0) {
-			size_t repeated_flag = (flag & osf_repeat_mask);
+			size_t repeated_flag = (flags & osf_repeat_mask);
 			for (size_t i = 1 ; repeated_flag != 0 ; i <<= 1) {
 				if ((repeated_flag & i) != 0) {
 					outsymbflag fl =
@@ -246,30 +279,19 @@ void formatter::do_output(ostream & out, string const & name,
 	}
 
 	// now the remaining field
-	// vma and repeated field has already been output. It's vital to mask
-	// too osf_details|osf_header cause they are not field but rather
-	// output modifier.
-	int const mask = osf_vma|osf_repeat_mask| osf_details|osf_header;
+	int const mask = osf_vma | osf_repeat_mask;
 
-	// don't be confused between flags member variable and flag passed as
-	// parameters, flags show the real requested field whilst flag contain
-	// the field which are really output. output flags wich are in flags
-	// but not in flag are blank output. this is used to re-use this
-	// function for detailed output, see various caller. FIXME: can be
-	// re-written by passing rather than outsymbflag flag parameter
-	// a bool do_output_details. Also we are trying to put too many things
-	// in output flags: osf_header and osf_details would be different
-	// boolean parameters rather encoded in flags.
-	size_t temp_flag = flag & ~mask;
-	size_t true_flags = flags & ~mask;
+	size_t temp_flag = flags & ~mask;
 	for (size_t i = 1 ; temp_flag != 0 ; i <<= 1) {
 		outsymbflag fl = static_cast<outsymbflag>(i);
-		if ((temp_flag & fl) != 0) {
-			padding = output_field(out, name, sample, fl, 0, padding);
+		if (flags & fl) {
+			if (hide_imutable_field && (fl & osf_imutable_field)) {
+				field_description const & field(format_map[fl]);
+				padding += field.width;
+			} else {
+				padding = output_field(out, name, sample, fl, 0, padding);
+			}
 			temp_flag &= ~i;
-		} else if ((true_flags & fl) != 0) {
-			field_description const & field(format_map[fl]);
-			padding += field.width;
 		}
 	}
 
@@ -285,7 +307,7 @@ void formatter::output_header(ostream & out)
 
 	first_output = false;
 
-	if ((flags & osf_header) == 0) {
+	if (need_header) {
 		return;
 	}
 
@@ -299,7 +321,7 @@ void formatter::output_header(ostream & out)
 	// now the repeated field.
 	for (size_t ctr = 0 ; ctr < profile_container.get_nr_counters(); ++ctr) {
 		if ((counter & (1 << ctr)) != 0) {
-			size_t repeated_flag = (flags & osf_repeat_mask);
+			size_t repeated_flag = flags & osf_repeat_mask;
 			for (size_t i = 1 ; repeated_flag != 0 ; i <<= 1) {
 				if ((repeated_flag & i) != 0) {
 					outsymbflag fl =
@@ -313,7 +335,7 @@ void formatter::output_header(ostream & out)
 	}
 
 	// now the remaining field
-	size_t temp_flag = flags & ~(osf_vma|osf_repeat_mask|osf_details|osf_header);
+	size_t temp_flag = flags & ~(osf_vma | osf_repeat_mask);
 	for (size_t i = 1 ; temp_flag != 0 ; i <<= 1) {
 		if ((temp_flag & i) != 0) {
 			outsymbflag fl = static_cast<outsymbflag>(i);
@@ -323,24 +345,6 @@ void formatter::output_header(ostream & out)
 	}
 
 	out << "\n";
-}
-
- 
-void formatter::output(ostream & out,
-			  vector<symbol_entry const *> const & symbols,
-			  bool reverse, bool vma_64_)
-{
-	if (reverse) {
-		vector<symbol_entry const *>::const_reverse_iterator it;
-		for (it = symbols.rbegin(); it != symbols.rend(); ++it) {
-			output(out, *it, vma_64_);
-		}
-	} else {
-		vector<symbol_entry const *>::const_iterator it;
-		for (it = symbols.begin(); it != symbols.end(); ++it) {
-			output(out, *it, vma_64_);
-		}
-	}
 }
 
  

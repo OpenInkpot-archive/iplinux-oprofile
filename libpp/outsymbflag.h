@@ -35,29 +35,24 @@ enum outsymbflag {
 	osf_short_linenr_info = 1 << 7,// w/o path name
 	osf_image_name = 1 << 8,
 	osf_short_image_name = 1 << 9, // w/o path name
-	osf_details = 1 << 10,		// for oprofpp -L / -s
-	// special format modifier: output all field selected separated by a
-	// single space. This is intended to run post profile tools as
-	// front-end of other tools which treat samples information.
-	osf_header = 1 << 11,
 
 	/// don't treat percent for details as relative to symbol but relative
 	/// to the total nr of samples
-	osf_percent_details = 1 << 12,
-	osf_percent_cumulated_details = 1 << 13,
+	osf_percent_details = 1 << 10,
+	osf_percent_cumulated_details = 1 << 11,
 
-	osf_app_name = 1 << 14,		// owning application
-	osf_short_app_name = 1 << 15,	// basename of owning application
+	osf_app_name = 1 << 12,		// owning application
+	osf_short_app_name = 1 << 13,	// basename of owning application
 
 	/// used internally
 	osf_repeat_mask = osf_nr_samples + osf_nr_samples_cumulated +
                          osf_percent + osf_percent_cumulated +
 			 osf_percent_details + osf_percent_cumulated_details,
-	/// only this field are showed in symbols samples details.
-	osf_details_mask = osf_nr_samples + osf_nr_samples_cumulated +
-			osf_percent + osf_percent_cumulated +
-			osf_vma + osf_linenr_info + osf_short_linenr_info +
-			 osf_percent_details + osf_percent_cumulated_details
+	/// These fields are considered imutable when showing details for one
+	/// symbol, we show them only when outputting the symbol itself but
+	/// we avoid to display them during details output
+	osf_imutable_field = osf_symb_name + osf_image_name +
+		osf_short_image_name + osf_app_name + osf_short_app_name
 };
 
 #endif // OUTSYMBFLAG_H

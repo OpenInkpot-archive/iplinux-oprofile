@@ -45,14 +45,16 @@ struct filename_by_samples {
 
 profile_container_t::profile_container_t(bool add_zero_samples_symbols_,
 					 outsymbflag flags_,
-					 int counter_mask_)
+					 int counter_mask_,
+					 bool need_details_)
 	:
 	symbols(new symbol_container_imp_t),
 	samples(new sample_container_imp_t),
 	nr_counters(static_cast<uint>(-1)),
 	add_zero_samples_symbols(add_zero_samples_symbols_),
 	flags(flags_),
-	counter_mask(counter_mask_)
+	counter_mask(counter_mask_),
+	need_details(need_details_)
 {
 }
 
@@ -79,8 +81,7 @@ add(profile_t const & profile, op_bfd const & abfd,
 	nr_counters = profile.nr_counters;
 
 	string const image_name = abfd.get_filename();
-	bool const need_linenr = (flags & (osf_linenr_info | osf_short_linenr_info));
-	bool const need_details = (flags & osf_details);
+	bool const need_linenr = flags & (osf_linenr_info | osf_short_linenr_info);
 
 	for (symbol_index_t i = 0 ; i < abfd.syms.size(); ++i) {
 

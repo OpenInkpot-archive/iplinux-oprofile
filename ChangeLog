@@ -1,5 +1,14 @@
 2003-04-17  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* libpp/format_output.h:
+	* libpp/format_output.cpp:
+	* libpp/outsymbflag.h:
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp: osf_header/osf_details are no longer
+	  flags but separate boolean.
+
+2003-04-17  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* dae/opd_kernel.c:
 	* daemon/opd_kernel.c: remove leading '/' on module name fixing 2.5
 	 module not under {dep} and similar case for "no-vmlinux" with 2.4/2.5

@@ -53,6 +53,11 @@ public:
 		    std::vector<symbol_entry const *> const & v, bool reverse,
 		    bool vma_64);
 
+	/// set the output_details boolean
+	void show_details();
+	/// set the output_header boolean
+	void show_header();
+
 private:
 
 	/// data passed for output
@@ -106,7 +111,7 @@ private:
  
 	/// actually do output
 	void do_output(std::ostream & out, std::string const & name,
-		      sample_entry const & sample, outsymbflag flags);
+		      sample_entry const & sample, bool hide_imutable_field);
  
 	/// output details for the symbol
 	void output_details(std::ostream & out, symbol_entry const * symb);
@@ -145,6 +150,10 @@ private:
 	bool first_output;
 	/// true if we need to format as 64 bits quantities
 	bool vma_64;
+	/// true if we need to show details for each symbols
+	bool need_details;
+	/// true if we need to show header before the beforethe first output
+	bool need_header;
 };
 
 }; // namespace format_output 
