@@ -19,25 +19,23 @@
 #include "op_sample_file.h"
 #include "op_config.h"
 
-char * op_mangle_filename(char const * image_name, char const * app_name,
-			  char const * event_name, int count,
-			  unsigned int unit_mask, pid_t tgid, pid_t tid,
-			  int cpu, int is_kernel)
+char * op_mangle_filename(struct mangle_values const * values)
 {
 	char * mangled;
 	size_t len;
-	int shared_lib = app_name && strcmp(app_name, image_name);
+	char const * image_name = values->image_name;
+	char const * dep_name = values->dep_name;
 
-	len = strlen(OP_SAMPLES_CURRENT_DIR) + strlen(image_name) + 1 + strlen(event_name) + 1;
-	if (shared_lib) {
-		char const * tmp;
-		len += strlen(app_name) + 1;
+	len = strlen(OP_SAMPLES_CURRENT_DIR) + strlen(values->image_name)
+	      + 1 + strlen(values->event_name) + 1;
 
-		/* PP:3 image_name and app_namea re reversed when profling with
-		   --separate */
-		tmp = image_name;
-		image_name = app_name;
-		app_name = tmp;
+	if (values->flags & MANGLE_DEP_NAME) {
+		len += strlen(values->dep_name) + 1;
+
+		/* PP:3 image_name and dep_name are reversed when
+		 * profiling with --separate */
+		image_name = values->dep_name;
+		dep_name = values->image_name;
 	}
 
 	/* provision for tgid, tid, unit_mask, cpu and three {root}, {dep} or
@@ -48,7 +46,7 @@ char * op_mangle_filename(char const * image_name, char const * app_name,
 
 	strcpy(mangled, OP_SAMPLES_CURRENT_DIR);
 
-	if (is_kernel && !strchr(image_name, '/')) {
+	if ((values->flags & MANGLE_KERNEL) && !strchr(image_name, '/')) {
 		strcat(mangled, "{kern}" "/");
 	} else {
 		strcat(mangled, "{root}" "/");
@@ -57,35 +55,38 @@ char * op_mangle_filename(char const * image_name, char const * app_name,
 	strcat(mangled, image_name);
 	strcat(mangled, "/");
 
-	if (shared_lib) {
+	if (values->flags & MANGLE_DEP_NAME) {
 		strcat(mangled, "{dep}" "/");
-		if (is_kernel && !strchr(image_name, '/'))
+		if ((values->flags & MANGLE_KERNEL)
+		    && !strchr(image_name, '/')) {
 			strcat(mangled, "{kern}" "/");
-		else
+		} else {
 			strcat(mangled, "{root}" "/");
-		strcat(mangled, app_name);
+		}
+		strcat(mangled, dep_name);
 		strcat(mangled, "/");
 	}
 
-	strcat(mangled, event_name);
-	sprintf(mangled + strlen(mangled), ".%d.%d.", count, unit_mask);
+	strcat(mangled, values->event_name);
+	sprintf(mangled + strlen(mangled), ".%d.%d.",
+	        values->count, values->unit_mask);
 
-	if (tgid == (pid_t)-1) {
-		sprintf(mangled + strlen(mangled), "%s.", "all");
+	if (values->flags & MANGLE_TGID) {
+		sprintf(mangled + strlen(mangled), "%d.", values->tgid);
 	} else {
-		sprintf(mangled + strlen(mangled), "%d.", tgid);
+		sprintf(mangled + strlen(mangled), "%s.", "all");
 	}
 
-	if (tid == (pid_t)-1) {
-		sprintf(mangled + strlen(mangled), "%s.", "all");
+	if (values->flags & MANGLE_TID) {
+		sprintf(mangled + strlen(mangled), "%d.", values->tid);
 	} else {
-		sprintf(mangled + strlen(mangled), "%d.", tid);
+		sprintf(mangled + strlen(mangled), "%s.", "all");
 	}
 
-	if (cpu == -1) {
+	if (values->flags & MANGLE_CPU) {
+		sprintf(mangled + strlen(mangled), "%d", values->cpu);
+	} else {
 		sprintf(mangled + strlen(mangled), "%s", "all");
-	} else {
-		sprintf(mangled + strlen(mangled), "%d", cpu);
 	}
 
 	return mangled;

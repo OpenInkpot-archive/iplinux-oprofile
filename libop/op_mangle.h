@@ -18,30 +18,43 @@
 extern "C" {
 #endif
 
+enum mangle_flags {
+	MANGLE_NONE     = 0,
+	MANGLE_DEP_NAME = (1 << 0),
+	MANGLE_CPU      = (1 << 1),
+	MANGLE_TGID     = (1 << 2),
+	MANGLE_TID      = (1 << 3),
+	MANGLE_KERNEL   = (1 << 4)
+};
+
 /**
- * op_mangle_filename - mangle a file filename
- * @param image_name  a path name to the image file
- * @param app_name  a path name for the owner image
- * of this image or %NULL if no owner exist. FIXME: code don't reflect this
- * comment
- * @param event_name  the event name to encode
- * @param count  counter count to encode
- * @param unit_mask unit mask to encode
- * @param tgid  thread group to encode or pid_t(-1) to use all as encoding
- * @param tid  the pid to encode or pid_t(-1) to use all as encoding
- * @param cpu  cpu numbr to encode or -1 to use all as encoding
- * @param is_kernel  non-zero if filename belong to a kernel or module image
+ * Temporary structure for passing parameters to
+ * op_mangle_filename.
+ */
+struct mangle_values {
+
+	int flags;
+
+	char const * image_name;
+	char const * dep_name;
+	char const * event_name;
+	int count;
+	unsigned int unit_mask;
+	pid_t tgid;
+	pid_t tid;
+	int cpu;
+};
+
+/**
+ * op_mangle_filename - mangle a sample filename
+ * @param params  parameters to use as mangling input
  *
  * See also PP:3 for the encoding scheme
  *
  * Returns a char* pointer to the mangled string. Caller
  * is responsible for freeing this string.
- *
  */
-char * op_mangle_filename(char const * filename, char const * app_name,
-			  char const * event_name, int count,
-			  unsigned int unit_mask, pid_t tgid, pid_t tid,
-			  int cpu, int is_kernel);
+char * op_mangle_filename(struct mangle_values const * values);
 
 #ifdef __cplusplus
 }

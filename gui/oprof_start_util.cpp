@@ -134,7 +134,7 @@ daemon_status::daemon_status()
 
 	nr_interrupts = 0;
 
-	switch (op_get_interface()){
+	switch (op_get_interface()) {
 	case OP_INTERFACE_24:
 		{
 			ifstream ifs3("/proc/sys/dev/oprofile/nr_interrupts");

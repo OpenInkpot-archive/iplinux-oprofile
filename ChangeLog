@@ -1,5 +1,15 @@
 2003-05-10  John Levon  <levon@movementarian.org>
 
+	* libop/op_mangle.h:
+	* libop/op_mangle.c: use a temp struct for
+	passing the mangle parameters with a set of
+	flags.
+
+	* dae/opd_sample_files.c:
+	* daemon/opd_sample_files.c: use it
+
+2003-05-10  John Levon  <levon@movementarian.org>
+
 	* Makefile.am:
 	* HACKING:
 	* libop++/:

@@ -37,19 +37,31 @@ extern double cpu_speed;
 extern op_cpu cpu_type;
 
 char * opd_mangle_filename(struct opd_image const * image, int counter,
-			   int create_path_)
+			   int create)
 {
 	char * mangled;
-	char const * app_name = separate_lib_samples ? image->app_name : NULL;
+	char const * dep_name = separate_lib_samples ? image->app_name : NULL;
 
 	struct op_event * event = op_find_event(cpu_type, ctr_event[counter]); 
 
-	mangled = op_mangle_filename(image->name, app_name,
-				     event->name, ctr_count[counter],
-				     ctr_um[counter], (pid_t)-1,
-				     (pid_t)-1, -1, image->kernel);
+	struct mangle_values values;
+	/* Here we can add TGID, TID, CPU, later.  */
+	values.flags = 0;
+	if (image->kernel)
+		values.flags |= MANGLE_KERNEL;
+	if  (dep_name && strcmp(dep_name, image->name))
+		values.flags |= MANGLE_DEP_NAME;
 
-	if (create_path_) {
+	values.event_name = event->name;
+	values.count = ctr_count[counter];
+	values.unit_mask = ctr_um[counter];
+
+	values.image_name = image->name;
+	values.dep_name = dep_name;
+
+	mangled = op_mangle_filename(&values);
+
+	if (create) {
 		create_path(mangled);
 	}
 
