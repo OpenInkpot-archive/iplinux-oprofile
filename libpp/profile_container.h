@@ -179,21 +179,4 @@ private:
 	//@}
 };
 
-/**
- * add_samples - populate a samples container with samples
- * @param samples the samples container to populate
- * @param sample_filename samples filename
- * @param abfd bfd object
- * @param app_name the owning application of these samples, identical to binary
- *  name if profiling session did not separate samples for shared libs or
- *  if binary name is not a shared libs
- *
- * populate samples with the relevant samples getting symbols name and size
- * from abfd
- */
-bool add_samples(profile_container & samples,
-		 std::string const & sample_filename,
-		 op_bfd const & abfd,
-		 std::string const & app_name);
-
 #endif /* !PROFILE_CONTAINER_H */

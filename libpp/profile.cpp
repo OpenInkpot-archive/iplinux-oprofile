@@ -25,15 +25,9 @@
 
 using namespace std;
 
-profile_t::profile_t(string const & sample_file, u32 offset)
+profile_t::profile_t()
 	: start_offset(0)
 {
-	build_ordered_samples(sample_file);
-
-	if (!get_header().is_kernel)
-		return;
-
-	start_offset = offset;
 }
 
 
@@ -66,7 +60,7 @@ unsigned int profile_t::accumulate_samples(uint start, uint end) const
 }
 
 
-void profile_t::build_ordered_samples(string const & filename)
+void profile_t::add_sample_file(string const & filename, u32 offset)
 {
 	samples_odb_t samples_db;
 	char * err_msg;
@@ -101,11 +95,22 @@ void profile_t::build_ordered_samples(string const & filename)
 
 	for (pos = 0; pos < node_nr; ++pos) {
 		if (node[pos].key) {
-			ordered_samples_t::value_type
-				val(node[pos].key, node[pos].value);
-			ordered_samples.insert(val);
+			ordered_samples_t::iterator it = 
+				ordered_samples.find(node[pos].key);
+			if (it != ordered_samples.end()) {
+				it->second += node[pos].value;
+			} else {
+				ordered_samples_t::value_type
+					val(node[pos].key, node[pos].value);
+				ordered_samples.insert(val);
+			}
 		}
 	}
 
 	odb_close(&samples_db);
+
+	if (!get_header().is_kernel)
+		return;
+
+	start_offset = offset;
 }

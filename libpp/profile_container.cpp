@@ -317,17 +317,3 @@ sample_container::samples_iterator profile_container::end() const
 	return samples->end();
 }
 
-
-bool add_samples(profile_container & samples,
-		 string const & sample_filename,
-		 op_bfd const & abfd,
-		 string const & app_name)
-{
-	profile_t profile(sample_filename, abfd.get_start_offset());
-
-	check_mtime(abfd.get_filename(), profile.get_header());
-	
-	samples.add(profile, abfd, app_name);
-
-	return abfd.have_debug_info();
-}

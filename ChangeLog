@@ -1,3 +1,17 @@
+2003-05-08  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/symbol_container.cpp: minor tidy
+
+	* libpp/profile.h:
+	* libpp/profile.cpp: allow to cumulate sample file
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp: remove free function add_samples()
+
+	* pp/annotate.cpp:
+	* pp/opgprof.cpp:
+	* pp/opreport.cpp: when possible cumulate samples into a profile_t
+	  first before cumulating them in a profile_container
+
 2003-05-07  John Levon  <levon@movementarian.org>
 
 	* pp/opannotate.cpp: small cleanup

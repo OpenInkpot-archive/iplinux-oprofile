@@ -84,7 +84,9 @@ files_count counts(partition_files::filename_set const & files)
 
 		sub_count.image_name = it->image;
 		sub_count.lib_image  = it->lib_image;
-		profile_t samples(it->sample_filename, 0);
+
+		profile_t samples;
+		samples.add_sample_file(it->sample_filename, 0);
 		// THere's another FIXME on this elsewhere. Note
 		// that the use of profile_t for this means we
 		// pass in an offset of "0" instead of the real
@@ -120,7 +122,8 @@ void output_header(partition_files const & files)
 	if (files.nr_set()) {
 		partition_files::filename_set const & file_set = files.set(0);
 		// See FIXME in opannotate.cpp  for similar code
-		profile_t profile(file_set.begin()->sample_filename, 0);
+		profile_t profile;
+		profile.add_sample_file(file_set.begin()->sample_filename, 0);
 		output_header(cout, profile.get_header());
 	}
 }
@@ -209,16 +212,42 @@ void output_symbols_count(partition_files const & files)
 		pair<image_set::const_iterator, image_set::const_iterator>
 			p_it = images.equal_range(it->first);
 
+		if (p_it.first == p_it.second)
+			continue;
+
 		op_bfd abfd(p_it.first->first, options::symbol_filter);
 
-		for (it = p_it.first;  it != p_it.second; ++it) {
-			string app_name = it->second.image;
-			if (options::merge_by.merge_lib) {
-				app_name = it->first;
+		// we can optimize by cumulating samples to this binary in
+		// a profile_t only if we merge by lib since for non merging
+		// case application name change and must be recorded
+		if (options::merge_by.merge_lib) {
+			string app_name = p_it.first->first;
+
+			profile_t profile;
+
+			for (it = p_it.first;  it != p_it.second; ++it) {
+				profile.add_sample_file(
+					it->second.sample_filename,
+					abfd.get_start_offset());
 			}
 
-			add_samples(samples, it->second.sample_filename,
-				    abfd, app_name);
+			check_mtime(abfd.get_filename(), profile.get_header());
+	
+			samples.add(profile, abfd, app_name);
+		} else {
+			for (it = p_it.first;  it != p_it.second; ++it) {
+				string app_name = it->second.image;
+
+				profile_t profile;
+				profile.add_sample_file(
+					it->second.sample_filename,
+					abfd.get_start_offset());
+
+				check_mtime(abfd.get_filename(),
+					    profile.get_header());
+	
+				samples.add(profile, abfd, app_name);
+			}
 		}
 	}
 

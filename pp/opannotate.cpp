@@ -68,17 +68,25 @@ image_set populate_samples(profile_container & samples,
 		pair<image_set::const_iterator, image_set::const_iterator>
 			p_it = images.equal_range(it->first);
 
+		if (p_it.first == p_it.second)
+			continue;
+
 		op_bfd abfd(p_it.first->first, symbol_filter);
+		profile_t profile;
+
+		string app_name = p_it.first->second.image;
+		if (merge_lib) {
+			app_name = p_it.first->first;
+		}
 
 		for (it = p_it.first;  it != p_it.second; ++it) {
-			string app_name = it->second.image;
-			if (merge_lib) {
-				app_name = it->first;
-			}
-
-			add_samples(samples, it->second.sample_filename,
-				    abfd, app_name);
+			profile.add_sample_file(it->second.sample_filename,
+						abfd.get_start_offset());
 		}
+
+		check_mtime(abfd.get_filename(), profile.get_header());
+	
+		samples.add(profile, abfd, app_name);
 	}
 
 	return images;
@@ -92,7 +100,8 @@ void save_sample_file_header(partition_files const & files)
 		// seems like a bit of a hack. Abstract out the code
 		// that opens the sample file and then  get the header
 		// from that directly, surely ?
-		profile_t profile(file_set.begin()->sample_filename, 0);
+		profile_t profile;
+		profile.add_sample_file(file_set.begin()->sample_filename, 0);
 		header.reset(new opd_header(profile.get_header()));
 	}
 }

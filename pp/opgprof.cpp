@@ -12,6 +12,8 @@
 #include <iostream>
 #include <cstdio>
 
+#include "op_header.h"
+#include "profile.h"
 #include "op_libiberty.h"
 #include "op_fileio.h"
 #include "string_filter.h"
@@ -184,10 +186,21 @@ string load_samples(op_bfd const & abfd, image_set const & images,
 		pair<image_set::const_iterator, image_set::const_iterator>
 			p_it = images.equal_range(it->first);
 
+		if (p_it.first == p_it.second)
+			continue;
+
+		string app_name = p_it.first->first;
+
+		profile_t profile;
+
 		for (it = p_it.first;  it != p_it.second; ++it) {
-			add_samples(samples, it->second.sample_filename,
-				    abfd, it->first);
+			profile.add_sample_file(it->second.sample_filename,
+						abfd.get_start_offset());
 		}
+
+		check_mtime(abfd.get_filename(), profile.get_header());
+
+		samples.add(profile, abfd, app_name);
 	}
 
 	return images.begin()->first;

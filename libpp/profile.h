@@ -31,15 +31,9 @@ class opd_header;
 class profile_t /*:*/  noncopyable {
 public:
 	/**
-	 * profile_t - construct a profile_t object
-	 * @param sample_file  sample file name
-	 * @param start_offset the offset for kernel files, \sa start_offset
-	 *
-	 * store samples for one sample file, sample file header is sanitized.
-	 *
-	 * all error are fatal
+	 * profile_t - construct an empty  profile_t object
 	 */
-	profile_t(std::string const & sample_file, u32 start_offset);
+	profile_t();
 
 	~profile_t();
  
@@ -66,13 +60,21 @@ public:
 		return *file_header;
 	}
 
+	/**
+	 * cumulate sample file to our container of samples
+	 * @param sample_file  sample file name
+	 * @param start_offset the offset for kernel files, \sa start_offset
+	 *
+	 * store samples for one sample file, sample file header is sanitized.
+	 *
+	 * all error are fatal
+	 */
+	void add_sample_file(std::string const & filename, u32 offset);
+
 private:
 
 	/// storage type for samples sorted by eip
 	typedef std::map<odb_key_t, odb_value_t> ordered_samples_t;
-
-	/// helper to build ordered samples by eip
-	void build_ordered_samples(std::string const & filename);
 
 	/// copy of the samples file header
 	scoped_ptr<opd_header> file_header;

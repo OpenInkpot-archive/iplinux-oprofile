@@ -48,8 +48,7 @@ symbol_container::find(string filename, size_t linenr) const
 	symbol.sample.file_loc.filename = filename;
 	symbol.sample.file_loc.linenr = linenr;
 
-	symbols_by_loc_t::const_iterator it =
-		symbols_by_loc.find(&symbol);
+	symbols_by_loc_t::const_iterator it = symbols_by_loc.find(&symbol);
 
 	if (it != symbols_by_loc.end())
 		return *it;
@@ -89,7 +88,7 @@ void symbol_container::build_by_loc() const
 symbol_entry const * symbol_container::find_by_vma(string const & image_name,
 						   bfd_vma vma) const
 {
-	// FIXME: this is too inneffcient probably
+	// FIXME: this is too inefficient probably
 	symbols_t::const_iterator it;
 	for (it = symbols.begin(); it != symbols.end(); ++it) {
 		if (it->sample.vma == vma &&
