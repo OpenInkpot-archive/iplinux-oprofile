@@ -38,16 +38,12 @@ symbol_index_t const nil_symbol_index = symbol_index_t(-1);
 class op_bfd_symbol {
 public:
 
-	op_bfd_symbol(asymbol const * a, u32 value, u32 filepos,
-		      bfd_vma sect_vma, u32 size, std::string name)
-		:
-		bfd_symbol(a),
-		symb_value(value),
-		section_filepos(filepos),
-		section_vma(sect_vma),
-		symb_size(size),
-		symb_name(name)
-		{}
+	/// ctor for real symbols
+	op_bfd_symbol(asymbol const * a);
+
+	/// ctor for artificial symbols
+	op_bfd_symbol(bfd_vma vma, size_t size, std::string const & name);
+
 	bfd_vma vma() const { return symb_value + section_vma; }
 	u32 value() const { return symb_value; }
 	u32 filepos() const { return symb_value + section_filepos; }

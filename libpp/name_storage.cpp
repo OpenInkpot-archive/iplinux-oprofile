@@ -12,6 +12,7 @@
 #include "name_storage.h"
 #include "demangle_symbol.h"
 #include "file_manip.h"
+#include "string_manip.h"
 
 using namespace std;
 
@@ -47,12 +48,21 @@ std::string const & name_storage::name(name_id id) const
 std::string const & name_storage::demangle(name_id id) const
 {
 	stored_name const & n = names.find(id)->second;
-	if (n.name_processed.empty()) {
-		if (n.name.length() && n.name[0] == '?')
-			n.name_processed = "(no symbol)";
-		else
-			n.name_processed = demangle_symbol(n.name);
+	if (!n.name_processed.empty() || n.name.empty())
+		return n.name_processed;
+
+	if (n.name[0] != '?') {
+		n.name_processed = demangle_symbol(n.name);
+		return n.name_processed;
 	}
+
+	if (n.name.length() < 2 || n.name[1] != '?') {
+		n.name_processed = "(no symbols)";
+		return n.name_processed;
+	}
+	
+	n.name_processed = "anonymous symbol from section ";
+	n.name_processed += ltrim(n.name, "?");
 	return n.name_processed;
 }
 

@@ -25,7 +25,33 @@
 using namespace std;
 
 extern ostream cverb;
- 
+
+op_bfd_symbol::op_bfd_symbol(asymbol const * a)
+	: bfd_symbol(a), symb_value(a->value),
+	  section_filepos(a->section->filepos),
+	  section_vma(a->section->vma),
+	  symb_size(0)
+{
+	// Some sections have unnamed symbols in them. If
+	// we just ignore them then we end up sticking
+	// things like .plt hits inside of _init. So instead
+	// we name the symbol after the section.
+	if (a->name && a->name[0] != '\0') {
+		symb_name = a->name;
+	} else {
+		symb_name = string("??") + a->section->name;
+	}
+}
+
+
+op_bfd_symbol::op_bfd_symbol(bfd_vma vma, size_t size, string const & name)
+	: bfd_symbol(0), symb_value(vma),
+	  section_filepos(0), section_vma(0),
+	  symb_size(size), symb_name(name)
+{
+}
+
+
 op_bfd::op_bfd(string const & filename, string_filter const & symbol_filter)
 	:
 	file_size(0),
@@ -116,14 +142,19 @@ bool interesting_symbol(asymbol * sym)
 	if (!(sym->section->flags & SEC_CODE))
 		return false;
 
-	// FIXME: do we need both these checks?
+	// returning true for fix up in op_bfd_symbol()
 	if (!sym->name || sym->name[0] == '\0')
-		return false;
+		return true;
 
 	// C++ exception stuff
 	if (sym->name[0] == '.' && sym->name[1] == 'L')
 		return false;
 
+	// This is still necessary because the symbol
+	// sits at the same VMA as a real function,
+	// so we can end up dropping the real function
+	// symbol when we remove duplicate VMAs in our
+	// caller.
 	if (!strcmp("gcc2_compiled.", sym->name))
 		return false;
 
@@ -179,17 +210,7 @@ void op_bfd::get_symbols(op_bfd::symbols_found_t & symbols)
 
 	for (symbol_index_t i = 0; i < nr_all_syms; i++) {
 		if (interesting_symbol(bfd_syms[i])) {
-			// we can't fill the size member for now, because in
-			// some case it is calculated from the vma of the
-			// next symbol
-			asymbol const * symbol = bfd_syms[i];
-			op_bfd_symbol symb(symbol,
-					   symbol->value,
-					   symbol->section->filepos,
-					   symbol->section->vma,
-					   0,
-					   symbol->name);
-			symbols.push_back(symb);
+			symbols.push_back(op_bfd_symbol(bfd_syms[i]));
 		}
 	}
 
@@ -474,7 +495,7 @@ op_bfd_symbol const op_bfd::create_artificial_symbol()
 
 	bfd_vma start, end;
 	get_vma_range(start, end);
-	return op_bfd_symbol(0, 0, start, 0, end - start, symname);
+	return op_bfd_symbol(start, end - start, symname);
 }
 
 

@@ -135,9 +135,9 @@ public:
 private:
 	/// helper for add()
 	void add_samples(profile_t const & profile,
-			 op_bfd const & abfd, symbol_index_t sym_index,
-			 u32 start, u32 end, bfd_vma base_vma,
-			 symbol_entry const * symbol);
+	                 op_bfd const & abfd, symbol_index_t sym_index,
+	                 u32 start, u32 end, bfd_vma base_vma,
+	                 symbol_entry const * symbol);
 
 	/**
 	 * create an unique artificial symbol for an offset range. The range

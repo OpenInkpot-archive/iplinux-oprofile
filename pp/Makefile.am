@@ -7,7 +7,7 @@ AM_CPPFLAGS = \
 	-I ${top_srcdir}/libregex \
 	-I ${top_srcdir}/libpp
 
-bin_PROGRAMS = opannotate opdiff opgprof opreport
+bin_PROGRAMS = opreport opannotate opdiff opgprof
 
 LIBS=@POPT_LIBS@ @BFD_LIBS@
 
