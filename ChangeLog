@@ -1,3 +1,13 @@
+2003-04-28  John Levon  <levon@movementarian.org>
+
+	* libutil++/string_filter.cpp:
+	* libutil++/string_filter.h:
+	* libutil++/glob_filter.h:
+	* libutil++/glob_filter.cpp:
+	* libutil++/path_filter.h:
+	* libutil++/path_filter.cpp: use std::find[_if],
+	share some code
+
 2003-04-28  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libutil++/op_bfd.cpp: replace a loop by a std::copy()

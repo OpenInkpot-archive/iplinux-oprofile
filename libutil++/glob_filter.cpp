@@ -19,31 +19,21 @@
 
 using namespace std;
 
-// FIXME: use find_if
-
-namespace {
-
-/// return true if the string is globbed by any of the patterns
-bool do_match(vector<string> const & patterns, string const & str)
+bool glob_filter::fnmatcher::operator()(string const & s)
 {
-	bool found = false;
-	for (size_t i = 0 ; i < patterns.size() && !found; ++i) {
-		if (fnmatch(patterns[i].c_str(), str.c_str(), 0) != FNM_NOMATCH)
-			found = true;
-	}
-
-	return found;
+	return fnmatch(s.c_str(), str_.c_str(), 0) != FNM_NOMATCH;
 }
-
-};
 
 
 bool glob_filter::match(std::string const & str) const
 {
-	if (do_match(exclude_pattern, str))
+	vector<string>::const_iterator cit;
+	cit = find_if(exclude.begin(), exclude.end(), fnmatcher(str));
+	if (cit != exclude.end())
 		return false;
 
-	if (include_pattern.empty() || do_match(include_pattern, str))
+	cit = find_if(include.begin(), include.end(), fnmatcher(str));
+	if (include.empty() || cit != include.end())
 		return true;
 
 	return false;

@@ -20,34 +20,20 @@
 
 using namespace std;
 
-// FIXME: use find_if
-
-namespace {
-
-/// return true if the string is globbed by any of the patterns
-bool do_match(vector<string> const & patterns, string const & str)
-{
-	bool found = false;
-	for (size_t i = 0 ; i < patterns.size() && !found; ++i) {
-		if (fnmatch(patterns[i].c_str(), str.c_str(), 0) != FNM_NOMATCH)
-			found = true;
-	}
-
-	return found;
-}
-
-};
-
-
 bool path_filter::match(std::string const & str) const
 {
+	vector<string>::const_iterator cit;
+
 	string const & base = basename(str);
 
 	// first, if any component of the dir is listed in exclude -> no
 	string comp = dirname(str);
 	while (!comp.empty() && comp != "/") {
-		if (do_match(exclude_pattern, basename(comp)))
+		cit = find_if(exclude.begin(), exclude.end(),
+			fnmatcher(basename(comp)));
+		if (cit != exclude.end())
 			return false;
+
 		// FIXME: test uneccessary, wait a decent testsuite before
 		// removing
 		if (comp == dirname(comp))
@@ -56,18 +42,22 @@ bool path_filter::match(std::string const & str) const
 	}
 
 	// now if the file name is specifically excluded -> no
-	if (do_match(exclude_pattern, base))
+	cit = find_if(exclude.begin(), exclude.end(), fnmatcher(base));
+	if (cit != exclude.end())
 		return false;
 
 	// now if the file name is specifically included -> yes
-	if (do_match(include_pattern, base))
+	cit = find_if(include.begin(), include.end(), fnmatcher(base));
+	if (cit != include.end())
 		return true;
 
 	// now if any component of the path is included -> yes
 	// note that the include pattern defaults to '*'
 	string compi = dirname(str);
 	while (!compi.empty() && compi != "/") {
-		if (do_match(include_pattern, basename(compi)))
+		cit = find_if(include.begin(), include.end(),
+			fnmatcher(basename(compi)));
+		if (cit != include.end())
 			return true;
 		// FIXME see above.
 		if (compi == dirname(compi))
@@ -75,5 +65,5 @@ bool path_filter::match(std::string const & str) const
 		compi = dirname(compi);
 	}
 
-	return include_pattern.empty();
+	return include.empty();
 }

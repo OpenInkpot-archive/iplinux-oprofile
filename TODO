@@ -28,12 +28,14 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
  o inhibit build of opdiff in pp/Makefile.am
  o consider to do the symbol (details too ?) sort at output, format_output receive
   a vector of symbol to consider, we can perhaps sort in format_output
- o implement pp_interface alias
  o opreport unhandled option (probably not exhaustive) 
   --accumulated
   --sort= (?)
   --no-header
   --image-path
+ 
+ o opreport /usr/bin/whatever should imply -l (like oprofpp back-compat) but NOT
+   if opreport <some spec> and it just *happens* to match one image.
 
  o fix John movement on 2.5: odb_insert failure (and message error corrupted ?)
 

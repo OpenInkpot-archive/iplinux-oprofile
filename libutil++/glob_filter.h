@@ -42,6 +42,17 @@ public:
 
 	/// Returns true if the given string matches
 	virtual bool match(std::string const & str) const;
+
+protected:
+
+	/// function object for fnmatching
+	struct fnmatcher {
+		fnmatcher(std::string const & str) : str_(str) {}
+
+		bool operator()(std::string const & s);
+
+		std::string const & str_;
+	};
 };
 
 #endif /* GLOB_FILTER_H */

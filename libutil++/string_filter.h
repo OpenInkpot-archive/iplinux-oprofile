@@ -47,9 +47,9 @@ public:
 
 protected:
 	/// include patterns
-	std::vector<std::string> include_pattern;
+	std::vector<std::string> include;
 	/// exclude patterns
-	std::vector<std::string> exclude_pattern;
+	std::vector<std::string> exclude;
 };
 
 #endif /* STRING_FILTER_H */
