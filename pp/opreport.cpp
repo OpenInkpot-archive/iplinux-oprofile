@@ -267,5 +267,5 @@ int opreport(int argc, char const * argv[])
 
 int main(int argc, char const * argv[])
 {
-	run_pp_tool(argc, argv, opreport);
+	return run_pp_tool(argc, argv, opreport);
 }

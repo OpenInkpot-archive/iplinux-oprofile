@@ -11,10 +11,24 @@
 #ifndef OPGPROF_OPTIONS_H
 #define OPGPROF_OPTIONS_H
 
+#include <string>
+
+#include "utility.h"
+#include "derive_files.h"
 #include "common_option.h"
 
+class partition_files;
+
 namespace options {
+	extern alt_filename_t alternate_filename;
+	extern std::string gmon_filename;
 }
+
+/**
+ * a partition of sample filename to treat, each sub-list is a list of
+ * sample to merge. filled by get_options()
+ */
+extern scoped_ptr<partition_files> sample_file_partition;
 
 /**
  * get_options - process command line

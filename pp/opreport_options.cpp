@@ -12,11 +12,8 @@
 #include <list>
 #include <iostream>
 #include <algorithm>
-#include <set>
 #include <iterator>
 
-#include "op_config.h"
-#include "file_manip.h"
 #include "parse_cmdline.h"
 #include "split_sample_filename.h"
 #include "opreport_options.h"
@@ -30,6 +27,8 @@ using namespace std;
 scoped_ptr<partition_files> sample_file_partition;
 
 namespace options {
+	bool demangle = true;
+	bool smart_demangle;
 	bool symbols;
 	bool debug_info;
 	bool details;
@@ -42,7 +41,6 @@ namespace options {
 	bool sort_by_debug;
 	bool sort_by_image;
 	string_filter symbol_filter;
-	vector<string> image_path;
 	merge_option merge_by;
 	bool show_header = true;
 	bool short_filename;
@@ -60,8 +58,15 @@ vector<string> merge;
 vector<string> sort_by;
 vector<string> exclude_symbols;
 vector<string> include_symbols;
+vector<string> image_path;
 
 popt::option options_array[] = {
+	popt::option(options::demangle, "demangle", 'd',
+		     "demangle GNU C++ symbol names (default on)"),
+	popt::option(options::demangle, "no-demangle", '\0',
+		     "don't demangle GNU C++ symbol names"),
+	popt::option(options::smart_demangle, "smart-demangle", 'D',
+		     "demangle GNU C++ symbol names and shrink them"),
 	// PP:5
 	popt::option(options::symbols, "symbols", 'l',
 		     "list all symbols"),
@@ -82,7 +87,7 @@ popt::option options_array[] = {
 		     "exclude these comma separated symbols", "symbols"),
 	popt::option(include_symbols, "include-symbols", 'i',
 		     "include these comma separated symbols", "symbols"),
-	popt::option(options::image_path, "image-path", 'p',
+	popt::option(image_path, "image-path", 'p',
 		     "comma separated path to search missing binaries","path"),
 	popt::option(merge, "merge", 'm',
 		     "comma separated list", "cpu,pid,lib"),
@@ -178,79 +183,6 @@ void handle_merge_option()
 	}
 }
 
-
-// FIXME: separate file
-vector<string> filter_session(vector<string> const & session,
-			      vector<string> const & session_exclude)
-{
-	vector<string> result(session);
-
-	if (result.empty()) {
-		result.push_back("current");
-	}
-
-	for (size_t i = 0 ; i < session_exclude.size() ; ++i) {
-		// FIXME: would we use fnmatch on each item, are we allowed
-		// to --session=current* ?
-		vector<string>::iterator it = find(result.begin(), 
-						   result.end(),
-						   session_exclude[i]);
-		if (it != result.end()) {
-			result.erase(it);
-		}
-	}
-
-	return result;
-}
-
-bool valid_candidate(string const & filename, parse_cmdline const & parser)
-{
-	if (parser.match(filename)) {
-		if (!options::include_dependent &&
-		    filename.find("{dep}") != string::npos)
-			return false;
-		return true;
-	}
-
-	return false;
-}
-
-// FIXME: in a separate file
-list<string> matching_sample_filename(parse_cmdline const & parser)
-{
-	set<string> unique_files;
-
-	vector<string> session = filter_session(parser.get_session(),
-						parser.get_session_exclude());
-
-	for (size_t i = 0; i < session.size(); ++i) {
-		if (session[i].empty())
-			continue;
-
-		string base_dir;
-		if (session[i][0] != '.' && session[i][0] != '/')
-			base_dir = OP_SAMPLES_DIR;
-		base_dir += session[i];
-
-		base_dir = relative_to_absolute_path(base_dir);
-
-		list<string> files;
-		create_file_list(files, base_dir, "*", true);
-
-		list<string>::const_iterator it;
-		for (it = files.begin(); it != files.end(); ++it) {
-			if (valid_candidate(*it, parser)) {
-				unique_files.insert(*it);
-			}
-		}
-	}
-
-	list<string> result;
-	copy(unique_files.begin(), unique_files.end(), back_inserter(result));
-
-	return result;
-}
-
 }  // anonymous namespace
 
 
@@ -279,7 +211,8 @@ void get_options(int argc, char const * argv[])
 
 	parse_cmdline parser = handle_non_options(non_option_args);
 
-	list<string> sample_files = matching_sample_filename(parser);
+	list<string> sample_files =
+		select_sample_filename(parser, options::include_dependent);
 
 	cverb << "Matched sample files: " << sample_files.size() << endl;
 	copy(sample_files.begin(), sample_files.end(),

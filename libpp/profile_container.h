@@ -117,6 +117,11 @@ public:
 	unsigned int samples_count(std::string const & filename,
 			   size_t linenr) const;
 
+	/// return iterator to the first samples
+	sample_container::samples_iterator begin() const;
+	/// return iterator to the last samples
+	sample_container::samples_iterator end() const;
+
 	/// return iterator to the first samples for this symbol
 	sample_container::samples_iterator begin(symbol_entry const *) const;
 	/// return iterator to the last samples for this symbol

@@ -300,6 +300,18 @@ profile_container::end(symbol_entry const * symbol) const
 }
 
 
+sample_container::samples_iterator profile_container::begin() const
+{
+	return samples->begin();
+}
+
+
+sample_container::samples_iterator profile_container::end() const
+{
+	return samples->end();
+}
+
+
 bool add_samples(profile_container & samples,
 		 string const & sample_filename,
 		 string const & image_name,

@@ -23,6 +23,8 @@ class partition_files;
 class merge_option;
 
 namespace options {
+	extern bool demangle;
+	extern bool smart_demangle;
 	extern bool symbols;
 	extern bool debug_info;
 	extern bool details;
@@ -33,7 +35,6 @@ namespace options {
 	extern bool global_percent;
 	extern bool short_filename;
 	extern string_filter symbol_filter;
-	extern std::vector<std::string> image_path;
 	extern double threshold;
 	extern alt_filename_t alternate_filename;
 	extern bool show_header;

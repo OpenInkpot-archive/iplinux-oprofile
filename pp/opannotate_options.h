@@ -11,9 +11,13 @@
 #ifndef OPANNOTATE_OPTIONS_H
 #define OPANNOTATE_OPTIONS_H
 
+#include <string>
+
 #include "common_option.h"
 
 namespace options {
+	extern bool demangle;
+	extern bool smart_demangle;
 }
 
 /**

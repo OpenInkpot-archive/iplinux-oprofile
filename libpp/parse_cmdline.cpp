@@ -8,6 +8,11 @@
  * @author Philippe Elie
  */
 
+#include <algorithm>
+#include <set>
+
+#include "file_manip.h"
+#include "op_config.h"
 #include "parse_cmdline.h"
 #include "string_manip.h"
 #include "glob_filter.h"
@@ -320,4 +325,81 @@ parse_cmdline handle_non_options(vector<string> const & args)
 	parser.validate();
 
 	return parser;
+}
+
+namespace {
+
+vector<string> filter_session(vector<string> const & session,
+			      vector<string> const & session_exclude)
+{
+	vector<string> result(session);
+
+	if (result.empty()) {
+		result.push_back("current");
+	}
+
+	for (size_t i = 0 ; i < session_exclude.size() ; ++i) {
+		// FIXME: would we use fnmatch on each item, are we allowed
+		// to --session=current* ?
+		vector<string>::iterator it = find(result.begin(), 
+						   result.end(),
+						   session_exclude[i]);
+		if (it != result.end()) {
+			result.erase(it);
+		}
+	}
+
+	return result;
+}
+
+bool valid_candidate(string const & filename, parse_cmdline const & parser,
+		     bool include_dependent)
+{
+	if (parser.match(filename)) {
+		if (!include_dependent &&
+		    filename.find("{dep}") != string::npos)
+			return false;
+		return true;
+	}
+
+	return false;
+}
+
+}  // anonymous namespace
+
+
+list<string> select_sample_filename(parse_cmdline const & parser,
+	bool include_dependent)
+{
+	set<string> unique_files;
+
+	vector<string> session = filter_session(parser.get_session(),
+						parser.get_session_exclude());
+
+	for (size_t i = 0; i < session.size(); ++i) {
+		if (session[i].empty())
+			continue;
+
+		string base_dir;
+		if (session[i][0] != '.' && session[i][0] != '/')
+			base_dir = OP_SAMPLES_DIR;
+		base_dir += session[i];
+
+		base_dir = relative_to_absolute_path(base_dir);
+
+		list<string> files;
+		create_file_list(files, base_dir, "*", true);
+
+		list<string>::const_iterator it;
+		for (it = files.begin(); it != files.end(); ++it) {
+			if (valid_candidate(*it, parser, include_dependent)) {
+				unique_files.insert(*it);
+			}
+		}
+	}
+
+	list<string> result;
+	copy(unique_files.begin(), unique_files.end(), back_inserter(result));
+
+	return result;
 }

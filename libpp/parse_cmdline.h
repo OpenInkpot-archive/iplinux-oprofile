@@ -13,6 +13,7 @@
 
 #include <map>
 #include <vector>
+#include <list>
 
 #include "generic_spec.h"
 #include "filename_spec.h"
@@ -145,5 +146,9 @@ private:
  *
  */
 parse_cmdline handle_non_options(std::vector<std::string> const & args);
+
+// FIXME: doc
+std::list<std::string> select_sample_filename(parse_cmdline const & parser,
+					      bool include_dependent);
 
 #endif /* !PARSE_CMDLINE_H */

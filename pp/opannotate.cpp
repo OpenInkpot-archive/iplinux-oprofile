@@ -30,5 +30,5 @@ int opannotate(int argc, char const * argv[])
 
 int main(int argc, char const * argv[])
 {
-	run_pp_tool(argc, argv, opannotate);
+	return run_pp_tool(argc, argv, opannotate);
 }
