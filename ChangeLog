@@ -1,6 +1,12 @@
 2003-05-09  John Levon  <levon@movementarian.org>
 
 	* libpp/format_output.h:
+	* libpp/format_output.cpp: vma_64 doesn't need
+	to be in field_datum. make one output() private
+
+2003-05-09  John Levon  <levon@movementarian.org>
+
+	* libpp/format_output.h:
 	* libpp/format_output.cpp: pass a symbol ref
 	not name down into the formatters
 

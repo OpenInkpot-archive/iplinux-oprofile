@@ -61,9 +61,8 @@ void formatter::add_format(outsymbflag flag)
 }
 
 
-void formatter::output(ostream & out, symbol_entry const * symb, bool vma_64_)
+void formatter::output(ostream & out, symbol_entry const * symb)
 {
-	vma_64 = vma_64_;
 	do_output(out, *symb, symb->sample, false);
 
 	if (need_details) {
@@ -73,18 +72,20 @@ void formatter::output(ostream & out, symbol_entry const * symb, bool vma_64_)
 
 
 void formatter::output(ostream & out,
-			  vector<symbol_entry const *> const & symbols,
-			  bool reverse, bool vma_64_)
+                       vector<symbol_entry const *> const & symbols,
+                       bool reverse, bool vma_64_)
 {
+	vma_64 = vma_64_;
+
 	if (reverse) {
 		vector<symbol_entry const *>::const_reverse_iterator it;
 		for (it = symbols.rbegin(); it != symbols.rend(); ++it) {
-			output(out, *it, vma_64_);
+			output(out, *it);
 		}
 	} else {
 		vector<symbol_entry const *>::const_iterator it;
 		for (it = symbols.begin(); it != symbols.end(); ++it) {
-			output(out, *it, vma_64_);
+			output(out, *it);
 		}
 	}
 }
@@ -122,8 +123,7 @@ size_t formatter::output_field(ostream & out, symbol_entry const & symbol,
 	padding = 0;
 
 	field_description const & field(format_map[fl]);
-	string str = (this->*field.formatter)
-		(field_datum(symbol, sample, vma_64));
+	string str = (this->*field.formatter)(field_datum(symbol, sample));
 	out << str;
 
 	padding = 1;	// at least one separator char
@@ -238,7 +238,7 @@ void formatter::output_header(ostream & out)
 string formatter::format_vma(field_datum const & f)
 {
 	ostringstream out;
-	int width = f.vma_64 ? 16 : 8;
+	int width = vma_64 ? 16 : 8;
 
 	out << hex << setw(width) << setfill('0') << f.sample.vma;
 

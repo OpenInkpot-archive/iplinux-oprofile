@@ -37,14 +37,11 @@ public:
 	/// convenience to add output options flags w/o worrying about cast
 	void add_format(outsymbflag flag);
 
-	/** output one symbol symb to out according to the output format
-	 * specifier previously set by call(s) to add_format() */
-	void output(std::ostream & out, symbol_entry const * symb,bool vma_64);
 	/** output a vector of symbols to out according to the output format
 	 * specifier previously set by call(s) to add_format() */
 	void output(std::ostream & out,
-		    std::vector<symbol_entry const *> const & v, bool reverse,
-		    bool vma_64);
+		    std::vector<symbol_entry const *> const & v,
+		    bool reverse, bool vma_64);
 
 	/// set the output_details boolean
 	void show_details();
@@ -52,16 +49,16 @@ public:
 	void hide_header();
 	/// set the short_filename boolean
 	void show_short_filename();
+
 private:
 
 	/// data passed for output
 	struct field_datum {
 		field_datum(symbol_entry const & sym,
-		            sample_entry const & s, bool vma_64_)
-			: symbol(sym), sample(s), vma_64(vma_64_) {}
+		            sample_entry const & s)
+			: symbol(sym), sample(s) {}
 		symbol_entry const & symbol;
 		sample_entry const & sample;
-		bool vma_64;
 	};
  
 	/// format callback type
@@ -100,6 +97,10 @@ private:
 	/// stores functors for doing actual formatting
 	format_map_t format_map;
  
+	/** output one symbol symb to out according to the output format
+	 * specifier previously set by call(s) to add_format() */
+	void output(std::ostream & out, symbol_entry const * symb);
+
 	/// actually do output
 	void do_output(std::ostream & out, symbol_entry const & symbol,
 		      sample_entry const & sample, bool hide_immutable_field);
