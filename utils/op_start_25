@@ -90,7 +90,8 @@ load_module() {
 		fi
 	fi
 	mkdir /dev/oprofile >/dev/null 2>&1
-	if test ! `grep -o oprofilefs /etc/mtab`; then
+	grep oprofilefs /etc/mtab >/dev/null
+	if test "$?" -ne 0; then
 		mount -t oprofilefs nodev /dev/oprofile >/dev/null
 	fi
 }
