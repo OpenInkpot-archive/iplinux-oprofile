@@ -150,26 +150,34 @@ void output_gprof(profile_container const & samples,
 
 	u16 * hist = (u16*)xcalloc(histsize, sizeof(u16));
 
-	sample_container::samples_iterator it  = samples.begin();
-	sample_container::samples_iterator end = samples.end();
-	for (; it != end ; ++it) {
-		u32 pos = (it->second.vma - low_pc) / multiplier;
-		u32 count = it->second.count;
+	profile_container::symbol_collection const symbols =
+		samples.select_symbols(string(), options::threshold);
 
-		if (pos >= histsize) {
-			cerr << "Bogus histogram bin " << pos
+	profile_container::symbol_collection::const_iterator sit
+		= symbols.begin();
+	profile_container::symbol_collection::const_iterator send
+		= symbols.end();
+
+	for (; sit != send; ++sit) {
+		sample_container::samples_iterator it  = samples.begin(*sit);
+		sample_container::samples_iterator end = samples.end(*sit);
+		for (; it != end ; ++it) {
+			u32 pos = (it->second.vma - low_pc) / multiplier;
+			u32 count = it->second.count;
+
+			if (pos >= histsize) {
+				cerr << "Bogus histogram bin " << pos
 			     << ", larger than " << pos << " !\n";
-			continue;
-		}
-
-		// FIXME: handle --threshold
-
-		if (hist[pos] + count > (u16)-1) {
-			hist[pos] = (u16)-1;
-			cerr <<	"Warning: capping sample count by "
-			     << hist[pos] + count - ((u16)-1) << endl;
-		} else {
-			hist[pos] += (u16)count;
+				continue;
+			}
+	
+			if (hist[pos] + count > (u16)-1) {
+				hist[pos] = (u16)-1;
+				cerr <<	"Warning: capping sample count by "
+				     << hist[pos] + count - ((u16)-1) << endl;
+			} else {
+				hist[pos] += (u16)count;
+			}
 		}
 	}
 
