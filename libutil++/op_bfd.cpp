@@ -254,22 +254,15 @@ u32 op_bfd::sym_offset(symbol_index_t sym_index, u32 num) const
 }
 
 
-bool op_bfd::have_debug_info() const
-{
-	return debug_info;
-}
-
-
 bool op_bfd::get_linenr(symbol_index_t sym_idx, uint offset,
 			string & filename, unsigned int & linenr) const
 {
-	char const * functionname;
-	bfd_vma pc;
-
 	if (!debug_info)
 		return false;
 
+	char const * functionname;
 	char const * cfilename = "";
+	bfd_vma pc;
 	linenr = 0;
 
 	// take care about artificial symbol

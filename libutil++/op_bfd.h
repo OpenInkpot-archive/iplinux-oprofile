@@ -146,9 +146,6 @@ public:
 	/** return the text section filepos. */
 	u32 const get_start_offset() const { return text_offset; }
 
-	/// returns true if the underlying bfd object contains debug info
-	bool have_debug_info() const;
-
 	/// return the image name of the underlying binary image
 	std::string get_filename() const;
 
