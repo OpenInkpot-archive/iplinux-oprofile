@@ -22,6 +22,10 @@ dnl for the man page
 DATE="`date '+%a %d %B %Y'`"
 AC_SUBST(DATE)
  
+dnl needed for module build
+OPROFILE_DIR=`pwd`
+AC_SUBST(OPROFILE_DIR)
+ 
 dnl -- local macros -- 
  
 dnl AX_MSG_RESULT_YN(a)
@@ -62,9 +66,6 @@ AC_TRY_COMPILE(
 CFLAGS=$SAVE_CFLAGS
 ])
 
-OPROFILE_DIR=`pwd`
-AC_SUBST(OPROFILE_DIR)
- 
 AC_PROG_CC
 AC_PROG_CPP
 AC_PROG_CXX
@@ -90,7 +91,6 @@ if test "$OPROFILE_25" != "yes"; then
 	AX_COMPILE_OPTION(CONFIG_OPROFILE, OPROFILE_25=yes, OPROFILE_25=no)
 	AX_COMPILE_OPTION(CONFIG_OPROFILE_MODULE, OPROFILE_25=yes, OPROFILE_25=$OPROFILE_25)
 fi
-AC_SUBST(OPROFILE_25)
 AC_MSG_RESULT($OPROFILE_25)
 
 AM_CONDITIONAL(WITH_KERNEL_SUPPORT, test $OPROFILE_25 = yes)
@@ -259,6 +259,7 @@ AC_MSG_RESULT([takes char **]);,
 AC_MSG_RESULT([takes const char **]); AC_DEFINE(CONST_POPT, 1, [whether popt prototype take a const char **]))
 CXXFLAGS="$SAVE_CXXFLAGS"
 
+# FIXME: update for automake ?
 AC_MSG_CHECKING([whether to use included sstream])
 AC_TRY_COMPILE([#include <sstream>], [], 
 AC_MSG_RESULT([no]);,
