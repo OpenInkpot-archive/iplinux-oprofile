@@ -546,7 +546,7 @@ static void opd_put_sample(struct transient * trans, vma_t eip)
 		if (separate_kernel_samples && trans->image)
 			app_image = trans->image->app_image;
 
-		/* This fixes up eip into an offset too */
+		/* This fixes up eip into an offset too and increase stats */
 		kernel_image = opd_find_kernel_image(&eip, app_image);
 
 		if (kernel_image) {
@@ -739,7 +739,7 @@ void opd_process_samples(char const * buffer, size_t count)
 	 */
 	unsigned long long code;
 
-	printf("Reading sample buffer.\n");
+	verbprintf("Reading sample buffer.\n");
 
 	while (trans.remaining) {
 		code = pop_buffer_value(&trans);

@@ -342,6 +342,7 @@ opd_find_app_kernel_image(vma_t * eip, struct opd_image * app_image)
 	struct opd_image * image;
 
 	if (module) {
+		opd_stats[OPD_MODULE]++;
 		*eip -= module->start;
 		return module->image;
 	}
@@ -349,6 +350,7 @@ opd_find_app_kernel_image(vma_t * eip, struct opd_image * app_image)
 	if (*eip >= kernel_start && *eip < kernel_end) {
 		image = opd_create_app_kernel_image(app_image, vmlinux,
 		                                    kernel_start, kernel_end);
+		opd_stats[OPD_KERNEL]++;
 		*eip -= kernel_start;
 		return image;
 	}
@@ -369,6 +371,7 @@ opd_find_app_kernel_image(vma_t * eip, struct opd_image * app_image)
 		return 0;
 	}
 
+	opd_stats[OPD_MODULE]++;
 	*eip -= module->start;
 	return opd_create_app_kernel_image(app_image, module->image->name,
 	                                   module->start, module->end);
@@ -384,13 +387,16 @@ opd_find_app_kernel_image(vma_t * eip, struct opd_image * app_image)
 struct opd_image *
 opd_find_kernel_image(vma_t * eip, struct opd_image * app_image)
 {
-	if (no_vmlinux)
+	if (no_vmlinux) {
+		opd_stats[OPD_KERNEL]++;
 		return kernel_image;
+	}
 
 	if (!app_image) {
 		struct opd_module * module;
 
 		if (*eip >= kernel_start && *eip < kernel_end) {
+			opd_stats[OPD_KERNEL]++;
 			*eip -= kernel_start;
 			return kernel_image;
 		}
