@@ -142,7 +142,7 @@ profile_container::add_samples(profile_t const & profile,
 		if (!sample.count)
 			continue;
 
-		if (need_linenr && sym_index != size_t(-1) &&
+		if (need_linenr && sym_index != nil_symbol_index &&
 		    abfd.get_linenr(sym_index, pos, filename, linenr)) {
 			sample.file_loc.filename = filename;
 			sample.file_loc.linenr = linenr;
