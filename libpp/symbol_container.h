@@ -56,8 +56,11 @@ public:
 	symbol_entry const * find_by_vma(std::string const & image_name,
 					 bfd_vma vma) const;
 
-	/// populate the given container with all the symbols, sorted by count
-	void get_symbols_by_count(symbol_collection & v) const;
+	/// return start of symbols
+	symbols_t::iterator begin();
+
+	/// return end of symbols
+	symbols_t::iterator end();
 
 private:
 	/// build the symbol by file-location cache

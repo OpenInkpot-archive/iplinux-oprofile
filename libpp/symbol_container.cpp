@@ -100,10 +100,13 @@ symbol_entry const * symbol_container::find_by_vma(string const & image_name,
 }
 
 
-void symbol_container::get_symbols_by_count(symbol_collection & v) const
+symbol_container::symbols_t::iterator symbol_container::begin()
 {
-	symbols_t::const_iterator it = symbols.begin();
-	symbols_t::const_iterator end = symbols.end();
-	for (; it != end; ++it)
-		v.push_back(&*it);
+	return symbols.begin();
+}
+
+
+symbol_container::symbols_t::iterator symbol_container::end()
+{
+	return symbols.end();
 }

@@ -1,5 +1,14 @@
 2003-05-15  John Levon  <levon@movementarian.org>
 
+	* libpp/symbol_container.h:
+	* libpp/symbol_container.cpp: add begin(), end(),
+	remove symbols_by_count()
+
+	* libpp/profile_container.cpp: use symbol container
+	iterator directly in select_symbols()
+
+2003-05-15  John Levon  <levon@movementarian.org>
+
 	* libpp/format_output.h:
 	* libpp/format_output.cpp:
 	* libpp/profile_container.h:

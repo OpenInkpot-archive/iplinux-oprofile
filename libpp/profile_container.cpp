@@ -164,24 +164,23 @@ profile_container::select_symbols(symbol_choice & choice) const
 
 	double const threshold = choice.threshold / 100.0;
 
-	symbols->get_symbols_by_count(v);
+	symbol_container::symbols_t::iterator it = symbols->begin();
+	symbol_container::symbols_t::iterator const end = symbols->end();
 
-	symbol_collection::const_iterator it = v.begin();
-	symbol_collection::const_iterator const end = v.end();
-	for (; it < end; ++it) {
+	for (; it != end; ++it) {
 		if (choice.match_image
-		    && (*it)->image_name != choice.image_name)
+		    && (it->image_name != choice.image_name))
 			continue;
 
 		double const percent =
-			op_ratio((*it)->sample.count, samples_count());
+			op_ratio(it->sample.count, samples_count());
 
 		if (percent >= threshold) {
-			result.push_back(*it);
+			result.push_back(&*it);
 
 			if (app_name.empty()) {
-				app_name = (*it)->app_name;
-			} else if (app_name != (*it)->app_name) {
+				app_name = it->app_name;
+			} else if (app_name != it->app_name) {
 				choice.hints = column_flags(
 					choice.hints | cf_multiple_apps);
 			}
@@ -192,7 +191,7 @@ profile_container::select_symbols(symbol_choice & choice) const
 			 * line, but the start is below it, but the
 			 * the hint is only used for formatting
 			 */
-			if ((*it)->sample.vma & ~0xffffffffLLU) {
+			if (it->sample.vma & ~0xffffffffLLU) {
 				choice.hints = column_flags(
 					choice.hints | cf_64bit_vma);
 			}
