@@ -41,7 +41,7 @@ size_t name_storage::do_create(string const & name)
 
 string const & name_storage::get_name(size_t id) const
 {
-	// some stl lack of at(), we emulate it
+	// some stl lack at(), so we emulate it
 	if (id > 0 && id <= names.size())
 		return names[id - 1].name;
 
@@ -148,6 +148,3 @@ string const & symbol_name_storage::demangle(symbol_name_id symb_id) const
 	n.name_processed += ltrim(n.name, "?");
 	return n.name_processed;
 }
-
-
-

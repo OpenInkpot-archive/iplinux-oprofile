@@ -53,19 +53,22 @@ private:
 	id_map ids;
 };
 
+
 /**
  * base class for shared filename storage
  */
 class filename_storage : public name_storage {
- protected:
+protected:
 	/// return the basename name for the given ID
 	std::string const & basename(size_t id) const;
 };
+
 
 struct image_name_id {
 	image_name_id() : id(0) {}
 	size_t id;
 };
+
 
 class image_name_storage : public filename_storage {
 public:
@@ -78,10 +81,12 @@ public:
 	std::string const & basename(image_name_id id) const;
 };
 
+
 struct debug_name_id {
 	debug_name_id() : id(0) {}
 	size_t id;
 };
+
 
 class debug_name_storage : public filename_storage {
 public:
@@ -94,10 +99,12 @@ public:
 	std::string const & basename(debug_name_id id) const;
 };
 
+
 struct symbol_name_id {
 	symbol_name_id() : id(0) {}
 	size_t id;
 };
+
 
 class symbol_name_storage : public name_storage {
 public:
