@@ -89,7 +89,10 @@ load_module() {
 			exit 1
 		fi
 	fi
-	mount -t oprofilefs nodev /dev/oprofile >/dev/null
+	mkdir /dev/oprofile >/dev/null 2>&1
+	if test ! `grep -o oprofilefs /etc/mtab`; then
+		mount -t oprofilefs nodev /dev/oprofile >/dev/null
+	fi
 }
 
 # initialise parameters
