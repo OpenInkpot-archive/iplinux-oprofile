@@ -233,7 +233,7 @@ string symbol_annotation(symbol_entry const * symbol)
 	if (annot.empty())
 		return  string();
 
-	string symname = demangle_symbol(symbol->name);
+	string const & symname = name_store.demangle(symbol->name);
 
 	string str = " ";
 	str += begin_comment + symname + " total: ";
@@ -421,7 +421,7 @@ void output_asm(string const & app_name)
 
 	sort_options options;
 	options.add_sort_option(sort_options::sample);
-	options.sort_by(symbols, false);
+	options.sort(symbols, false, false);
 
 	output_info(cout);
 

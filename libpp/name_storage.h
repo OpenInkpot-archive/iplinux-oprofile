@@ -1,0 +1,70 @@
+/**
+ * @file name_storage.h
+ * Storage of global names (filenames and symbols)
+ *
+ * @remark Copyright 2002 OProfile authors
+ * @remark Read the file COPYING
+ *
+ * @author Philippe Elie
+ * @author John Levon
+ */
+
+#ifndef NAME_STORAGE_H
+#define NAME_STORAGE_H
+
+#include <string>
+#include <map>
+
+typedef int name_id;
+
+/**
+ * Holds shared names for filenames and symbol names.
+ * Each ID identifies a unique string, and IDs  can be
+ * shared across all users.
+ */
+class name_storage {
+
+public:
+	name_storage();
+
+	/// allocate or re-use an ID for this name
+	name_id create(std::string const & original);
+
+	/// return the original name for the given ID
+	std::string const & name(name_id id) const;
+
+	/// return the demangled form of the given ID
+	std::string const & demangle(name_id id) const;
+
+	/// return the basename form of the given ID
+	std::string const & basename(name_id id) const;
+
+private:
+	struct stored_name {
+		stored_name() : demangled(false), basenamed(false) {}
+		stored_name(std::string const & n) : name(n),
+			demangled(false), basenamed(false) {}
+
+		std::string name;
+		mutable std::string name_demangled;
+		mutable std::string name_basenamed;
+		mutable bool demangled;
+		mutable bool basenamed;
+
+		bool operator<(stored_name const & rhs) const {
+			return name < rhs.name;
+		}
+	};
+
+	typedef std::map<name_id, stored_name> name_map;
+
+	typedef std::map<stored_name, name_id> id_map;
+
+	name_map names;
+
+	id_map ids;
+};
+
+extern name_storage name_store;
+
+#endif /* !NAME_STORAGE_H */

@@ -13,6 +13,7 @@
 #define OPP_SYMBOL_H
 
 #include "config.h"
+#include "name_storage.h"
 
 #include <string>
 #include <iostream>
@@ -22,7 +23,7 @@
 /// A simple container for a fileno:linenr location.
 struct file_location {
 	/// empty if not valid.
-	std::string filename;
+	name_id filename;
 	/// 0 means invalid or code is generated internally by the compiler
 	unsigned int linenr;
 
@@ -47,15 +48,15 @@ struct sample_entry {
 /// associate a symbol with a file location, samples count and vma address
 struct symbol_entry {
 	/// which image this symbol belongs to
-	std::string image_name;
+	name_id image_name;
 	/// owning application name: identical to image name if profiling
 	/// session did not separate samples for shared libs or if image_name
 	// is not a shared lib
-	std::string app_name;
+	name_id app_name;
 	/// file location, vma and cumulated samples count for this symbol
 	sample_entry sample;
 	/// name of symbol
-	std::string name;
+	name_id name;
 	/// symbol size as calculated by op_bfd, start of symbol is sample.vma
 	size_t size;
 };

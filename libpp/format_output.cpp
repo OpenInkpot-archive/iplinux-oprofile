@@ -19,7 +19,6 @@
 #include "format_output.h"
 #include "profile_container.h"
 #include "sample_container.h"
-#include "demangle_symbol.h"
 
 using namespace std;
 
@@ -245,25 +244,30 @@ string formatter::format_vma(field_datum const & f)
  
 string formatter::format_symb_name(field_datum const & f)
 {
-	if (f.symbol.name[0] == '?')
-		return "(no symbol)";
-	return demangle_symbol(f.symbol.name);
+	return name_store.demangle(f.symbol.name);
+}
+
+
+namespace {
+
+inline string const & get(name_id id, bool lf)
+{
+	return lf ? name_store.name(id)
+		: name_store.basename(id);
+}
+
 }
 
  
 string formatter::format_image_name(field_datum const & f)
 {
-	return long_filenames
-		? f.symbol.image_name
-		: basename(f.symbol.image_name);
+	return get(f.symbol.image_name, long_filenames);
 }
 
  
 string formatter::format_app_name(field_datum const & f)
 {
-	return long_filenames
-		? f.symbol.app_name
-		: basename(f.symbol.app_name);
+	return get(f.symbol.app_name, long_filenames);
 }
 
  
@@ -271,10 +275,10 @@ string formatter::format_linenr_info(field_datum const & f)
 {
 	ostringstream out;
 
-	if (!f.sample.file_loc.filename.empty()) {
-		string filename = long_filenames
-			? f.sample.file_loc.filename
-			: basename(f.sample.file_loc.filename);
+	string const & filename =
+		get(f.sample.file_loc.filename, long_filenames);
+
+	if (!filename.empty()) {
 		out << filename << ":" << f.sample.file_loc.linenr;
 	} else {
 		out << "(no location information)";

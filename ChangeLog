@@ -1,5 +1,26 @@
 2003-05-16  John Levon  <levon@movementarian.org>
 
+	* libpp/Makefile.am:
+	* libpp/name_storage.h:
+	* libpp/name_storage.cpp: add shared storage
+	and caching of symbol and file names
+
+	* libpp/opp_symbol.h:
+	* libpp/format_output.cpp:
+	* libpp/profile_container.cpp:
+	* libpp/sample_container.cpp:
+	* libpp/symbol_container.cpp:
+	* libpp/symbol_container.h:
+	* libpp/symbol_sort.cpp:
+	* libpp/symbol_sort.h:
+	* pp/opannotate.cpp:
+	* pp/opreport.cpp: use it
+
+	* pp/opgprof_options.cpp: add unused demangle
+	options to hack-fix the build
+
+2003-05-16  John Levon  <levon@movementarian.org>
+
 	* libpp/symbol_sort.cpp: fix --sort debug
 
 2003-05-16  John Levon  <levon@movementarian.org>

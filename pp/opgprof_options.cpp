@@ -25,6 +25,10 @@ scoped_ptr<partition_files> sample_file_partition;
 
 namespace options {
 	string gmon_filename = "gmon.out";
+
+	// Ugly, for build only
+	bool demangle;
+	bool smart_demangle;
 }
 
 

@@ -36,11 +36,11 @@ struct sort_options {
 	/**
 	 * Sort the vector by the given criteria.
 	 */
-	void sort_by(symbol_collection & syms,
-		     bool reverse_sort) const;
+	void sort(symbol_collection & syms, bool reverse_sort,
+		  bool long_filenames) const;
 
 private:
-	std::vector<sort_order> sort;
+	std::vector<sort_order> options;
 };
 
 #endif // SYMBOL_SORT_H

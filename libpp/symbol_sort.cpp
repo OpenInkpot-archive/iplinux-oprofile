@@ -13,12 +13,22 @@
 #include "opp_symbol.h"
 #include "symbol_functors.h"
 #include "file_manip.h"
+#include "name_storage.h"
 
 #include <algorithm>
 
 using namespace std;
 
 namespace {
+
+bool long_filenames;
+
+inline string const & get(name_id id)
+{
+	if (long_filenames)
+		return name_store.name(id);
+	return name_store.basename(id);
+}
 
 
 int compare_by(sort_options::sort_order order,
@@ -32,10 +42,12 @@ int compare_by(sort_options::sort_order order,
 				return -1;
 			return 0;
 		case sort_options::symbol:
-			// FIXME demangle optionally the symbol
-			return lhs->name.compare(rhs->name);
-		case sort_options::image:
-			return lhs->image_name.compare(rhs->image_name);
+			return name_store.demangle(lhs->name).compare(
+				name_store.demangle(rhs->name));
+		case sort_options::image: {
+			return get(lhs->image_name).compare(
+				get(rhs->image_name));
+		}
 		case sort_options::vma:
 			if (lhs->sample.vma < rhs->sample.vma)
 				return -1;
@@ -45,8 +57,7 @@ int compare_by(sort_options::sort_order order,
 		case sort_options::debug: {
 			file_location const & f1 = lhs->sample.file_loc;
 			file_location const & f2 = rhs->sample.file_loc;
-			// FIXME: would compare based on short or long filename
-			int ret = f1.filename.compare(f2.filename);
+			int ret = get(f1.filename).compare(get(f2.filename));
 			if (ret == 0)
 				ret = f1.linenr - f2.linenr;
 		}
@@ -90,25 +101,28 @@ bool symbol_compare::operator()(symbol_entry const * lhs,
 } // anonymous namespace
 
 
-void sort_options::sort_by(symbol_collection & syms, bool reverse_sort) const
+void sort_options::sort(symbol_collection & syms,
+                        bool reverse_sort, bool lf) const
 {
+	long_filenames = lf;
+
 	stable_sort(syms.begin(), syms.end(),
-	            symbol_compare(sort, reverse_sort));
+	            symbol_compare(options, reverse_sort));
 }
 
 
 void sort_options::add_sort_option(std::string const & name)
 {
 	if (name == "vma") {
-		sort.push_back(vma);
+		options.push_back(vma);
 	} else if (name == "sample") {
-		sort.push_back(sample);
+		options.push_back(sample);
 	} else if (name == "symbol") {
-		sort.push_back(symbol);
+		options.push_back(symbol);
 	} else if (name == "debug") {
-		sort.push_back(debug);
+		options.push_back(debug);
 	} else if (name == "image") {
-		sort.push_back(image);
+		options.push_back(image);
 	} else {
 		cerr << "unknown sort option: " << name << endl;
 		exit(EXIT_FAILURE);
@@ -118,5 +132,5 @@ void sort_options::add_sort_option(std::string const & name)
 
 void sort_options::add_sort_option(sort_options::sort_order order)
 {
-	sort.push_back(order);
+	options.push_back(order);
 }

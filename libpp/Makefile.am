@@ -16,6 +16,8 @@ libpp_a_SOURCES = \
 	format_output.h \
 	locate_images.cpp \
 	locate_images.h \
+	name_storage.cpp \
+	name_storage.h \
 	op_header.cpp \
 	op_header.h \
 	opp_symbol.h \

@@ -47,10 +47,11 @@ public:
 	symbol_entry const * insert(symbol_entry const &);
 
 	/// find the symbol at the given filename and line number, if any
-	symbol_entry const * find(std::string filename, size_t linenr) const;
+	symbol_entry const * find(std::string const & filename,
+	                          size_t linenr) const;
 
 	/// return all symbols of the given name
-	symbol_collection const find(std::string name) const;
+	symbol_collection const find(std::string const & name) const;
 
 	/// find the symbol with the given image_name vma if any
 	symbol_entry const * find_by_vma(std::string const & image_name,
