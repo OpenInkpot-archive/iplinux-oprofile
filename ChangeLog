@@ -1,5 +1,11 @@
 2003-05-19  John Levon  <levon@movementarian.org>
 
+	* libutil++/generic_spec.h: move strict_convert<> to...
+
+	* libutil++/string_manip.h: ...here
+
+2003-05-19  John Levon  <levon@movementarian.org>
+
 	* libutil++/generic_spec.h: comma_list isn't a friend
 	any more
 
