@@ -522,7 +522,7 @@ do_options() {
 				EXCLUSIVE_ARGV="$arg"
 				;;
 
-			-r|--reset)
+			--reset)
 				DUMP=yes
 				RESET=yes
 				EXCLUSIVE_ARGC=`expr $EXCLUSIVE_ARGC + 1`
