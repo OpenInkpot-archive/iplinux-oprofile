@@ -1,5 +1,12 @@
 2003-04-16  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* pp/common_option.cpp:
+	* pp/common_option.h:
+	* libregex/demangle_symbol.cpp: rename demangle_and_shrink to
+	  smart_demangle
+
+2003-04-16  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* starting branch pp-interface-branch
 
 	* Makefile.am:

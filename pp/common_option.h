@@ -14,8 +14,7 @@
 
 namespace options {
 	extern bool demangle;
-	// FIXME: rename to smart_demangle
-	extern bool demangle_and_shrink;
+	extern bool smart_demangle;
 	extern bool verbose;
 };
 

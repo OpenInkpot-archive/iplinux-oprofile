@@ -26,7 +26,7 @@ extern "C" char * cplus_demangle(char const * mangled, int options);
 using namespace std;
 
 namespace options {
-	extern bool demangle_and_shrink;
+	extern bool smart_demangle;
 }
 
 string const demangle_symbol(string const & name)
@@ -41,7 +41,7 @@ string const demangle_symbol(string const & name)
 	string result(unmangled);
 	free(unmangled);
 
-	if (options::demangle_and_shrink) {
+	if (options::smart_demangle) {
 		static bool init = false;
 		static regular_expression_replace regex;
 		if (init == false) {

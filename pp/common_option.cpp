@@ -20,7 +20,7 @@ using namespace std;
 namespace options {
 	bool demangle;
 	// FIXME: rename to smart_demangle
-	bool demangle_and_shrink;
+	bool smart_demangle;
 	bool verbose;
 }
 
@@ -28,7 +28,7 @@ namespace {
 popt::option options_array[] = {
 	popt::option(options::verbose, "verbose", 'V', "verbose output"),
 	popt::option(options::demangle, "demangle", 'd', "demangle GNU C++ symbol names"),
-	popt::option(options::demangle_and_shrink, "smart-demangle", 'D', "demangle GNU C++ symbol names then pass them through regular expression to shrink them")
+	popt::option(options::smart_demangle, "smart-demangle", 'D', "demangle GNU C++ symbol names then pass them through regular expression to shrink them")
 };
 }
 
