@@ -1,5 +1,10 @@
 2003-05-18  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* pp/opreport_options.cpp:
+	* pp/opannotate_options.cpp: remove conflicting options shortcut
+
+2003-05-18  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libregex/stl.pat.in: add list<T>::{const_}+iterator
 
 2003-05-17  Philippe Elie  <phil.el@wanadoo.fr>
