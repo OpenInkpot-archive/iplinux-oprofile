@@ -1,5 +1,11 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* libpp/opp_symbol.h: move vma64_p to ...
+
+	* libpp/format_flags.h: ... here
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* libpp/Makefile.am:
 	* libpp/outsymbflags.h:
 	* libpp/format_flags.h:
