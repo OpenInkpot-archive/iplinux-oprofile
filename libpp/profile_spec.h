@@ -98,7 +98,6 @@ private:
 	void parse_image(std::string const &);
 	void parse_image_exclude(std::string const &);
 	void parse_lib_image(std::string const &);
-	void parse_lib_image_exclude(std::string const &);
 	void parse_event(std::string const &);
 	void parse_count(std::string const &);
 	void parse_unitmask(std::string const &);
@@ -128,7 +127,6 @@ private:
 	std::vector<std::string> image;
 	std::vector<std::string> image_exclude;
 	std::vector<std::string> lib_image;
-	std::vector<std::string> lib_image_exclude;
 	generic_spec<std::string> event;
 	generic_spec<int> count;
 	generic_spec<unsigned int> unitmask;

@@ -63,8 +63,6 @@ profile_spec::profile_spec(extra_images const & extra)
 	parse_table["image"] = &profile_spec::parse_image;
 	parse_table["image-exclude"] = &profile_spec::parse_image_exclude;
 	parse_table["lib-image"] = &profile_spec::parse_lib_image;
-	parse_table["lib-image-exclude"] =
-		&profile_spec::parse_lib_image_exclude;
 	parse_table["event"] = &profile_spec::parse_event;
 	parse_table["count"] = &profile_spec::parse_count;
 	parse_table["unit-mask"] = &profile_spec::parse_unitmask;
@@ -171,13 +169,6 @@ void profile_spec::parse_lib_image(string const & str)
 }
 
 
-void profile_spec::parse_lib_image_exclude(string const & str)
-{
-	normal_tag_set = true;
-	separate_token(lib_image_exclude, str, ',');
-}
-
-
 void profile_spec::parse_event(string const & str)
 {
 	normal_tag_set = true;
@@ -257,9 +248,8 @@ bool profile_spec::match(string const & filename) const
 		// which have "/oprofile" or similar
 		string simage = find_image_path(spec.image, extra);
 		string slib_image = find_image_path(spec.lib_image, extra);
-		glob_filter f_1(image_or_lib_image, image_exclude);
-		glob_filter f_2(image_or_lib_image, lib_image_exclude);
-		if (f_1.match(simage) || f_2.match(slib_image)) {
+		glob_filter filter(image_or_lib_image, image_exclude);
+		if (filter.match(simage) || filter.match(slib_image)) {
 			matched_by_image_or_lib_image = true;
 		}
 	}
@@ -268,7 +258,7 @@ bool profile_spec::match(string const & filename) const
 		// PP:3.7 3.8
 		if (!image.empty()) {
 			glob_filter filter(image, image_exclude);
-			if (!filter.match(spec.image)) {
+			if (filter.match(spec.image)) {
 				return false;
 			}
 		} else if (!image_or_lib_image.empty()) {
@@ -279,7 +269,7 @@ bool profile_spec::match(string const & filename) const
 
 		// PP:3.9 3.10
 		if (!lib_image.empty()) {
-			glob_filter filter(lib_image, lib_image_exclude);
+			glob_filter filter(lib_image, image_exclude);
 			if (!filter.match(spec.lib_image)) {
 				return false;
 			}
@@ -287,6 +277,20 @@ bool profile_spec::match(string const & filename) const
 			// lib_image empty means match all except if user
 			// specified image_or_lib_image *or* we already
 			// matched this spec through image
+			return false;
+		}
+	}
+
+	if (!matched_by_image_or_lib_image) {
+		// if we don't match by image_or_lib_image we must try to
+		// exclude from spec, exclusion from image_or_lib_image has
+		// been handled above
+		vector<string> empty;
+		glob_filter filter(empty, image_exclude);
+		if (!filter.match(spec.image)) {
+			return false;
+		}
+		if (!spec.lib_image.empty() && !filter.match(spec.lib_image)) {
 			return false;
 		}
 	}
