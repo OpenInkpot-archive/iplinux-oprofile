@@ -1,6 +1,7 @@
 /**
  * @file common_option.cpp
  * Contains common options and implementation of entry point of pp tools
+ * and some miscelleaneous functions
  *
  * @remark Copyright 2003 OProfile authors
  * @remark Read the file COPYING
@@ -9,6 +10,7 @@
  */
 
 #include <iostream>
+#include <sstream>
 
 #include "op_exception.h"
 #include "popt_options.h"
@@ -76,4 +78,29 @@ int run_pp_tool(int argc, char const * argv[], pp_fct_run_t fct)
 	}
 
 	return EXIT_FAILURE;
+}
+
+
+double handle_threshold(string threshold)
+{
+	double value = 0.0;
+
+	if (threshold.length()) {
+		istringstream ss(threshold);
+		if (!(ss >> value)) {
+			cerr << "illegal threshold value: " << threshold
+			     << " allowed range: [0-100]" << endl;
+			exit(EXIT_FAILURE);
+		}
+
+		if (value < 0.0 || value > 100.0) {
+			cerr << "illegal threshold value: " << threshold
+			     << " allowed range: [0-100]" << endl;
+			exit(EXIT_FAILURE);
+		}
+	}
+
+	cverb << value << endl;;
+
+	return value;
 }

@@ -36,11 +36,13 @@ namespace options {
 	bool assembly;
 	vector<string> objdump_params;
 	bool include_dependent;
+	double threshold;
 }
 
 
 namespace {
 
+	string threshold;
 	string include_symbols;
 	string exclude_symbols;
 	string include_file;
@@ -67,12 +69,15 @@ popt::option options_array[] = {
 		     "include these comma separated symbols", "symbols"),
 	popt::option(exclude_symbols, "exclude-symbol", 'e',
 		     "exclude these comma separated symbols", "symbols"),
-	popt::option(exclude_symbols, "objdump-params", 'p',
+	popt::option(options::objdump_params, "objdump-params", 'p',
 		     "additionnal params to pass to objdump", "parameters"),
 	popt::option(options::include_dependent, "include-dependent", 'n',
 		     "include libs, modules etc."),
 	popt::option(options::source, "source", 's', "output source"),
 	popt::option(options::assembly, "assembly", 'a', "output assembly"),
+	popt::option(threshold, "threshold", 't',
+		     "threshold of minimum value before a symbol is printed",
+		     "count or percent"),
 };
 
 }  // anonymous namespace
@@ -92,6 +97,9 @@ void handle_options(vector<string> const & non_options)
 		     << "output" << endl;
 		exit(EXIT_FAILURE);
 	}
+
+	if (!::threshold.empty())
+		options::threshold = handle_threshold(::threshold);
 
 	options::symbol_filter = string_filter(include_symbols, exclude_symbols);
 

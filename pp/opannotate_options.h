@@ -32,6 +32,7 @@ namespace options {
 	extern std::string output_dir;
 	extern std::string source_dir;
 	extern std::vector<std::string> objdump_params;
+	extern double threshold;
 }
 
 /**

@@ -1,7 +1,7 @@
 /**
  * @file common_option.h
  * Declaration of entry point of pp tools, implementation file add common
- * options of pp tools
+ * options of pp tools and some miscelleaneous functions
  *
  * @remark Copyright 2003 OProfile authors
  * @remark Read the file COPYING
@@ -34,5 +34,12 @@ typedef int (*pp_fct_run_t)(std::vector<std::string> const & non_options);
  * common options and providing the necessary try catch clause
  */
 int run_pp_tool(int argc, char const * argv[], pp_fct_run_t fct);
+
+/**
+ * @param threshold  a percent threshold as string
+ *
+ * convert threshold to a double and return it. All error are fatal
+ */
+double handle_threshold(string threshold);
 
 #endif /* !COMMON_OPTION_H */

@@ -1,3 +1,12 @@
+2003-05-11  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* pp/opreport_options.cpp: move handle_threshold()
+	* pp/common_option.h:
+	* pp/common_option.cpp: here
+	* pp/opannotate_options.h:
+	* pp/opannotate_options.cpp:
+	* pp/opannotate.cpp: handle --threshold
+
 2003-05-10  John Levon  <levon@movementarian.org>
 
 	* libop/op_mangle.h:

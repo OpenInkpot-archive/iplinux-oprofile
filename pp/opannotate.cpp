@@ -39,7 +39,7 @@ scoped_ptr<profile_container> samples;
 // needed to display samples file information
 scoped_ptr<opd_header> header;
 
-/// how op_to_source was invoked
+/// how opannotate was invoked
 string cmdline;
 
 /// empty annotation fill string
@@ -415,7 +415,8 @@ void output_asm(string const & app_name)
 	// select the subset of symbols which statisfy the user requests
 	vector<symbol_entry const *> output_symbols;
 
-	output_symbols = samples->select_symbols(app_name, 0.0, false);
+	output_symbols = samples->select_symbols(app_name,
+				options::threshold / 100.0, false);
 
 	output_info(cout);
 
@@ -526,7 +527,7 @@ void output_one_file(istream & in, string const & filename,
 		out_filename.erase(0, source_dir.length());
 	} else if (pos == string::npos) {
 		// filename is outside the source dir: ignore this file
-		cerr << "op_to_source: file "
+		cerr << "opannotate: file "
 		     << '"' << out_filename << '"' << " ignored" << endl;
 		return;
 	}
@@ -582,7 +583,7 @@ void output_source(path_filter const & filter, bool output_separate_file)
 			// if the filename is non empty. The case: no debug
 			// info at all has already been checked.
 			if (filenames[i].length())
-				cerr << "op_to_source (warning): unable to "
+				cerr << "opannotate (warning): unable to "
 				     << "open for reading: "
 				     << filenames[i] << endl;
 		} 

@@ -106,30 +106,6 @@ popt::option options_array[] = {
 
 
 // FIXME: separate file if reused
-void handle_threshold()
-{
-	if (threshold.length()) {
-		double value;
-		istringstream ss(threshold);
-		if (ss >> value) {
-			options::threshold = value;
-		} else {
-			cerr << "illegal threshold value: " << threshold
-			     << " allowed range: [0-100]" << endl;
-			exit(EXIT_FAILURE);
-		}
-
-		if (options::threshold < 0.0 || options::threshold > 100.0) {
-			cerr << "illegal threshold value: " << threshold
-			     << " allowed range: [0-100]" << endl;
-			exit(EXIT_FAILURE);
-		}
-	}
-
-	cverb << options::threshold << endl;;
-}
-
-// FIXME: separate file if reused
 void handle_sort_option()
 {
 	if (sort_by.empty()) {
@@ -217,7 +193,9 @@ void handle_options(vector<string> const & non_options)
 	if (options::details)
 		options::symbols = true;
 
-	handle_threshold();
+	if (!::threshold.empty())
+		options::threshold = handle_threshold(::threshold);
+
 	handle_sort_option();
 	handle_merge_option();
 	handle_output_file();

@@ -44,7 +44,6 @@ vma      samples  %           symbol name             app name
   can objdump retrieve the source file and if no can we work-around ?
  o opannotate unhandled option (probably not exhaustive) 
    --base-dir
-   --threshold
  o move oprofiled.log to OP_SAMPLE_DIR/current ?
  o opd_mangle_filename() in dae/ daemon/ use create_path blindly and try to
   recreate from /var.
