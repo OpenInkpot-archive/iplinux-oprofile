@@ -22,10 +22,6 @@ vma      samples  cum. samples  %           cum. %     symbol name             i
 
   Note the ellipsis
 
- o we don't resolve relative image paths e.g. :
-
-	pp/opannotate --source --output-dir=o pp/opannotate
-
  o We don't use abfd.have_debug_info() any more, gives crap reports:
 [moz@lambent oprofile-pp]$ pp/opreport -l /usr/bin/which
 Cpu type: PIII
@@ -103,17 +99,6 @@ vma      samples  %           symbol name             app name
   It will allow more freedom on how to refactorize partition_files and
   image_set
   
-
- o #pp/opreport -l -p /lib/modules/2.5.69/kernel/ oprofile.ko
-   No samples files found: profile specification too strict ?
-   # pp/opreport -l -p /lib/modules/2.5.69/kernel/ oprofile
-   No samples files found: profile specification too strict ?
-   # pp/opreport -l -p /lib/modules/2.5.69/kernel/ /oprofile
-   Cpu type: PIII
-   ...
-
-   It would be nice to allow at least the first alternate form.
-
  o test with 2.95 if cout.rdbuf(os.rdbuf()); work even when there is non
   flushed data in cout buffer. It's also not clear if at exit() we have not
   a problem (who is the owner of the buffer and in what order of and cout will

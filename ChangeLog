@@ -1,5 +1,26 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* locate_images.h:
+	* locate_images.cpp: extra_images can now use
+	relative paths for its search dirs. Move most of 
+	the warnings out of find_image_path, and make it
+	also handle relative paths. Return the file
+	even if it wasn't readable.
+
+	* libpp/partition_files.cpp: give warnings when
+	necessary.
+
+	* libpp/profile_spec.h:
+	* libpp/profile_spec.cpp: handle relative paths
+	inside image specs, as stated in pp_interface; also
+	use the extra images search path for resolution.
+
+	* pp/opannotate_options.cpp:
+	* pp/opreport_options.cpp:
+	* pp/opgprof_options.cpp: changes from above
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* libpp/format_flags.h: source doc improvements
 
 2003-05-11  John Levon  <levon@movementarian.org>

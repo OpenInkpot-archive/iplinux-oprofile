@@ -19,15 +19,41 @@
 #include "profile_spec.h"
 #include "string_manip.h"
 #include "glob_filter.h"
-
+#include "locate_images.h"
 
 using namespace std;
 
+namespace {
 
-profile_spec::profile_spec()
+// PP:3.7, full path, or relative path. If we can't find it,
+// we should maintain the original to maintain the wordexp etc.
+string const fixup_image_spec(string const & str, extra_images const & extra)
+{
+	string const image = find_image_path(str, extra);
+	if (image.empty())
+		return str;
+	return image;
+}
+
+
+void fixup_image_spec(vector<string> & images, extra_images const & extra)
+{
+	vector<string>::iterator it = images.begin();
+	vector<string>::iterator const end = images.end();
+
+	for (; it != end; ++it) {
+		*it = fixup_image_spec(*it, extra);
+	}
+}
+
+}
+
+
+profile_spec::profile_spec(extra_images const & extra)
 	:
 	normal_tag_set(false),
-	sample_file_set(false)
+	sample_file_set(false),
+	extra(extra)
 {
 	parse_table["sample-file"] = &profile_spec::parse_sample_file;
 	parse_table["binary"] = &profile_spec::parse_binary;
@@ -91,7 +117,7 @@ void profile_spec::validate()
 void profile_spec::set_image_or_lib_name(string const & str)
 {
 	normal_tag_set = true;
-	image_or_lib_image.push_back(str);
+	image_or_lib_image.push_back(fixup_image_spec(str, extra));
 }
 
 
@@ -126,6 +152,7 @@ void profile_spec::parse_image(string const & str)
 {
 	normal_tag_set = true;
 	separate_token(image, str, ',');
+	fixup_image_spec(image, extra);
 }
 
 
@@ -140,6 +167,7 @@ void profile_spec::parse_lib_image(string const & str)
 {
 	normal_tag_set = true;
 	separate_token(lib_image, str, ',');
+	fixup_image_spec(image, extra);
 }
 
 
@@ -225,9 +253,13 @@ bool profile_spec::match(string const & filename) const
 
 	// PP:3.19
 	if (!image_or_lib_image.empty()) {
+		// Need the path search for the benefit of modules
+		// which have "/oprofile" or similar
+		string simage = find_image_path(spec.image, extra);
+		string slib_image = find_image_path(spec.lib_image, extra);
 		glob_filter f_1(image_or_lib_image, image_exclude);
 		glob_filter f_2(image_or_lib_image, lib_image_exclude);
-		if (f_1.match(spec.image) || f_2.match(spec.lib_image)) {
+		if (f_1.match(simage) || f_2.match(slib_image)) {
 			matched_by_image_or_lib_image = true;
 		}
 	}
@@ -295,9 +327,10 @@ static bool substitute_alias(profile_spec & /*parser*/,
 }
 
 
-profile_spec profile_spec::create(vector<string> const & args)
+profile_spec profile_spec::create(vector<string> const & args,
+                                  extra_images const & extra)
 {
-	profile_spec spec;
+	profile_spec spec(extra);
 
 	for (size_t i = 0 ; i < args.size() ; ++i) {
 		if (spec.is_valid_tag(args[i])) {

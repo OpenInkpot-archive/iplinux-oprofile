@@ -71,8 +71,7 @@ profile_container::~profile_container()
 //  the range of sample_entry inside each symbol entry are valid
 //  the samples_by_file_loc member var is correctly setup.
 void profile_container::add(profile_t const & profile,
-                            op_bfd const & abfd,
-                            string const & app_name)
+                            op_bfd const & abfd, string const & app_name)
 {
 	string const image_name = abfd.get_filename();
 
@@ -229,10 +228,8 @@ vector<string> const profile_container::select_filename(double threshold) const
 		= file_by_samples.end();
 
 	for (; cit != cend; ++cit) {
-		filename_by_samples const & s = *cit;
-
-		if (s.percent >= threshold)
-			result.push_back(s.filename);
+		if (cit->percent >= threshold)
+			result.push_back(cit->filename);
 	}
 
 	return result;
@@ -312,4 +309,3 @@ sample_container::samples_iterator profile_container::end() const
 {
 	return samples->end();
 }
-

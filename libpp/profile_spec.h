@@ -19,6 +19,8 @@
 #include "filename_spec.h"
 #include "comma_list.h"
 
+class extra_images;
+
 /**
  * Holds a parsed profile spec composed of tag:value pairs, as given in
  * pp_interface documentation.
@@ -37,7 +39,8 @@ public:
 	 * substitution, non-valid tag:value options are considered
 	 * as image:value
 	 */
-	static profile_spec create(std::vector<std::string> const & args);
+	static profile_spec create(std::vector<std::string> const & args,
+	                           extra_images const & extra);
 
 	/**
 	 * @param include_dependent  whether to include dependent
@@ -56,7 +59,7 @@ public:
 	bool match(std::string const & filename) const;
 
 private:
-	profile_spec();
+	profile_spec(extra_images const & extra);
 
 	/**
 	 * @param tag_value  a "tag:value" to interpret, all error throw an
@@ -139,6 +142,8 @@ private:
 	bool normal_tag_set;
 	/// true if sample-file: tag has been seen
 	bool sample_file_set;
+	/// extra search path for images
+	extra_images const & extra;
 };
 
 #endif /* !PROFILE_SPEC_H */

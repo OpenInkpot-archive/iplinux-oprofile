@@ -192,9 +192,11 @@ void handle_options(vector<string> const & non_options)
 	handle_merge_option();
 	handle_output_file();
 
-	options::symbol_filter = string_filter(include_symbols, exclude_symbols);
+	options::symbol_filter =
+		string_filter(include_symbols, exclude_symbols);
 
-	profile_spec spec = profile_spec::create(non_options);
+	profile_spec const spec =
+		profile_spec::create(non_options, options::extra_found_images);
 
 	list<string> sample_files = spec.generate_file_list(include_dependent);
 

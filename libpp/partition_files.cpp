@@ -171,6 +171,44 @@ partition_files::filename_set const & partition_files::set(size_t index) const
 }
 
 
+namespace {
+
+struct handle_insert {
+	handle_insert(image_set & o, extra_images const & e)
+		: out(o), extra(e) {}
+
+	void operator()(split_sample_filename const & profile) {
+		string const image_name = profile.lib_image.empty()
+			? profile.image : profile.lib_image;
+
+		string const found_name = find_image_path(image_name, extra);
+
+		if (found_name.empty()) {
+			static bool warned_already;
+			cerr << "Couldn't find the binary file " << image_name
+			     << endl;
+			if (!warned_already) {
+				cerr << "Try adding a search path with the "
+				     << "-p option." << endl;
+				warned_already = true;
+			}
+		} else if (!op_file_readable(found_name)) {
+			cerr << "Couldn't read the binary file " << image_name
+			     << endl;
+		} else {
+			image_set::value_type value(found_name, profile);
+			out.insert(value);
+		}
+	}
+
+private:
+	image_set & out;
+	extra_images const & extra;
+};
+
+}
+
+		
 image_set sort_by_image(partition_files const & files,
 			extra_images const & extra_images)
 {
@@ -179,22 +217,8 @@ image_set sort_by_image(partition_files const & files,
 	for (size_t i = 0 ; i < files.nr_set(); ++i) {
 		partition_files::filename_set const & file_set = files.set(i);
 
-		partition_files::filename_set::const_iterator it;
-		for (it = file_set.begin(); it != file_set.end(); ++it) {
-			string image_name = it->lib_image.empty() ?
-				it->image : it->lib_image;
-
-			// if the image files does not exist try to retrieve it
-			image_name = find_image_path(extra_images,
-				image_name, it->sample_filename);
-
-			// no need to warn if image_name is not readable
-			// check_image_name() already do that
-			if (op_file_readable(image_name)) {
-				image_set::value_type value(image_name, *it);
-				result.insert(value);
-			}
-		}
+		for_each(file_set.begin(), file_set.end(),
+		         handle_insert(result, extra_images));
 	}
 
 	return result;

@@ -97,7 +97,8 @@ void handle_options(vector<string> const & non_options)
 
 	options::file_filter = path_filter(include_file, exclude_file);
 
-	profile_spec spec = profile_spec::create(non_options);
+	profile_spec const spec =
+		profile_spec::create(non_options, options::extra_found_images);
 
 	// FIXME add --include-dependent
 	list<string> sample_files = spec.generate_file_list(include_dependent);

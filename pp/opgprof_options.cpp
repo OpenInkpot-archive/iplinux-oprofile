@@ -99,7 +99,8 @@ void handle_options(vector<string> const & non_options)
 {
 	cverb << "output filename: " << options::gmon_filename << endl;
 
-	profile_spec spec = profile_spec::create(non_options);
+	profile_spec const spec =
+		profile_spec::create(non_options, options::extra_found_images);
 
 	// we do a first try w/o include-dependent if it fails we include
 	// dependent. First try should catch "opgrof /usr/bin/make" whilst

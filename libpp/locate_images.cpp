@@ -15,7 +15,6 @@
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
-#include <cerrno>
 
 using namespace std;
 
@@ -25,8 +24,9 @@ void extra_images::populate(vector<string> const & paths)
 	vector<string>::const_iterator cit = paths.begin();
 	vector<string>::const_iterator end = paths.end();
 	for (; cit != end; ++cit) {
+		string const path = relative_to_absolute_path(*cit);
 		list<string> file_list;
-		create_file_list(file_list, *cit, "*", true);
+		create_file_list(file_list, path, "*", true);
 		list<string>::const_iterator lit = file_list.begin();
 		list<string>::const_iterator lend = file_list.end();
 		for (; lit != lend; ++lit) {
@@ -92,39 +92,24 @@ public:
 /**
  * @param extra_images container where all candidate filename are stored
  * @param image_name binary image name
- * @param samples_filename samples filename
  *
  * helper for find_image_path either return image name on success or an empty
  * string, output also a warning if we failt to retrieve the image name. All
  * this handling is special for 2.5/2.6 module where daemon are no way to know
  * full path name of module
  */
-string const find_module_path(extra_images const & extra_images,
-                              string const & module_name,
-                              string const & samples_filename)
+string const find_module_path(string const & module_name,
+                              extra_images const & extra_images)
 {
 	vector<string> result =
 		extra_images.find(module_matcher(module_name));
 
 	if (result.empty()) {
-		static bool first_warn = true;
-		if (first_warn) {
-			cerr << "I can't locate some binary image files, all\n"
-			     << "of these files will be ignored in statistics"
-			     << endl
-			     << "Have you provided the right -p option ?"
-			     << endl;
-			first_warn = false;
-		}
-
-		cerr << "warning: can't locate image file for samples files : "
-		     << samples_filename << endl;
-
 		return string();
 	}
 
 	if (result.size() > 1) {
-		cerr << "The image name " << samples_filename
+		cerr << "The image name " << module_name
 		     << " matches more than one filename." << endl;
 	        cerr << "I have used " << result[0] << endl;
 	}
@@ -135,37 +120,29 @@ string const find_module_path(extra_images const & extra_images,
 } // anon namespace
 
 
-string const find_image_path(extra_images const & extra_images,
-                             string const & image_name,
-                             string const & samples_filename)
+string const find_image_path(string const & image_name,
+                             extra_images const & extra_images)
 {
+	string const image = relative_to_absolute_path(image_name);
+
 	// simplest case
-	if (op_file_readable(image_name))
-		return image_name;
+	if (op_file_readable(image))
+		return image;
 
-	if (errno == EACCES) {
-		static bool first_warn = true;
-		if (first_warn) {
-			cerr << "You do not have read access to some binary "
-			     << "images, all\nof these files will be ignored "
-			     << "in the results.\n";
-			first_warn = false;
-		}
-		cerr << "access denied for : " << image_name << endl;
+	if (errno == EACCES)
+		return image;
 
-		return string(); 
-	}
+	string const base = basename(image);
 
-	vector<string> result = extra_images.find(basename(image_name));
+	vector<string> result = extra_images.find(base);
 
 	// not found, try a module search
 	if (result.empty()) {
-		return find_module_path(extra_images,
-			basename(image_name) + ".ko", samples_filename);
+		return find_module_path(base + ".ko", extra_images);
 	}
 
 	if (result.size() > 1) {
-		cerr << "The image name " << samples_filename
+		cerr << "The image name " << image_name
 		     << " matches more than one filename, "
 		     << "and will be ignored." << endl;
 		return string();
