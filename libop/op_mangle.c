@@ -30,7 +30,14 @@ char * op_mangle_filename(char const * image_name, char const * app_name,
 
 	len = strlen(OP_SAMPLES_CURRENT_DIR) + strlen(image_name) + 1 + strlen(event_name) + 1;
 	if (shared_lib) {
+		char const * tmp;
 		len += strlen(app_name) + 1;
+
+		/* PP:3 image_name and app_namea re reversed when profling with
+		   --separate */
+		tmp = image_name;
+		image_name = app_name;
+		app_name = tmp;
 	}
 
 	/* provision for tgid, tid, unit_mask, cpu and three {root}, {dep} or
@@ -51,6 +58,7 @@ char * op_mangle_filename(char const * image_name, char const * app_name,
 	strcat(mangled, "/");
 
 	if (shared_lib) {
+		strcat(mangled, "{dep}" "/");
 		if (is_kernel && !strchr(image_name, '/'))
 			strcat(mangled, "{kern}" "/");
 		else
