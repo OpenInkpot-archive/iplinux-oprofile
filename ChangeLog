@@ -1,5 +1,9 @@
 2003-05-26  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* pp/opreport.cpp: remove automatic switch to --symbols mode
+
+2003-05-26  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libpp/symbol_sort.h:
 	* pp/opannotate_options.cpp:
 	* pp/opgprof_options.cpp:

@@ -355,13 +355,8 @@ int opreport(vector<string> const & non_options)
 		vector<group_summary> summaries;
 		double const total =
 			populate_summaries(*sample_file_partition, summaries);
-		
-		// If we're only going to show a boring summary
-		// of one image, then show symbols by default instead.
-		if (summaries.size() > 1 || !summaries[0].should_hide_deps()) {
-			output_summaries(summaries, total);
-			return 0;
-		}
+		output_summaries(summaries, total);
+		return 0;
 	}
 
 	profile_container samples(false,
