@@ -157,8 +157,8 @@ void output_gprof(profile_container const & samples,
 			continue;
 		}
 
-		// FIXME: this doesn't actually cap to max value ?
 		if (hist[pos] + count > (u16)-1) {
+			hist[pos] = (u16)-1;
 			cerr <<	"Warning: capping sample count by "
 			     << hist[pos] + count - ((u16)-1) << endl;
 		} else {
