@@ -1,5 +1,16 @@
 2003-05-09  John Levon  <levon@movementarian.org>
 
+	* libpp/opp_symbol.h: app name, image name should
+	be in symbol not in file_location
+
+	* libpp/format_output.cpp:
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp:
+	* libpp/symbol_container.cpp:
+	* libpp/symbol_functors.cpp: changes from above
+
+2003-05-09  John Levon  <levon@movementarian.org>
+
 	* libpp/format_output.h:
 	* libpp/format_output.cpp: vma_64 doesn't need
 	to be in field_datum. make one output() private

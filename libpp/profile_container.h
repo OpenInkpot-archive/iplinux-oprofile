@@ -139,8 +139,6 @@ private:
 	void add_samples(profile_t const & profile,
 			 op_bfd const & abfd, symbol_index_t sym_index,
 			 u32 start, u32 end, bfd_vma base_vma,
-			 std::string const & image_name,
-			 std::string const & app_name,
 			 symbol_entry const * symbol);
 
 	/**

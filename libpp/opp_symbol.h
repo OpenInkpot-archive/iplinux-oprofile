@@ -21,12 +21,6 @@
 
 /// A simple container for a fileno:linenr location.
 struct file_location {
-	/// From where image come this file location
-	std::string image_name;
-	/// owning application name: identical to image name if profiling
-	/// session did not separate samples for shared libs or if image_name
-	// is not a shared libs
-	std::string app_name;
 	/// empty if not valid.
 	std::string filename;
 	/// 0 means invalid or code is generated internally by the compiler
@@ -52,6 +46,12 @@ struct sample_entry {
 
 /// associate a symbol with a file location, samples count and vma address
 struct symbol_entry {
+	/// which image this symbol belongs to
+	std::string image_name;
+	/// owning application name: identical to image name if profiling
+	/// session did not separate samples for shared libs or if image_name
+	// is not a shared lib
+	std::string app_name;
 	/// file location, vma and cumulated samples count for this symbol
 	sample_entry sample;
 	/// name of symbol

@@ -104,8 +104,8 @@ void profile_container::add(profile_t const & profile,
 			symb_entry.sample.file_loc.linenr = 0;
 		}
 
-		symb_entry.sample.file_loc.image_name = image_name;
-		symb_entry.sample.file_loc.app_name = app_name;
+		symb_entry.image_name = image_name;
+		symb_entry.app_name = app_name;
 
 		bfd_vma base_vma = abfd.syms[i].vma();
 
@@ -115,7 +115,7 @@ void profile_container::add(profile_t const & profile,
 
 		if (need_details) {
 			add_samples(profile, abfd, i, start, end,
-				    base_vma, image_name, app_name, symbol);
+			            base_vma, symbol);
 		}
 	}
 }
@@ -127,8 +127,6 @@ profile_container::add_samples(profile_t const & profile,
                                op_bfd const & abfd,
                                symbol_index_t sym_index,
                                u32 start, u32 end, bfd_vma base_vma,
-                               string const & image_name,
-                               string const & app_name,
                                symbol_entry const * symbol)
 {
 
@@ -148,9 +146,6 @@ profile_container::add_samples(profile_t const & profile,
 		} else {
 			sample.file_loc.linenr = 0;
 		}
-
-		sample.file_loc.image_name = image_name;
-		sample.file_loc.app_name = app_name;
 
 		sample.vma = (sym_index != nil_symbol_index)
 			? abfd.sym_offset(sym_index, pos) + base_vma
@@ -175,7 +170,7 @@ profile_container::select_symbols(string const & image_name,
 	symbol_collection::const_iterator const end = v.end();
 	for (; it < end && threshold >= 0; ++it) {
 		if (!image_name.empty() &&
-		    (*it)->sample.file_loc.image_name != image_name)
+		    (*it)->image_name != image_name)
 			continue;
 
 		double const percent =

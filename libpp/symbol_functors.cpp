@@ -14,13 +14,11 @@
 bool less_symbol::operator()(symbol_entry const & lhs,
 			     symbol_entry const & rhs) const
 {
-	if (lhs.sample.file_loc.image_name != rhs.sample.file_loc.image_name)
-		return lhs.sample.file_loc.image_name < 
-			rhs.sample.file_loc.image_name;
+	if (lhs.image_name != rhs.image_name)
+		return lhs.image_name < rhs.image_name;
 
-	if (lhs.sample.file_loc.app_name != rhs.sample.file_loc.app_name)
-		return lhs.sample.file_loc.app_name <
-			rhs.sample.file_loc.app_name;
+	if (lhs.app_name != rhs.app_name)
+		return lhs.app_name < rhs.app_name;
 
 	if (lhs.sample.vma != rhs.sample.vma)
 		return lhs.sample.vma < rhs.sample.vma;

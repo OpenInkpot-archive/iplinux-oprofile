@@ -257,16 +257,16 @@ string formatter::format_symb_name(field_datum const & f)
 string formatter::format_image_name(field_datum const & f)
 {
 	return short_filename
-		? basename(f.sample.file_loc.image_name)
-		: f.sample.file_loc.image_name;
+		? basename(f.symbol.image_name)
+		: f.symbol.image_name;
 }
 
  
 string formatter::format_app_name(field_datum const & f)
 {
 	return short_filename
-		? basename(f.sample.file_loc.app_name)
-		: f.sample.file_loc.app_name;
+		? basename(f.symbol.app_name)
+		: f.symbol.app_name;
 }
 
  
@@ -274,7 +274,7 @@ string formatter::format_linenr_info(field_datum const & f)
 {
 	ostringstream out;
 
-	if (f.sample.file_loc.filename.length()) {
+	if (!f.sample.file_loc.filename.empty()) {
 		string filename = short_filename
 			? basename(f.sample.file_loc.filename)
 			: f.sample.file_loc.filename;

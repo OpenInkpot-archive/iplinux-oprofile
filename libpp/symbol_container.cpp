@@ -92,7 +92,7 @@ symbol_entry const * symbol_container::find_by_vma(string const & image_name,
 	symbols_t::const_iterator it;
 	for (it = symbols.begin(); it != symbols.end(); ++it) {
 		if (it->sample.vma == vma &&
-		    it->sample.file_loc.image_name == image_name)
+		    it->image_name == image_name)
 			return &*it;
 	}
 
