@@ -52,23 +52,21 @@ std::string const & name_storage::name(name_id id) const
 std::string const & name_storage::demangle(name_id id) const
 {
 	stored_name const & n = names.find(id)->second;
-	if (!n.demangled) {
+	if (n.name_processed.empty()) {
 		if (n.name.length() && n.name[0] == '?')
-			n.name_demangled = "(no symbol)";
+			n.name_processed = "(no symbol)";
 		else
-			n.name_demangled = demangle_symbol(n.name);
-		n.demangled = true;
+			n.name_processed = demangle_symbol(n.name);
 	}
-	return n.name_demangled;
+	return n.name_processed;
 }
 
 
 std::string const & name_storage::basename(name_id id) const
 {
 	stored_name const & n = names.find(id)->second;
-	if (!n.basenamed) {
-		n.name_basenamed = ::basename(n.name);
-		n.basenamed = true;
+	if (n.name_processed.empty()) {
+		n.name_processed = ::basename(n.name);
 	}
-	return n.name_basenamed;
+	return n.name_processed;
 }

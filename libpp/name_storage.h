@@ -41,15 +41,11 @@ public:
 
 private:
 	struct stored_name {
-		stored_name() : demangled(false), basenamed(false) {}
-		stored_name(std::string const & n) : name(n),
-			demangled(false), basenamed(false) {}
+		stored_name(std::string const & n = std::string())
+			: name(n) {}
 
 		std::string name;
-		mutable std::string name_demangled;
-		mutable std::string name_basenamed;
-		mutable bool demangled;
-		mutable bool basenamed;
+		mutable std::string name_processed;
 
 		bool operator<(stored_name const & rhs) const {
 			return name < rhs.name;

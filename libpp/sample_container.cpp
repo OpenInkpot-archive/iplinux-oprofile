@@ -54,7 +54,7 @@ sample_container::begin(symbol_entry const * symbol) const
 sample_container::samples_iterator 
 sample_container::end(symbol_entry const * symbol) const
 {
-	samples_storage::key_type key(symbol, ~(bfd_vma)0);
+	samples_storage::key_type key(symbol, ~bfd_vma(0));
 
 	return samples.upper_bound(key);
 }

@@ -1,6 +1,12 @@
 2003-05-16  John Levon  <levon@movementarian.org>
 
 	* libpp/name_storage.h:
+	* libpp/name_storage.cpp: merge processed names
+	into one string, remove the boolean
+
+2003-05-16  John Levon  <levon@movementarian.org>
+
+	* libpp/name_storage.h:
 	* libpp/name_storage.cpp: whoops, use string
 	not stored_name for the ID map
 
