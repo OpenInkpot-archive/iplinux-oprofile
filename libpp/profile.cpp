@@ -28,7 +28,8 @@ using namespace std;
 
 profile_t::profile_t(string const & sample_file)
 	:
-	sample_filename(sample_file)
+	sample_filename(sample_file),
+	start_offset(0)
 {
 	if (access(sample_filename.c_str(), R_OK) == 0) {
 		build_ordered_samples(sample_file);
@@ -76,6 +77,9 @@ unsigned int profile_t::accumulate_samples(uint start, uint end) const
 	unsigned int count = 0;
 
 	ordered_samples_t::const_iterator first, last;
+	// FIXME: this is wrong since we use accumulate_samples(0, ~0);
+	// as special constant to get the whole sample count. Fix here or
+	// caller ?
 	first = ordered_samples.lower_bound(start - start_offset);
 	last = ordered_samples.lower_bound(end - start_offset);
 	for ( ; first != last ; ++first) {

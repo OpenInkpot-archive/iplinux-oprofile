@@ -284,6 +284,16 @@ void get_options(int argc, char const * argv[])
 	copy(unmerged_profile.begin(), unmerged_profile.end(),
 	     ostream_iterator<unmergeable_profile>(cverb, "\n"));
 
+
+	if (unmerged_profile.size() > 1) {
+		// quick and dirty check for now
+		cerr << "Can't handle multiple counter!" << endl;
+		cerr << "use event:xxxx and/or count:yyyyy to restrict "
+		     << "samples files set considered\n" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+
 	sample_file_partition.reset(
 		new partition_files(sample_files, options::merge_by));
 }

@@ -20,6 +20,7 @@ class partition_files;
 
 namespace options {
 	extern bool symbols;
+	extern bool reverse_sort;
 }
 
 /**

@@ -1,5 +1,17 @@
 2003-04-24  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* libpp/partition_files.h: typo
+	* libpp/profile.cpp: difficult to get right result with a random value
+	  in profile::start_offset
+
+	* pp/opreport_options.h: export options::reverse_sort
+	* pp/opreport_options.cpp: bailout if we get multiple counter
+
+	* pp/opreport.cpp: raw output result for application (not symbol)
+	  output.
+
+2003-04-24  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libpp/filename_spec.h:
 	* libpp/filename_spec.cpp:
 	* libpp/parse_cmdline.h:

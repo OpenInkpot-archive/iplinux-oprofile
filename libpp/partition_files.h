@@ -46,7 +46,7 @@ struct unmergeable_profile {
  * return a vector of unmergeable profile
  *
  */
-std::vector<unmergeable_profile> merge_profile(std::list<std::string> const & diles);
+std::vector<unmergeable_profile> merge_profile(std::list<std::string> const & files);
 
 /// convenience function for debug/verbose
 std::ostream & operator<<(std::ostream & out, unmergeable_profile const & lhs);
