@@ -45,6 +45,7 @@ string const & name_storage::get_name(size_t id) const
 	if (id > 0 && id <= names.size())
 		return names[id - 1].name;
 
+	cout << endl << id << endl;
 	throw out_of_range("name_storage::get_name(size_t): out of bound index");
 }
 
@@ -104,6 +105,11 @@ debug_name_id debug_name_storage::create(string const & name)
 
 string const & debug_name_storage::name(debug_name_id debug_id) const
 {
+	static string empty;
+	if (!debug_id.id) {
+		return empty;
+	}
+
 	return get_name(debug_id.id);
 }
 
