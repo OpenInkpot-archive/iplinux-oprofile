@@ -94,18 +94,18 @@ namespace {
 
 // only add symbols that would /never/ be
 // worth examining
-static char const * boring_symbols[] = {
+char const * boring_symbols[] = {
 	"gcc2_compiled.",
 	"_init"
 };
 
-static size_t const nr_boring_symbols =
-			sizeof(boring_symbols) / sizeof(boring_symbols[0]);
+size_t const nr_boring_symbols =
+	sizeof(boring_symbols) / sizeof(boring_symbols[0]);
 
 /**
  * Return true if the symbol is worth looking at
  */
-static bool interesting_symbol(asymbol * sym)
+bool interesting_symbol(asymbol * sym)
 {
 	// #717720 some binutils are miscompiled by gcc 2.95, one of the
 	// typical symptom can be catched here.
