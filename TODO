@@ -34,8 +34,6 @@ vma      samples  cum. samples  %           cum. %     symbol name             i
    --base-dir
    --threshold
  o move oprofiled.log to OP_SAMPLE_DIR/current ?
- o mtime checking in dae is in the wrong place: we must check at each
-  samples files open not at image opening
  o opd_mangle_filename() in dae/ daemon/ use create_path blindly and try to
   recreate from /var.
  o at least add some FIXME in dae/daemon (see opd_mangle_file(),
@@ -46,6 +44,7 @@ vma      samples  cum. samples  %           cum. %     symbol name             i
  o inhibit build of opdiff in pp/Makefile.am
  o consider to do the symbol (details too ?) sort at output, format_output receive
   a vector of symbol to consider, we can perhaps sort in format_output
+     -- this would seem a more logical thing to do yes. what advantages will it give us?
  o disallow --accumulated without -l
  o opreport unhandled option (probably not exhaustive) 
   --global-percent is not handled according to pp_interface
@@ -85,7 +84,15 @@ vma      samples  cum. samples  %           cum. %     symbol name             i
      should be an equivalent transformation IMHO otherwise we will have problems...
 
  o in some case (--separate=library and not using --merge=lib) we get multiple
-  time error message "last modified time ... does not match ..."
+  time error message "last modified time ... does not match ...". This is because
+  we do mtime checking in output_symbols_count() when we iterate over the
+  partition_files, because we delay the creation of profile_t until then.
+
+  I think what we really want to do is, instead of passing partition_files about
+  is to make a container of profile_t's reflecting a similar structure. BUT instead
+  of add_sample_filename() (we don't want to do that for all the profiles at once)
+  we have a smaller constructor, and we still delay the actual processing of the
+  data until later. Comments phil ?
 
  o #pp/opreport -l -p /lib/modules/2.5.69/kernel/ oprofile.ko
    No samples files found: profile specification too strict ?
