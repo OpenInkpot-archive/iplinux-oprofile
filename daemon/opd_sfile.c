@@ -217,8 +217,8 @@ static samples_odb_t * get_file(struct sfile * sf, uint counter, int cg)
 static void sfile_log_arc(struct transient const * trans)
 {
 	int err;
-	vma_t to = trans->pc;
-	vma_t from = trans->last_pc;
+	vma_t from = trans->pc;
+	vma_t to = trans->last_pc;
 	uint64_t key;
 	samples_odb_t * file;
 
