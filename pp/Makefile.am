@@ -2,6 +2,7 @@ AM_CPPFLAGS = \
 	-I ${top_srcdir}/libop \
 	-I ${top_srcdir}/libutil \
 	-I ${top_srcdir}/libdb \
+	-I ${top_srcdir}/libcgdb \
 	-I ${top_srcdir}/libopt++ \
 	-I ${top_srcdir}/libutil++ \
 	-I ${top_srcdir}/libregex \
@@ -22,7 +23,8 @@ common_libs =  \
 	../libutil++/libutil++.a \
 	../libop/libop.a \
 	../libutil/libutil.a \
-	../libdb/libodb.a
+	../libdb/libodb.a \
+	../libcgdb/libocgdb.a
 
 opannotate_SOURCES = opannotate.cpp \
 	opannotate_options.h opannotate_options.cpp \

@@ -22,6 +22,7 @@
 #include "partition_files.h"
 #include "opgprof_options.h"
 #include "cverb.h"
+#include "ocg_hash.h"
 
 using namespace std;
 
@@ -29,6 +30,7 @@ namespace {
 
 #define GMON_VERSION 1
 #define GMON_TAG_TIME_HIST 0
+#define GMON_TAG_CG_ARC 1
 
 struct gmon_hdr {
 	char cookie[4];
@@ -101,8 +103,36 @@ bool aligned_samples(profile_container const & samples, int gap)
 }
 
 
-void output_gprof(profile_container const & samples,
-                  string gmon_filename, op_bfd const & abfd)
+void output_cg(FILE * fp, op_bfd const & abfd, samples_ocg_t const & cg_db)
+{
+	ocg_node_nr_t node_nr, pos;
+	ocg_node_t * node = ocg_get_iterator(&cg_db, &node_nr);
+
+	opd_header const & head = *static_cast<opd_header *>(cg_db.base_memory);
+	bfd_vma offset = abfd.get_start_offset();
+	if (!head.is_kernel)
+		offset = 0;
+
+	for (pos = 0; pos < node_nr; ++pos) {
+		if (!node[pos].key)
+			continue;
+
+		bfd_vma from = node[pos].key >> 32;
+		bfd_vma to = node[pos].key & 0xffffffff;
+
+		from += offset;
+		to += offset;
+		op_write_u8(fp, GMON_TAG_CG_ARC);
+		op_write_vma(fp, abfd, abfd.offset_to_pc(from));
+		op_write_vma(fp, abfd, abfd.offset_to_pc(to));
+		op_write_u32(fp, node[pos].value);
+	}
+}
+
+
+void output_gprof(op_bfd const & abfd, profile_container const & samples,
+                  samples_ocg_t const & cg_db, bool is_cg,
+                  string const & gmon_filename)
 {
 	static gmon_hdr hdr = { { 'g', 'm', 'o', 'n' }, GMON_VERSION, {0,0,0,},};
 
@@ -181,6 +211,10 @@ void output_gprof(profile_container const & samples,
 	}
 
 	op_write_file(fp, hist, histsize * sizeof(u16));
+
+	if (is_cg)
+		output_cg(fp, abfd, cg_db);
+
 	op_close_file(fp);
 
 	free(hist);
@@ -202,7 +236,7 @@ string load_samples(op_bfd const & abfd, image_set const & images,
 
 		profile_t profile;
 
-		for (it = p_it.first;  it != p_it.second; ++it) {
+		for (it = p_it.first; it != p_it.second; ++it) {
 			profile.add_sample_file(it->second.sample_filename,
 						abfd.get_start_offset());
 		}
@@ -213,6 +247,23 @@ string load_samples(op_bfd const & abfd, image_set const & images,
 	}
 
 	return images.begin()->first;
+}
+
+
+bool load_cg(samples_ocg_t & cg_db, image_set const & images)
+{
+	string const filename = images.begin()->second.sample_filename;
+
+	string::size_type prefixend = filename.find_last_of("/");
+	string const base = filename.substr(0, prefixend + 1);
+	string const end = filename.substr(prefixend + 1, string::npos);
+
+	string const cg_file = base + "{cg}/" + end;
+
+	int rc = ocg_open(&cg_db, cg_file.c_str(), OCG_RDONLY,
+		sizeof(struct opd_header));
+
+	return rc == EXIT_SUCCESS;
 }
 
 
@@ -230,7 +281,14 @@ int opgprof(vector<string> const & non_options)
 
 	load_samples(abfd, images, samples);
 
-	output_gprof(samples, options::gmon_filename, abfd);
+	samples_ocg_t cg_db;
+
+	bool const is_cg = load_cg(cg_db, images);
+
+	output_gprof(abfd, samples, cg_db, is_cg, options::gmon_filename);
+
+	if (is_cg)
+		ocg_close(&cg_db);
 
 	return 0;
 }

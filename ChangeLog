@@ -1,3 +1,21 @@
+2003-06-12  Graydon Hoare  <graydon@redhat.com>
+
+	* libop/op_events.c (op_check_events): Check bitmasks as well as 
+	exclusive values, for unit masks.
+
+2003-06-12  John Levon  <levon@movementarian.org>
+
+	* daemon/opd_image.c: we were not handling a truncated
+	TGID entry properly
+
+2003-06-12  John Levon  <levon@movementarian.org>
+
+	* libutil++/unique_storage.h: missing typename
+
+2003-06-11  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* pp/opannotate_options.cpp: typo in option name
+
 2003-06-11  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libutil++/op_bfd.cpp: boring_symbol() new to get a better choice
