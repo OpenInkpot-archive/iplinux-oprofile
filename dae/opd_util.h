@@ -30,6 +30,7 @@
 
 #include "../util/misc.h"
 #include "../op_user.h"
+#include "../libdb/db.h"
 
 /* this char replaces '/' in sample filenames */
 #define OPD_MANGLE_CHAR '}'
