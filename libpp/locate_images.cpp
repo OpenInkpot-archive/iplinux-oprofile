@@ -45,7 +45,8 @@ vector<string> const extra_images::find(string const & name) const
 }
 
 
-vector<string> const extra_images::find(extra_images::matcher const & match) const
+vector<string> const
+extra_images::find(extra_images::matcher const & match) const
 {
 	vector<string> matches;
 

@@ -152,7 +152,7 @@ private:
 	 * for special case such image w/o symbol.
 	 */
 	std::string create_artificial_symbol(op_bfd const & abfd, u32 start,
-					     u32 & end, size_t & order);
+	                                     u32 & end, size_t & order);
 
 	/// The symbols collected by oprofpp sorted by increased vma, provide
 	/// also a sort order on samples count for each counter.

@@ -46,10 +46,10 @@ protected:
 	/// return a reference to the storage used for the given ID
 	stored_name const & processed_name(size_t id) const;
 private:
-	typedef std::vector<stored_name> name_map;
+	typedef std::vector<stored_name> stored_names;
 	typedef std::map<std::string, size_t> id_map;
 
-	name_map names;
+	stored_names names;
 	id_map ids;
 };
 

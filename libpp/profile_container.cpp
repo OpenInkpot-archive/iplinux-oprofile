@@ -98,7 +98,7 @@ void profile_container::add(profile_t const & profile,
 		if (debug_info) {
 			string filename;
 			if (abfd.get_linenr(i, start, filename,
-					symb_entry.sample.file_loc.linenr)) {
+			    symb_entry.sample.file_loc.linenr)) {
 				symb_entry.sample.file_loc.filename =
 					debug_names.create(filename);
 			}
