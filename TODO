@@ -27,7 +27,6 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
  o inhibit build of opdiff in pp/Makefile.am
  o consider to do the symbol (details too ?) sort at output, format_output receive
   a vector of symbol to consider, we can perhaps sort in format_output
- o implement pp_interface alias
  o when a library is not accessible we warn each time we try to bfd_open this
   lib so on multiple time with --seperate=lib, we must warn once. The best way
   is to bfd_open only one time each binary. It will also speed up opreport
