@@ -35,7 +35,7 @@ void output_header(partition_files const & files)
 		partition_files::filename_set const & file_set = files.set(0);
 		opd_header header =
 			read_header(file_set.begin()->sample_filename);
-		output_header(cout, header);
+		cout << header;
 	}
 }
 

@@ -34,12 +34,6 @@ void op_check_header(opd_header const & h1, opd_header const & h2);
  */
 void check_mtime(std::string const & file, opd_header const & header);
 
-
-/**
- * output a readable form of header to out
- */
-void output_header(std::ostream & out, opd_header const & header);
-
 /**
  * @param sample_filename  the sample to open
  *
@@ -47,5 +41,10 @@ void output_header(std::ostream & out, opd_header const & header);
  * the version number is not checked. All error are fatal
  */
 opd_header read_header(std::string const & sample_filename);
+
+/**
+ * output a readable form of header to out
+ */
+std::ostream & operator<<(std::ostream & out, opd_header const & header);
 
 #endif // OP_HEADER_H

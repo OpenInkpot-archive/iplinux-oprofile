@@ -27,6 +27,10 @@ vma      samples  cum. samples  %           cum. %     symbol name             i
 
   Note the ellipsis
 
+ o we don't resolve relative image paths e.g. :
+
+	pp/opannotate --source --output-dir=o pp/opannotate
+
  o We don't use abfd.have_debug_info() any more, gives crap reports:
 [moz@lambent oprofile-pp]$ pp/opreport -l /usr/bin/which
 Cpu type: PIII

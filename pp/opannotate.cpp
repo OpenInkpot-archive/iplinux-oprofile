@@ -175,7 +175,7 @@ void output_info(ostream & out)
 
 	stringstream stream;
 
-	output_header(stream, *header);
+	stream << *header;
 	stream.seekp(0);
 
 	string line;

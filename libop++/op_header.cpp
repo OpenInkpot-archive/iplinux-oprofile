@@ -76,18 +76,6 @@ void check_mtime(string const & file, opd_header const & header)
 }
 
 
-void output_header(ostream & out, opd_header const & header)
-{
-	op_cpu cpu = static_cast<op_cpu>(header.cpu_type);
-
-	out << "Cpu type: " << op_get_cpu_type_str(cpu) << endl;
-
-	out << "Cpu speed was (MHz estimation) : " << header.cpu_speed << endl;
-
-	op_print_event(out, cpu, header.ctr_event,
-		       header.ctr_um, header.ctr_count);
-}
-
 opd_header read_header(string const & sample_filename)
 {
 	samples_odb_t samples_db;
@@ -107,4 +95,19 @@ opd_header read_header(string const & sample_filename)
 	odb_close(&samples_db);
 
 	return head;
+}
+
+
+ostream & operator<<(ostream & out, opd_header const & header)
+{
+	op_cpu cpu = static_cast<op_cpu>(header.cpu_type);
+
+	out << "CPU type: " << op_get_cpu_type_str(cpu) << endl;
+
+	out << "Estimated CPU speed was (MHz): " << header.cpu_speed << endl;
+
+	op_print_event(out, cpu, header.ctr_event,
+	               header.ctr_um, header.ctr_count);
+
+	return out;
 }

@@ -73,11 +73,11 @@ public:
 
 private:
 
-	/// storage type for samples sorted by eip
-	typedef std::map<odb_key_t, odb_value_t> ordered_samples_t;
-
 	/// copy of the samples file header
 	scoped_ptr<opd_header> file_header;
+
+	/// storage type for samples sorted by eip
+	typedef std::map<odb_key_t, odb_value_t> ordered_samples_t;
 
 	/**
 	 * Samples are stored in hash table, iterating over hash table don't
