@@ -100,6 +100,9 @@ void db_open(db_tree_t * tree, const char * filename, size_t sizeof_header);
  */
 void db_close(db_tree_t * tree);
 
+/** issue a msync on the used size of the mmaped file */
+void db_sync(db_tree_t * tree);
+
 /** add a page returning its index. Take care all page pointer can be
  * invalidated by this call ! */
 db_page_idx_t db_add_page(db_tree_t * tree);

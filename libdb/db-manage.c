@@ -118,6 +118,7 @@ void db_open(db_tree_t * tree, const char * filename, size_t sizeof_header)
 			fprintf(stderr, "unable to resize file %s to %d "
 				"length, cause : %s\n",
 				filename, file_size, strerror(errno));
+			exit(EXIT_FAILURE);
 		}
 	} else {
 		nr_page = (stat_buf.st_size - tree->offset_page) / sizeof(db_page_t);
@@ -153,7 +154,7 @@ void db_open(db_tree_t * tree, const char * filename, size_t sizeof_header)
 
 void db_close(db_tree_t * tree)
 {
-	if (tree->page_base)
+	if (tree->base_memory)
 		munmap(tree->base_memory,
 		  (tree->descr->size * sizeof(db_page_t)) + tree->offset_page);
 
@@ -161,3 +162,12 @@ void db_close(db_tree_t * tree)
 		close(tree->fd);
 }
 
+void db_sync(db_tree_t * tree)
+{
+	if (tree->base_memory) {
+		msync(tree->base_memory,
+		      tree->offset_page +
+			   (tree->descr->current_size * sizeof(db_page_t)),
+		      MS_ASYNC);
+	}
+}
