@@ -40,7 +40,6 @@ char * opd_mangle_filename(struct opd_image const * image, int counter,
 			   int create, int cg)
 {
 	char * mangled;
-	struct mangle_values values;
 	char const * dep_name = separate_lib_samples ? image->app_name : NULL;
 	struct op_event * event = NULL;
 	struct mangle_values values;
@@ -160,7 +159,8 @@ void opd_handle_old_sample_files(struct opd_image const * image)
 }
 
 
-/* opd_open_sample_file - open an image sample file
+/*
+ * opd_open_sample_file - open an image sample file
  * @param image  image to open file for
  * @param counter  counter number
  *

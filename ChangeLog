@@ -1,5 +1,9 @@
 2003-07-19  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* daemon/opd_sample_files.c: compile fix from last merge + minor merge
+
+2003-07-19  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* gui/oprof_start.cpp:
 	* libpp/format_output.cpp:
 	* libpp/format_output.h:
