@@ -507,7 +507,7 @@ pid_t opd_read_lock_file(const char * file)
 	if (fp == NULL)
 		return 0;
  
-	if (fscanf(fp, "%u", &value) != 1) {
+	if (fscanf(fp, "%d", &value) != 1) {
 	        fclose(fp);
 		return 0;
         }
