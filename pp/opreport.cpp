@@ -28,11 +28,11 @@ struct files_count {
 };
 
 struct compare_files_count {
-	bool operator()(files_count const & lhs, files_count const & rhs);
+	bool operator()(files_count const & lhs, files_count const & rhs) const;
 };
 
 bool compare_files_count::operator()(files_count const & lhs,
-				     files_count const & rhs)
+				     files_count const & rhs) const
 {
 	return options::reverse_sort 
 		? lhs.count < rhs.count
