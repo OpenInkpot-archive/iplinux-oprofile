@@ -14,13 +14,6 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
 
  o we show a header but not column headers for image report
  o write the man page and xml doc (i'll do this right at the end - john)
- o We don't use abfd.have_debug_info() any more, gives crap reports:
-[moz@lambent oprofile-pp]$ pp/opreport -l /usr/bin/which
-Cpu type: PIII
-Cpu speed was (MHz estimation) : 863.192
-Counted CPU_CLK_UNHALTED events (clocks processor is not halted) with a unit mask of 0x00 (No unit mask) count 50000
-vma      samples  %           symbol name             app name
-08048870 1        100         _init                   /usr/bin/which
 
  o --debug-info is really slow
  o test opannotate -s -a on an application containing relative path debug
@@ -33,16 +26,12 @@ vma      samples  %           symbol name             app name
  o at least add some FIXME in dae/daemon (see opd_mangle_file(),
   op_mangle_file() and caller)
  o inhibit build of opdiff in pp/Makefile.am
- o consider to do the symbol (details too ?) sort at output, format_output receive
-  a vector of symbol to consider, we can perhaps sort in format_output
-     -- this would seem a more logical thing to do yes. what advantages will it give us?
  o disallow --accumulated without -l
  o opreport unhandled option (probably not exhaustive) 
   --global-percent is not handled according to pp_interface
  o pp/opreport --exclude-dependent --merge lib /lib/i686/libc-2.3.2.so doesn't do anything when using
    separate, you need to remove --exclude-dependent ... makes sense ???
 
- o --sort not handled properly (long filenames used, un-demangled symbol)
  o merging vmlinux as dependent library and as primary image
    $ pp/opreport --merge=lib | more
    194561  40.1204 /boot/2.5.66/vmlinux
