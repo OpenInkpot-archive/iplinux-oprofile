@@ -14,7 +14,6 @@ for some pointers and/or read HACKING and doc/CodingStyle.
 0.7 release
 -----------
 
- o opcontrol should take "--blah foo" too
  o side-by-side opreport output (--compare - needs UI spec)
  o thread profiling
  o per-cpu profiling
@@ -48,7 +47,10 @@ Before 1.0 little stuff
  o implement pp_interface alias
   --separate==none. Must we take care ?
  o look if we must remove help_str support from libopt++
+<<<<<<< TODO
  o just running "opcontrol" does nothing, should error
+=======
+>>>>>>> 1.224
  o option xxx and negated option --no-xxx: we can hide them in --help and
   mention in the xxx option help string than the --no-xxx is allowed. Not
   really usefull if we have a little number of --no.
