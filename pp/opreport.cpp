@@ -251,8 +251,11 @@ void output_symbols_count(partition_files const & files)
 		}
 	}
 
+	// FIXME: it's a weird API that requires a string() as first
+	// arg here ...
 	vector<symbol_entry const *> symbols =
-		samples.select_symbols(string(), options::threshold / 100.0, false);
+		samples.select_symbols(string(),
+			options::threshold / 100.0, false);
 
 	bool need_vma64 = vma64_p(symbols.begin(), symbols.end());
 
@@ -267,7 +270,12 @@ void output_symbols_count(partition_files const & files)
 
 	// FIXME: we probably don't want to show application name if
 	// we report samples about only one application
-	outsymbflag flags = outsymbflag(osf_vma | osf_nr_samples | osf_percent | osf_symb_name | osf_app_name);
+	outsymbflag flags = outsymbflag(osf_vma | osf_nr_samples | osf_percent);
+	flags = outsymbflag(flags | osf_symb_name | osf_app_name);
+	if (options::accumulated) {
+		flags = outsymbflag(flags | osf_nr_samples_cumulated);
+		flags = outsymbflag(flags | osf_percent_cumulated);
+	}
 
 	if (options::include_dependent && !options::merge_by.merge_lib)
 		flags = outsymbflag(flags | osf_image_name);

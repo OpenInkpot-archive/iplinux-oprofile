@@ -1,3 +1,9 @@
+2003-05-08  John Levon  <levon@movementarian.org>
+
+	* opreport_options.h: add accumulated
+
+	* opreport.cpp: handle --accumulated
+
 2003-05-08  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libpp/symbol_container.cpp: minor tidy

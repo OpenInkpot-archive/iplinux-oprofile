@@ -37,6 +37,7 @@ namespace options {
 	extern string_filter symbol_filter;
 	extern double threshold;
 	extern bool show_header;
+	extern bool accumulated;
 }
 
 /**

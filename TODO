@@ -12,6 +12,8 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
 
    - race with opcontrol --shutdown on odb_open() ?
 
+ o default to opreport -n as discussed
+ o we show a header but not column headers for image report
  o write the man page and xml doc
  o test opannotate -s -a on an application containing relative path debug
   info and profiled in another directory than the application build once.
@@ -32,17 +34,28 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
  o inhibit build of opdiff in pp/Makefile.am
  o consider to do the symbol (details too ?) sort at output, format_output receive
   a vector of symbol to consider, we can perhaps sort in format_output
+ o cumulative headers do not line up properly
+ o disallow --accumulated without -l
  o opreport unhandled option (probably not exhaustive) 
   --global-percent is not handled according to pp_interface
-  --accumulated
   --sort= (?)
   --output-file filename
  o pp/opreport --merge lib /lib/i686/libc-2.3.2.so doesn't do anything when using
    separate
+ o pp/opreport --merge=lib. This should give a list of all the binaries shown separately,
+   including the libs, e.g.
+
+   44 45% /bin/bash
+   54 45% /lib/libc.so
+
+   it doesn't work ...
+
  o opreport /usr/bin/whatever should imply -l (like oprofpp back-compat) but
   NOT if opreport <some spec> and it just *happens* to match one image. The
   same idea can be applied to remove the app_name field in output since it's
-  annoying to get a report with the same application showed on each line
+  annoying to get a report with the same application showed on each line.
+	- difficult one: with -n (to be the default), it's actually useful information.
+	  what to do ?
 
  o merging vmlinux as dependent library and as primary image
    $ pp/opreport --merge=lib -n | more
@@ -56,6 +69,10 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
   must be rewritten or we must fix it in dae. It make sense to fix it in dae by
   encoding primary image as {root}/usr/bin/make/{dep}/{root}/usr/bin/make. If
   we fix it in this way I defer the fix after daemon rewrite
+
+   - this fix is fine for me (probably better for call stacks anyway) but I'd
+     prefer it to be done *before* any long-drawn daemon rewrite. A daemon rewrite
+     should be an equivalent transformation IMHO otherwise we will have problems...
 
  o in some case (--separate=library and not using --merge=lib) we get multiple
   time error message "last modified time ... does not match ..."
@@ -71,6 +88,7 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
    It would be nice to allow at least the first alternate form.
 
  o fix John movement on 2.5: odb_insert failure (and message error corrupted ?)
+   - haven't been able to reproduce yet, I just get too many files open instead ;)
 
 After merging with trunk
 ------------------------
