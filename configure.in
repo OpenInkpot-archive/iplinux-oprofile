@@ -150,7 +150,7 @@ if test "$OPROFILE_25" = "no"; then
 	fi
 
 	test "$arch" = "unknown" && AC_MSG_ERROR(Unsupported architecture)
-	rm -f module/arch && ln -s "$arch" module/arch
+	(cd ${srcdir}/module/ && rm -f arch/ && ln -s $arch arch)
 	ARCH_MAKEFILE=module/arch/Makefile
 
 	dnl check to see if kernel verion appropriate for arch
