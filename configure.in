@@ -153,7 +153,6 @@ AC_OUTPUT(Makefile \
 	libutil/Makefile \
 	libutil++/Makefile \
 	libop/Makefile \
-	libop++/Makefile \
 	libopt++/Makefile \
 	libdb/Makefile \
 	libabi/Makefile \

@@ -23,7 +23,6 @@
 #include "partition_files.h"
 #include "profile_container.h"
 #include "symbol_sort.h"
-#include "demangle_symbol.h"
 #include "format_output.h"
 
 using namespace std;
@@ -327,26 +326,14 @@ void output_symbols(profile_container const & samples)
 	profile_container::symbol_choice choice;
 	choice.threshold = options::threshold;
 	symbol_collection symbols = samples.select_symbols(choice);
-
-	symbol_collection::iterator it = symbols.begin();
-	symbol_collection::iterator end = symbols.end();
-	for (; it != end; ++it) {
-		if (!options::long_filenames) {
-			it->app_name = basename(it->app_name);
-			it->image_name = basename(it->image_name);
-			it->sample.file_loc.filename =
-				basename(it->sample.file_loc.filename);
-		}
-		it->name = demangle_symbol(it->name);
-		// FIXME: do details details
-	}
-
 	options::sort_by.sort_by(symbols, options::reverse_sort);
 
 	format_output::formatter out(samples);
 
 	if (options::details)
 		out.show_details();
+	if (options::long_filenames)
+		out.show_long_filenames();
 	if (!options::show_header)
 		out.hide_header();
 	if (choice.hints & cf_64bit_vma)

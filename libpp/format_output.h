@@ -43,6 +43,8 @@ public:
 	void show_details();
 	/// set the need_header boolean to false
 	void hide_header();
+	/// show long (full path) filenames
+	void show_long_filenames();
 	/// format for 64 bit wide VMAs
 	void vma_format_64bit();
 
@@ -95,14 +97,14 @@ private:
  
 	/** output one symbol symb to out according to the output format
 	 * specifier previously set by call(s) to add_format() */
-	void output(std::ostream & out, symbol_entry const & symb);
+	void output(std::ostream & out, symbol_entry const * symb);
 
 	/// actually do output
 	void do_output(std::ostream & out, symbol_entry const & symbol,
 		      sample_entry const & sample, bool hide_immutable_field);
  
 	/// output details for the symbol
-	void output_details(std::ostream & out, symbol_entry const & symb);
+	void output_details(std::ostream & out, symbol_entry const * symb);
  
 	/// output table header
 	void output_header(std::ostream & out);
@@ -141,6 +143,8 @@ private:
 	bool need_details;
 	/// true if we need to show header before the before the first output
 	bool need_header;
+	/// false if we use basename(filename) in output rather filename
+	bool long_filenames;
 };
 
 }; // namespace format_output 

@@ -295,20 +295,17 @@ symbol_entry const * output_objdump_asm_line(symbol_entry const * last_symbol,
 	}
 
 	if (is_symbol_line(str, pos)) {
-		do_output = false;
-
 		last_symbol = find_symbol(app_name, str);
 
-		symbol_collection::const_iterator cit = symbols.begin();
-		symbol_collection::const_iterator end = symbols.end();
 		// ! complexity: linear in number of symbol must use sorted
 		// by address vector and lower_bound ?
-		// FIXME: dubious pointer comparisons: symbol pointers
-		// are unique
-
-		for (; cit != end; ++cit) {
-			if (&*cit == last_symbol)
-				do_output = true;
+		// Note this use a pointer comparison. It work because symbols
+		// pointer are unique
+		if (find(symbols.begin(), symbols.end(), last_symbol)
+			!= symbols.end()) {
+			do_output = true;
+		} else {
+			do_output = false;
 		}
 
 		if (do_output)
@@ -404,8 +401,8 @@ void output_objdump_asm(symbol_collection const & symbols,
 		symbol_collection::const_iterator cit = symbols.begin();
 		symbol_collection::const_iterator end = symbols.end();
 		for (; cit != end; ++cit) {
-			bfd_vma start = cit->sample.vma;
-			bfd_vma end  = start + cit->size;
+			bfd_vma start = (*cit)->sample.vma;
+			bfd_vma end  = start + (*cit)->size;
 			do_one_output_objdump(symbols, app_name, start, end);
 		}
 	} else {
