@@ -1,5 +1,7 @@
 2003-05-19  John Levon  <levon@movementarian.org>
 
+	* libutil++/comma_list.h:
+	* libpp/filename_spec.cpp:
 	* libutil++/string_manip.h:
 	* libutil++/generic_spec.h: rename strict_convert<>
 	to lexical_cast_no_ws<>

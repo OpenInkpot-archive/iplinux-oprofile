@@ -62,8 +62,8 @@ void filename_spec::set_sample_filename(string const & filename)
 	image = split.image;
 	lib_image = split.lib_image;
 	event = split.event;
-	count = strict_convert<int>(split.count);
-	unitmask = strict_convert<unsigned int>(split.unitmask);
+	count = lexical_cast_no_ws<int>(split.count);
+	unitmask = lexical_cast_no_ws<unsigned int>(split.unitmask);
 	tgid.set(split.tgid);
 	tid.set(split.tid);
 	cpu.set(split.cpu);
