@@ -383,7 +383,7 @@ struct transient {
 	cookie_t cookie;
 	cookie_t app_cookie;
 	struct opd_image * image;
-	cookie_t last_cookie;
+	struct opd_image * last_image;
 	vma_t last_offset;
 	int in_kernel;
 	enum tracing_type tracing;
@@ -434,8 +434,11 @@ static int enough_remaining(struct transient * trans, size_t size)
 
 static void opd_put_arc(struct transient * trans, vma_t eip)
 {
-	struct opd_image * last_image =
-		opd_get_image(trans->last_cookie, trans->app_cookie);
+	vma_t from_pc = trans->last_offset;
+	vma_t to_pc = eip;
+	struct opd_image * from_image;
+	struct opd_image * to_image;
+
 
 	if (trans->in_kernel > 0) {
 		struct opd_image * app_image = 0;
@@ -443,14 +446,24 @@ static void opd_put_arc(struct transient * trans, vma_t eip)
 		/* We can get a NULL image if it's a kernel thread */
 		if (separate_kernel_samples && trans->image)
 			app_image = trans->image->app_image;
-		opd_put_kernel_arc(trans->last_offset, eip,
-		                   trans->event, app_image);
+
+		from_image = opd_find_kernel_image(&from_pc, app_image);
+		to_image = opd_find_kernel_image(&to_pc, app_image);
 	} else {
-		verbprintf("ARC: 0x%llx (%s) -> 0x%llx (%s)\n",
-			trans->last_offset, last_image->name,
-			eip, trans->image ? trans->image->name : "kernel");
+		from_image = trans->last_image;
+		to_image = trans->image;
 	}
 
+	if (!from_image || !to_image) {
+		verbprintf("opd_put_arc() nil image, sample lost\n");
+		opd_stats[OPD_NIL_IMAGE]++;
+		return;
+	}
+
+	verbprintf("ARC: 0x%llx (%s) -> 0x%llx (%s)\n",
+		from_pc, from_image->name, to_pc, to_image->name);
+
+	trans->last_image = to_image;
 	trans->last_offset = eip;
 }
 
@@ -482,13 +495,11 @@ static void opd_put_sample(struct transient * trans, vma_t eip)
 	/* if we have an arc, handle it specially */
 	if (trans->tracing == TRACING_ON) {
 		opd_put_arc(trans, eip);
-		trans->last_cookie = trans->cookie;
 		return;
 	}
 
 	/* we want to log the first sample as a normal one */
 	if (trans->tracing == TRACING_START) {
-		trans->last_cookie = trans->cookie;
 		trans->last_offset = eip;
 		trans->tracing = TRACING_ON;
 	}
@@ -497,22 +508,31 @@ static void opd_put_sample(struct transient * trans, vma_t eip)
 
 	if (trans->in_kernel > 0) {
 		struct opd_image * app_image = 0;
+		struct opd_image * kernel_image;
 
 		/* We can get a NULL image if it's a kernel thread */
 		if (separate_kernel_samples && trans->image)
 			app_image = trans->image->app_image;
-		verbprintf("Putting kernel sample 0x%llx, counter %lu - application %s\n",
-			eip, trans->event, app_image ? app_image->name : "kernel");
-		opd_handle_kernel_sample(eip, trans->event, app_image);
+
+		/* This fixes up eip into an offset too */
+		kernel_image = opd_find_kernel_image(&eip, app_image);
+
+		if (kernel_image) {
+			verbprintf("Putting kernel sample 0x%llx - application %s\n",
+				eip, app_image ? app_image->name : "kernel");
+			opd_put_image_sample(kernel_image, eip, trans->event);
+		}
+		trans->last_image = kernel_image;
 		return;
 	}
 
 	/* It's a user-space sample ... */
 
-	if (trans->image != NULL) {
+	if (trans->image) {
 		verbprintf("Putting image sample (%s) offset 0x%llx, counter %lu\n",
 			trans->image->name, eip, trans->event);
 		opd_put_image_sample(trans->image, eip, trans->event);
+		trans->last_image = trans->image;
 		return;
 	}
 
@@ -583,9 +603,7 @@ static void code_cookie_switch(struct transient * trans)
 		return;
 	}
 
-	trans->last_cookie = trans->cookie;
 	trans->cookie = pop_buffer_value(trans);
-
 	trans->image = opd_get_image(trans->cookie, trans->app_cookie);
 
 	verbprintf("COOKIE_SWITCH to cookie %llx (%s)\n",
@@ -651,9 +669,9 @@ void opd_process_samples(char const * buffer, size_t count)
 		.remaining = count,
 		.cookie = 0,
 		.app_cookie = 0,
-		.last_cookie = 0,
 		.last_offset = 0,
 		.image = NULL,
+		.last_image = NULL,
 		.in_kernel = -1,
 		.tracing = TRACING_OFF,
 		.event = 0,
