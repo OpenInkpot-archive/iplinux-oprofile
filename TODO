@@ -12,6 +12,9 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
 
    - race with opcontrol --shutdown on odb_open() ?
 
+ o test opannotate -s -a on an application containing relative path debug
+  info and profiled in another directory than the application build once.
+  can objdump retrieve the source file and if no can we work-around ?
  o "no samples files found". Make that check if there were some, but they
    didn't match, and if so, give a different message w/o mentioning --dump
  o move oprofiled.log to OP_SAMPLE_DIR/current ?

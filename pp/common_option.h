@@ -12,21 +12,26 @@
 #ifndef COMMON_OPTION_H
 #define COMMON_OPTION_H
 
+#include "derive_files.h"
+
 namespace options {
-	extern bool demangle;
-	extern bool smart_demangle;
 	extern bool verbose;
+	extern alt_filename_t alternate_filename;
 };
 
-typedef int (*pp_fct_run_t)(int argc, char const * argv[]);
+/**
+ * prototype of a pp tool entry point. This entry point is called
+ * by run_pp_tool
+ */
+typedef int (*pp_fct_run_t)(std::vector<std::string> const & non_options);
 
 /**
  * @param argc  command line number of argument
  * @param argv  command line argument pointer array
- * @param fct  functon to run to start this pp tool
+ * @param fct  function to run to start this pp tool
  *
- * Provide a common entry to all pp tools, adding default options and
- * providing the necessary try catch clause
+ * Provide a common entry to all pp tools, parsing all options, handling
+ * common options and providing the necessary try catch clause
  */
 int run_pp_tool(int argc, char const * argv[], pp_fct_run_t fct);
 

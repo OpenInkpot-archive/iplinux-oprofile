@@ -17,9 +17,9 @@ using namespace std;
 
 namespace {
 
-int opannotate(int argc, char const * argv[])
+int opannotate(vector<string> const & non_options)
 {
-	get_options(argc, argv);
+	handle_options(non_options);
 
 	cerr << "N/A\n";
 	return 0;

@@ -36,7 +36,6 @@ namespace options {
 	extern bool short_filename;
 	extern string_filter symbol_filter;
 	extern double threshold;
-	extern alt_filename_t alternate_filename;
 	extern bool show_header;
 }
 
@@ -48,11 +47,10 @@ extern scoped_ptr<partition_files> sample_file_partition;
 
 /**
  * get_options - process command line
- * @param argc program arg count
- * @param argv program arg array
+ * @param non_options vector of non options string
  *
  * Process the arguments, fatally complaining on error.
  */
-void get_options(int argc, char const * argv[]);
+void handle_options(std::vector<std::string> const & non_options);
 
 #endif // OPREPORT_OPTIONS_H

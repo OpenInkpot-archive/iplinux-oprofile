@@ -47,7 +47,6 @@ namespace options {
 	bool accumulated;
 	bool reverse_sort;
 	bool global_percent;
-	alt_filename_t alternate_filename;
 }
 
 
@@ -58,7 +57,6 @@ vector<string> merge;
 vector<string> sort_by;
 vector<string> exclude_symbols;
 vector<string> include_symbols;
-vector<string> image_path;
 
 popt::option options_array[] = {
 	popt::option(options::demangle, "demangle", 'd',
@@ -87,8 +85,6 @@ popt::option options_array[] = {
 		     "exclude these comma separated symbols", "symbols"),
 	popt::option(include_symbols, "include-symbols", 'i',
 		     "include these comma separated symbols", "symbols"),
-	popt::option(image_path, "image-path", 'p',
-		     "comma separated path to search missing binaries","path"),
 	popt::option(merge, "merge", 'm',
 		     "comma separated list", "cpu,pid,lib"),
 	popt::option(options::show_header, "no-header", '\0',
@@ -186,15 +182,9 @@ void handle_merge_option()
 }  // anonymous namespace
 
 
-void get_options(int argc, char const * argv[])
+void handle_options(vector<string> const & non_options)
 {
 	using namespace options;
-
-	vector<string> non_option_args;
-
-	popt::parse_options(argc, argv, non_option_args);
-
-	set_verbose(verbose);
 
 	if (options::details)
 		options::symbols = true;
@@ -205,11 +195,9 @@ void get_options(int argc, char const * argv[])
 
 	handle_merge_option();
 
-	add_to_alternate_filename(alternate_filename, image_path);
-
 	options::symbol_filter = string_filter(include_symbols, exclude_symbols);
 
-	parse_cmdline parser = handle_non_options(non_option_args);
+	parse_cmdline parser = handle_non_options(non_options);
 
 	list<string> sample_files =
 		select_sample_filename(parser, options::include_dependent);

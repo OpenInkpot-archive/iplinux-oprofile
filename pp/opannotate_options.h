@@ -21,12 +21,11 @@ namespace options {
 }
 
 /**
- * get_options - process command line
- * @param argc program arg count
- * @param argv program arg array
+ * handle_options - process command line
+ * @param non_options vector of non options string
  *
  * Process the arguments, fatally complaining on error.
  */
-void get_options(int argc, char const * argv[]);
+void handle_options(std::vector<std::string> const & non_options);
 
 #endif // OPANNOTATE_OPTIONS_H

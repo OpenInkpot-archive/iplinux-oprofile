@@ -20,7 +20,6 @@
 class partition_files;
 
 namespace options {
-	extern alt_filename_t alternate_filename;
 	extern std::string gmon_filename;
 }
 
@@ -31,12 +30,11 @@ namespace options {
 extern scoped_ptr<partition_files> sample_file_partition;
 
 /**
- * get_options - process command line
- * @param argc program arg count
- * @param argv program arg array
+ * handle_options - process command line
+ * @param non_options vector of non options string
  *
  * Process the arguments, fatally complaining on error.
  */
-void get_options(int argc, char const * argv[]);
+void handle_options(std::vector<std::string> const & non_options);
 
 #endif // OPGPROF_OPTIONS_H

@@ -206,9 +206,9 @@ string load_samples(partition_files const & files, profile_container & samples)
 }
 
 
-int opgprof(int argc, char const * argv[])
+int opgprof(vector<string> const & non_options)
 {
-	get_options(argc, argv);
+	handle_options(non_options);
 
 	profile_container samples(false, osf_vma, true);
 

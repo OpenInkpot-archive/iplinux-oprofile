@@ -16,9 +16,9 @@
 using namespace std;
 
 
-int opdiff(int argc, char const * argv[])
+int opdiff(vector<string> const & non_options)
 {
-	get_options(argc, argv);
+	handle_options(non_options);
 
 	cerr << "N/A\n";
 	return 0;

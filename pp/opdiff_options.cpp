@@ -25,7 +25,7 @@ namespace {
 }  // anonymous namespace
 
 
-void get_options(int /*argc*/, char const * /*argv*/[])
+void handle_options(vector<string> const & /*non_options*/)
 {
 	using namespace options;
 }

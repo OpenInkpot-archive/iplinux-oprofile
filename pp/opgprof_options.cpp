@@ -24,20 +24,16 @@ scoped_ptr<partition_files> sample_file_partition;
 
 namespace options {
 	string gmon_filename = "gmon.out";
-	alt_filename_t alternate_filename;
 }
 
 
 namespace {
 
-vector<string> image_path;
 
 popt::option options_array[] = {
 	popt::option(options::gmon_filename, "output-filename", 'o',
 		     "output filename, defaults to gmon.out if not specified",
 		     "filename"),
-	popt::option(image_path, "image-path", 'p',
-		     "comma-separated path to search missing binaries","path"),
 };
 
 
@@ -100,21 +96,11 @@ bool try_partition_file(parse_cmdline const & parser,  bool include_dependent)
 }  // anonymous namespace
 
 
-void get_options(int argc, char const * argv[])
+void handle_options(vector<string> const & non_options)
 {
-	using namespace options;
-
-	vector<string> non_option_args;
-
-	popt::parse_options(argc, argv, non_option_args);
-
-	set_verbose(verbose);
-
 	cverb << "output filename: " << options::gmon_filename << endl;
 
-	add_to_alternate_filename(alternate_filename, image_path);
-
-	parse_cmdline parser = handle_non_options(non_option_args);
+	parse_cmdline parser = handle_non_options(non_options);
 
 	// we do a first try w/o include-dependent if it fails we include
 	// dependent. First try should catch "opgrof /usr/bin/make" whilst

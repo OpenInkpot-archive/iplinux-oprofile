@@ -250,9 +250,9 @@ void output_symbols_count(partition_files const & files)
 }
 
 
-int opreport(int argc, char const * argv[])
+int opreport(vector<string> const & non_options)
 {
-	get_options(argc, argv);
+	handle_options(non_options);
 
 	if (options::symbols) {
 		output_symbols_count(*sample_file_partition);

@@ -12,44 +12,65 @@
 
 #include "op_exception.h"
 #include "popt_options.h"
-
+#include "cverb.h"
 #include "common_option.h"
 
 using namespace std;
 
 namespace options {
 	bool verbose;
+	alt_filename_t alternate_filename;
 }
 
 namespace {
+
+vector<string> image_path;
+
 popt::option options_array[] = {
 	popt::option(options::verbose, "verbose", 'V',
 		     "verbose output"),
+	popt::option(image_path, "image-path", 'p',
+		     "comma-separated path to search missing binaries","path"),
 };
+
+vector<string> get_options(int argc, char const * argv[])
+{
+	vector<string> non_options;
+	popt::parse_options(argc, argv, non_options);
+
+	set_verbose(options::verbose);
+
+	add_to_alternate_filename(options::alternate_filename, image_path);
+
+	return non_options;
+}
+
 }
 
 int run_pp_tool(int argc, char const * argv[], pp_fct_run_t fct)
 {
 	try {
-		return fct(argc, argv);
+		vector<string> non_options = get_options(argc, argv);
+
+		return fct(non_options);
 	}
 	catch (op_runtime_error const & e) {
-		cerr << "op_runtime_error:\n" << e.what();
+		cerr << argv[0] << " op_runtime_error:\n" << e.what();
 	}
 	catch (op_fatal_error const & e) {
-		cerr << "op_fatal_error:\n" << e.what();
+		cerr << argv[0] << " op_fatal_error:\n" << e.what();
 	}
 	catch (op_exception const & e) {
-		cerr << "op_exception:\n" << e.what();
+		cerr << argv[0] << " op_exception:\n" << e.what();
 	}
 	catch (invalid_argument const & e) {
-		cerr << "invalid_argument:\n" << e.what();
+		cerr << argv[0] << " invalid_argument:\n" << e.what();
 	}
 	catch (exception const & e) {
-		cerr << "exception:\n" << e.what() << endl;
+		cerr << argv[0] << " exception:\n" << e.what() << endl;
 	}
 	catch (...) {
-		cerr << "unknown exception" << endl;
+		cerr << argv[0] << " unknown exception" << endl;
 	}
 
 	return EXIT_FAILURE;
