@@ -1,5 +1,10 @@
 2003-05-19  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* libregx/mangled-name.txt: partial handling of _Identity<> and
+	  _Select1st<>, pattern fail if type are too complex
+
+2003-05-19  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libpp/format_output.cpp: small cleanup
 
 	* libpp/name_storage.h:
