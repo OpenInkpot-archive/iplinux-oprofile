@@ -63,7 +63,7 @@ AC_SUBST(GCC_2_91)
 AC_TRY_COMPILE( 
   [],
   [
-  #if __GNUC__ == 2 || __GNUC_MINOR__ == 91
+  #if __GNUC__ == 2 && __GNUC_MINOR__ == 91
   break_me_hard(\\\);
   #endif
   ], AC_MSG_RESULT("no"); GCC_2_91=no, AC_MSG_RESULT("yes"); GCC_2_91=yes)
