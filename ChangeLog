@@ -1,3 +1,96 @@
+2003-07-19  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* gui/oprof_start.cpp:
+	* libpp/format_output.cpp:
+	* libpp/format_output.h:
+	* pp/opannotate.cpp:
+	* pp/opreport_options.cpp: minor tidy
+
+2003-07-19  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* gui/oprof_start.cpp: RTC mode was not working
+
+2003-07-16  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* gui/oprof_start_config.h:
+	* gui/oprof_start_config.cpp: remove dead code, fix kernel_only read
+
+2003-07-16  John Levon  <levon@movementarian.org>
+
+	* utils/opcontrol: fix typo that was partly breaking
+	CPU_TIMER_INT
+
+2003-07-16  John Levon  <levon@movementarian.org>
+
+	* gui/oprof_start.h:
+	* gui/oprof_start.cpp: fixes for CPU_TIMER_INT
+
+2003-07-16  John Levon  <levon@movementarian.org>
+
+	* gui/ui/oprof_start.base.ui: remove add/remove event buttons,
+	fix resize weirdness
+
+	* gui/oprof_start.h:
+	* gui/oprof_start.cpp: remove add/remove event buttons, allow
+	short-form event descriptions
+
+2003-07-15  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* gui/persistent_config.h: remove
+	* gui/oprof_start.h:
+	* gui/oprof_start.cpp: debug, remove dead code, works better now, see
+	  TODO
+
+2003-07-15  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* gui/oprof_start.h:
+	* gui/oprof_start.cpp:
+	* gui/oprof_start_util.cpp: re-enable partially the gui, sorta of
+	  working if cautioulsy used
+
+2003-07-15  John Levon  <levon@movementarian.org>
+
+	* gui/ui/oprof_start_base.ui:
+	* gui/oprof_start.h:
+	* gui/oprof_start.cpp: some steps towards fixing gui for
+	the new events stuff
+
+2003-07-15  John Levon  <levon@movementarian.org>
+
+	* libop/op_events.h:
+	* libop/op_events.c: add op_default_event
+
+	* utils/op_help.c: move default event stuff to libop,
+	fix -c option
+
+2003-07-15  John Levon  <levon@movementarian.org>
+
+	* utils/op_help.c: fix default RTC event to be
+	"RTC_INTERRUPTS"
+
+2003-07-15  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* utils/opcontrol
+	* events/rtc..events: use RTC_INTERRUPTS as event name
+
+2003-07-15  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* daemon/opd_sample_files.c: C89 compile fix
+
+2003-07-15  John Levon  <levon@movementarian.org>
+
+	* utils/opcontrol:
+	* utils/op_help.c: move the default event strings into
+	op_help.c instead of in opcontrol
+
+2003-07-15  John Levon  <levon@movementarian.org>
+
+	* doc/oprofile.xml: document event name for timer interrupt
+
+	* daemon/opd_sample_files.c: handle CPU_TIMER_INT
+
+	* utils/op_help.c: fix a core dump
+
 2003-07-13  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* daemon/opd_image.c: verbprintf() when starting reading buffer not
@@ -5,14 +98,23 @@
 
 2003-07-12  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* from BRANCH_CALLGRAPH:
 	* daemon/opd_image.c: printf -> verbprintf, fix comment
 	* daemon/opd_kernel.c: kernel/module samples statistics was wrong
+
+	* daemon/opd_image.c:
+	* daemon/opd_image.h:
+	* daemon/opd_kernel.c:
+	* daemon/opd_kernel.h: import cleanup from branch, mainly don't handle
+	  samples in opd_kernel.c but return (creating if neccessary) an
+	  opd_image struct where the sample must go and let opd_image caller
+	  in opd_image.c do sample insertion
 
 2003-07-11  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* utils/opcontrol: shows basename $0 with --version
 	* libpp/op_header.cpp: formating
-
+	
 2003-07-11  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* utils/opcontrol: don't try to save current if the directory doesn't
@@ -43,6 +145,16 @@
 2003-07-08  Will Cohen  <wcohen@redhat.com>
 
 	* utils/opcontrol: Correct P4 default event.
+
+2003-06-03  John Levon  <levon@movementarian.org>
+
+	* from BRANCH_CALLGRAPH
+	* libdb/odb_hash.h:
+	* libdb/db_manage.c:
+	* libdb/db_insert.c: namespace safety
+
+	* libpp/partition_files.cpp:
+	* libpp/profile.cpp: spacing, add a FIXME
 
 2003-07-07  Philippe Elie  <phil.el@wanadoo.fr>
 
@@ -383,12 +495,6 @@
 	* libop/op_config_24.h: ... here
 
 	* libop/op_hw_config.h: remove unused OP_COUNT_MAX
-
-2003-06-03  John Levon  <levon@movementarian.org>
-
-	* libdb/odb_hash.h:
-	* libdb/db_manage.c:
-	* libdb/db_insert.c: namespace safety
 
 2003-06-03  Philippe Elie  <phil.el@wanadoo.fr>
 

@@ -32,6 +32,7 @@
 #include <qvalidator.h>
 #include <qlabel.h>
 #include <qpushbutton.h>
+#include <qheader.h>
 
 #include "config.h"
 #include "oprof_start.h"
@@ -51,19 +52,16 @@ op_event_descr::op_event_descr()
 {
 }
 
+
 oprof_start::oprof_start()
 	:
 	oprof_start_base(0, 0, false, 0),
 	event_count_validator(new QIntValidator(event_count_edit)),
-	current_ctr(0),
+	current_event(0),
+	current_events(OP_MAX_COUNTERS),
 	cpu_speed(op_cpu_frequency()),
 	total_nr_interrupts(0)
 {
-	for (uint i = 0; i < OP_MAX_COUNTERS; ++i) {
-		current_event[i] = 0;
-		ctr_enabled[i] = 0;
-	}
-
 	vector<string> args;
 	args.push_back("--init");
 
@@ -74,15 +72,77 @@ oprof_start::oprof_start()
 	op_nr_counters = op_get_nr_counters(cpu_type);
 
 	if (cpu_type == CPU_RTC) {
-		current_ctr = 0;
-		enabled_toggled(1);
-		enabled->hide();
 		counter_combo->hide();
 		unit_mask_group->hide();
 	}
 
+	if (cpu_type == CPU_TIMER_INT) {
+		setup_config_tab->removePage(counter_setup_page);
+	} else {
+		fill_events();
+	}
+
+	bool is_25 = op_get_interface() == OP_INTERFACE_25;
+
+	if (is_25) {
+		pid_filter_label->hide();
+		pid_filter_edit->hide();
+		pgrp_filter_label->hide();
+		pgrp_filter_edit->hide();
+		note_table_size_edit->hide();
+		note_table_size_label->hide();
+		kernel_only_cb->hide();
+		// FIXME: can adapt to 2.5 ...
+		buffer_size_edit->hide();
+		buffer_size_label->hide();
+	}
+
+	// setup the configuration page.
+	kernel_filename_edit->setText(config.kernel_filename.c_str());
+
+	no_vmlinux->setChecked(config.no_kernel);
+
+	buffer_size_edit->setText(QString().setNum(config.buffer_size));
+	note_table_size_edit->setText(QString().setNum(config.note_table_size));
+	if (config.pid_filter)
+		pid_filter_edit->setText(QString().setNum(config.pid_filter));
+	else
+		pid_filter_edit->setText("");
+	if (config.pgrp_filter)
+		pgrp_filter_edit->setText(QString().setNum(config.pgrp_filter));
+	else
+		pgrp_filter_edit->setText("");
+	verbose->setChecked(config.verbose);
+	kernel_only_cb->setChecked(config.kernel_only);
+	separate_lib_samples_cb->setChecked(config.separate_lib_samples);
+	separate_kernel_samples_cb->setChecked(config.separate_kernel_samples);
+
+	// the unit mask check boxes
+	hide_masks();
+
+	event_count_edit->setValidator(event_count_validator);
+	QIntValidator * iv;
+	iv = new QIntValidator(OP_MIN_BUF_SIZE, OP_MAX_BUF_SIZE, buffer_size_edit);
+	buffer_size_edit->setValidator(iv);
+	iv = new QIntValidator(OP_MIN_NOTE_TABLE_SIZE, OP_MAX_NOTE_TABLE_SIZE, note_table_size_edit);
+	note_table_size_edit->setValidator(iv);
+	iv = new QIntValidator(pid_filter_edit);
+	pid_filter_edit->setValidator(iv);
+	iv = new QIntValidator(pgrp_filter_edit);
+	pgrp_filter_edit->setValidator(iv);
+
+	// daemon status timer
+	startTimer(5000);
+	timerEvent(0);
+
+	resize(minimumSizeHint());
+}
+
+
+void oprof_start::fill_events()
+{
 	// we need to build the event descr stuff before loading the
-	// configuration because we use locate_events to get an event descr
+	// configuration because we use locate_event to get an event descr
 	// from its name.
 	struct list_head * pos;
 	struct list_head * events = op_events(cpu_type);
@@ -133,86 +193,25 @@ oprof_start::oprof_start()
 		v_events.push_back(descr);
 	}
 
-	load_config_file();
-
-	bool is_25 = op_get_interface() == OP_INTERFACE_25;
-
-	if (is_25) {
-		pid_filter_label->hide();
-		pid_filter_edit->hide();
-		pgrp_filter_label->hide();
-		pgrp_filter_edit->hide();
-		note_table_size_edit->hide();
-		note_table_size_label->hide();
-		kernel_only_cb->hide();
-		// FIXME: can adapt to 2.5 ...
-		buffer_size_edit->hide();
-		buffer_size_label->hide();
-	} else {
-		no_vmlinux->hide();
-	}
-
-	// setup the configuration page.
-	kernel_filename_edit->setText(config.kernel_filename.c_str());
-
-	no_vmlinux->setChecked(config.no_kernel);
-
-	buffer_size_edit->setText(QString().setNum(config.buffer_size));
-	note_table_size_edit->setText(QString().setNum(config.note_table_size));
-	if (config.pid_filter)
-		pid_filter_edit->setText(QString().setNum(config.pid_filter));
-	else
-		pid_filter_edit->setText("");
-	if (config.pgrp_filter)
-		pgrp_filter_edit->setText(QString().setNum(config.pgrp_filter));
-	else
-		pgrp_filter_edit->setText("");
-	verbose->setChecked(config.verbose);
-	kernel_only_cb->setChecked(config.kernel_only);
-	separate_lib_samples_cb->setChecked(config.separate_lib_samples);
-	separate_kernel_samples_cb->setChecked(config.separate_kernel_samples);
-
-	// the unit mask check boxes
-	hide_masks();
-
-	event_count_edit->setValidator(event_count_validator);
-	QIntValidator * iv;
-	iv = new QIntValidator(OP_MIN_BUF_SIZE, OP_MAX_BUF_SIZE, buffer_size_edit);
-	buffer_size_edit->setValidator(iv);
-	iv = new QIntValidator(OP_MIN_NOTE_TABLE_SIZE, OP_MAX_NOTE_TABLE_SIZE, note_table_size_edit);
-	note_table_size_edit->setValidator(iv);
-	iv = new QIntValidator(pid_filter_edit);
-	pid_filter_edit->setValidator(iv);
-	iv = new QIntValidator(pgrp_filter_edit);
-	pgrp_filter_edit->setValidator(iv);
-
+	events_list->header()->hide();
 	events_list->setSorting(-1);
-
-	for (uint ctr = 0 ; ctr < op_nr_counters ; ++ctr) {
-		load_event_config_file(ctr);
-	}
 
 	read_set_events();
 
-	// re-init event stuff
-	enabled_toggled(ctr_enabled[current_ctr]);
-	display_event(current_event[current_ctr]);
+	display_event(current_events[current_event]);
 
 	for (uint ctr = 0 ; ctr < op_nr_counters ; ++ctr) {
 		counter_combo->insertItem("");
 		set_counter_combo(ctr);
 	}
 
-	counter_selected(0);
+	counter_selected(current_event);
 
+	// FIXME: why this ?
 	if (cpu_type == CPU_RTC)
 		events_list->setCurrentItem(events_list->firstChild());
 
-	// daemon status timer
-	startTimer(5000);
-	timerEvent(0);
-
-	resize(minimumSizeHint());
+	load_config_file();
 }
 
 
@@ -226,55 +225,46 @@ void oprof_start::read_set_events()
 		return;
 
 	string str;
-	unsigned int ctr = 0;
-	string evname;
 
 	while (getline(in, str)) {
-		string val = split(str, '=');
-		if (str == "RTC_VALUE" && cpu_type == CPU_RTC) {
-			current_event[0] = &locate_event("RTC_INTERRUPTS");
-			event_cfgs[ctr]["RTC_INTERRUPTS"].count = touint(val);
-			return;
-		}
-		
-		if (!is_prefix(str, "CTR_"))
-	       		continue;
-	
-		// CTR_EVENT[0]
-		str = split(str, '_');
-		// EVENT[0]
-		string num = split(str, '[');
-		string const type = str;
-		// num == "0]", type == "EVENT"
+		string const val = split(str, '=');
+		string const name = str;
 
-		num = rtrim(num, "]");
-		ctr = touint(num);
-
-		if (type == "EVENT") {
-			evname = val;
-			ctr_enabled[ctr] = evname.length();
-			if (evname.length()) {
-				current_event[ctr] = &locate_event(evname);
-			} else {
-				current_event[ctr] = 0;
-			}
+		if (!is_prefix(name, "CHOSEN_EVENTS["))
 			continue;
 
+		// CHOSEN_EVENTS[0]=CPU_CLK_UNHALTED:10000:0:1:1
+		vector<string> parts;
+		separate_token(parts, val, ':');
+
+		if (parts.size() != 5 && parts.size() != 2) {
+			cerr << "invalid configuration file\n";
+			// FIXME
+			exit(EXIT_FAILURE);
 		}
 
-		if (!ctr_enabled[ctr])
-			continue;
+		/* fill in */
+		int ctr = touint(name.substr(strlen("CHOSEN_EVENTS[")));
 
-		if (type == "COUNT") {
-			event_cfgs[ctr][evname].count = touint(val);
-		} else if  (type == "KERNEL") {
-			event_cfgs[ctr][evname].os_ring_count = tobool(val);
-		} else if  (type == "USER") {
-			event_cfgs[ctr][evname].user_ring_count = tobool(val);
-		} else if (type == "UM") {
-			event_cfgs[ctr][evname].umask = touint(val);
+		string ev_name = parts[0];
+		event_cfgs[ctr][ev_name].count = touint(parts[1]);
+
+		// CPU_CLK_UNHALTED:10000 is also valid
+		if (parts.size() == 5) {
+			event_cfgs[ctr][ev_name].umask = touint(parts[2]);
+			event_cfgs[ctr][ev_name].user_ring_count = touint(parts[3]);
+			event_cfgs[ctr][ev_name].os_ring_count = touint(parts[4]);
+		} else {
+			event_cfgs[ctr][ev_name].umask = 0;
+			event_cfgs[ctr][ev_name].user_ring_count = 1;
+			event_cfgs[ctr][ev_name].os_ring_count = 1;
 		}
+
+		current_events[ctr] = &locate_event(ev_name);
 	}
+
+	// FIXME what about if ctr 0 is not set ?
+	current_event = 0;
 }
 
 
@@ -300,69 +290,11 @@ void oprof_start::load_config_file()
 }
 
 
-void oprof_start::load_event_config_file(uint ctr)
-{
-	ostringstream ss;
-
-	ss << get_user_filename(".oprofile/oprof_start_event");
-	ss << "#" << ctr;
-
-	string const name = ss.str();
-
-	ifstream in(name.c_str());
-	if (!in) {
-		if (!check_and_create_config_dir())
-			return;
-
-		ofstream out(name.c_str());
-		if (!out) {
-			string msg = "Unable to open configuration file ";
-			msg += name;
-			QMessageBox::warning(this, 0, msg.c_str());
-			return;
-		}
-		return;
-	}
-
-	// need checking on the key validity :(
-	in >> event_cfgs[ctr];
-}
-
-
-bool oprof_start::save_event_config_file(uint ctr)
-{
-	if (!check_and_create_config_dir())
-		return false;
-
-	ostringstream ss;
-
-	ss << get_user_filename(".oprofile/oprof_start_event");
-	ss << "#" << ctr;
-
-	string const name = ss.str();
-
-	ofstream out(name.c_str());
-	if (!out) {
-		string msg = "Unable to save configuration file ";
-		msg += name;
-		QMessageBox::warning(this, 0, msg.c_str());
-		return false;
-	}
-
-	out << event_cfgs[ctr];
-
-	return true;
-}
-
-
 // user request a "normal" exit so save the config file.
 void oprof_start::accept()
 {
 	// record the previous settings
 	record_selected_event_config();
-
-	for (uint ctr = 0 ; ctr < op_nr_counters ; ++ctr)
-		save_event_config_file(ctr);
 
 	save_config();
 
@@ -409,16 +341,11 @@ void oprof_start::timerEvent(QTimerEvent *)
 
 void oprof_start::set_counter_combo(uint ctr)
 {
-	string ctrstr("Counter ");
-	char c = '0' + ctr;
-	ctrstr += c;
-	ctrstr += string(": ");
-	if (current_event[ctr])
-		ctrstr += current_event[ctr]->name;
-	else
-		ctrstr += "not used";
-	counter_combo->changeItem(ctrstr.c_str(), ctr);
-	counter_combo->setMinimumSize(counter_combo->sizeHint());
+	if (current_events[ctr]) {
+		string ctrstr = current_events[ctr]->name;
+		counter_combo->changeItem(ctrstr.c_str(), ctr);
+		counter_combo->setMinimumSize(counter_combo->sizeHint());
+	}
 }
 
 
@@ -429,9 +356,9 @@ void oprof_start::counter_selected(int ctr)
 
 	record_selected_event_config();
 
-	current_ctr = ctr;
+	current_event = ctr;
 
-	display_event(current_event[current_ctr]);
+	display_event(current_events[current_event]);
 
 	QListViewItem * theitem = 0;
 
@@ -439,7 +366,7 @@ void oprof_start::counter_selected(int ctr)
 		cit != v_events.rend(); ++cit) {
 		if (cit->counter_mask & (1 << ctr)) {
 			QListViewItem * item = new QListViewItem(events_list, cit->name.c_str());
-			if (current_event[ctr] != 0 && cit->name == current_event[ctr]->name)
+			if (current_events[ctr] != 0 && cit->name == current_events[ctr]->name)
 				theitem = item;
 		}
 	}
@@ -449,11 +376,10 @@ void oprof_start::counter_selected(int ctr)
 		events_list->ensureItemVisible(theitem);
 	}
 
-	enabled->setChecked(ctr_enabled[ctr]);
-
 	setUpdatesEnabled(true);
 	update();
 }
+
 
 void oprof_start::display_event(op_event_descr const * descrp)
 {
@@ -473,7 +399,8 @@ void oprof_start::display_event(op_event_descr const * descrp)
 	os_ring_count_cb->setEnabled(true);
 	user_ring_count_cb->setEnabled(true);
 	event_count_edit->setEnabled(true);
-	persistent_config_t<event_setting> const & cfg = event_cfgs[current_ctr];
+
+	event_setting_map & cfg = event_cfgs[current_event];
 
 	os_ring_count_cb->setChecked(cfg[descrp->name].os_ring_count);
 	user_ring_count_cb->setChecked(cfg[descrp->name].user_ring_count);
@@ -496,9 +423,10 @@ void oprof_start::event_selected(QListViewItem * item)
 	record_selected_event_config();
 
 	display_event(&descr);
-	current_event[current_ctr] = &descr;
 
-	set_counter_combo(current_ctr);
+	current_events[current_event] = &descr;
+
+	set_counter_combo(current_event);
 }
 
 
@@ -506,20 +434,6 @@ void oprof_start::event_over(QListViewItem * item)
 {
 	op_event_descr const & descr = locate_event(item->text(0).latin1());
 	event_help_label->setText(descr.help_str.c_str());
-}
-
-
-void oprof_start::enabled_toggled(bool en)
-{
-	ctr_enabled[current_ctr] = en;
-	if (!en) {
-		events_list->clearSelection();
-		current_event[current_ctr] = 0;
-		set_counter_combo(current_ctr);
-	}
-	events_list->setEnabled(en);
-
-	display_event(current_event[current_ctr]);
 }
 
 
@@ -538,12 +452,12 @@ void oprof_start::choose_kernel_filename()
 // FIXME: need validation?
 void oprof_start::record_selected_event_config()
 {
-	op_event_descr const * curr = current_event[current_ctr];
+	op_event_descr const * curr = current_events[current_event];
 
 	if (!curr)
 		return;
 
-	persistent_config_t<event_setting> & cfg = event_cfgs[current_ctr];
+	event_setting_map & cfg = event_cfgs[current_event];
 	string name(curr->name);
 
 	cfg[name].count = event_count_edit->text().toUInt();
@@ -599,7 +513,9 @@ bool oprof_start::record_config()
 	return true;
 }
 
-void oprof_start::get_unit_mask_part(op_event_descr const & descr, uint num, bool selected, uint & mask)
+
+void oprof_start::get_unit_mask_part(op_event_descr const & descr, uint num,
+                                     bool selected, uint & mask)
 {
 	if (!selected)
 		return;
@@ -611,6 +527,7 @@ void oprof_start::get_unit_mask_part(op_event_descr const & descr, uint num, boo
 	else
 		mask = descr.unit->um[num].value;
 }
+
 
 // return the unit mask selected through the unit mask check box
 uint oprof_start::get_unit_mask(op_event_descr const & descr)
@@ -645,6 +562,7 @@ uint oprof_start::get_unit_mask(op_event_descr const & descr)
 	return mask;
 }
 
+
 void oprof_start::hide_masks()
 {
 	check0->hide();
@@ -665,6 +583,7 @@ void oprof_start::hide_masks()
 	check15->hide();
 }
 
+
 void oprof_start::setup_unit_masks(op_event_descr const & descr)
 {
 	op_unit_mask const * um = descr.unit;
@@ -674,7 +593,7 @@ void oprof_start::setup_unit_masks(op_event_descr const & descr)
 	if (!um || um->unit_type_mask == utm_mandatory)
 		return;
 
-	persistent_config_t<event_setting> const & cfg = event_cfgs[current_ctr];
+	event_setting_map & cfg = event_cfgs[current_event];
 
 	unit_mask_group->setExclusive(um->unit_type_mask == utm_exclusive);
 
@@ -717,10 +636,12 @@ void oprof_start::setup_unit_masks(op_event_descr const & descr)
 	setup_config_tab->setMinimumSize(setup_config_tab->sizeHint());
 }
 
+
 uint oprof_start::max_perf_count() const
 {
 	return cpu_type == CPU_RTC ? OP_MAX_RTC_COUNT : OP_MAX_PERF_COUNT;
 }
+
 
 void oprof_start::on_flush_profiler_data()
 {
@@ -733,6 +654,7 @@ void oprof_start::on_flush_profiler_data()
 		QMessageBox::warning(this, 0, "The profiler is not started.");
 }
 
+
 // user is happy of its setting.
 void oprof_start::on_start_profiler()
 {
@@ -741,23 +663,21 @@ void oprof_start::on_start_profiler()
 
 	uint c;
 	for (c = 0; c < op_nr_counters; ++c) {
-		if (ctr_enabled[c] && current_event[c])
+		if (current_events[c])
 			break;
 	}
-	if (c == op_nr_counters) {
+	if (c == op_nr_counters && cpu_type != CPU_TIMER_INT) {
 		QMessageBox::warning(this, 0, "No counters enabled.\n");
 		return;
 	}
 
 	for (uint ctr = 0; ctr < op_nr_counters; ++ctr) {
-		if (!current_event[ctr])
-			continue;
-		if (!ctr_enabled[ctr])
+		if (!current_events[ctr])
 			continue;
 
-		persistent_config_t<event_setting> const & cfg = event_cfgs[ctr];
+		event_setting_map & cfg = event_cfgs[ctr];
 
-		op_event_descr const * descr = current_event[ctr];
+		op_event_descr const * descr = current_events[ctr];
 
 		if (!cfg[descr->name].os_ring_count &&
 		    !cfg[descr->name].user_ring_count) {
@@ -810,7 +730,7 @@ void oprof_start::on_start_profiler()
 
 	vector<string> args;
 
-	// save_config validate the config
+	// save_config validate and setup the config
 	if (!save_config())
 		goto out;
 
@@ -833,43 +753,39 @@ bool oprof_start::save_config()
 
 	vector<string> args;
 
+	// saving config is done by running opcontrol --setup with appropriate
+	// setted parameters so we use the same config file as command line
+	// tools
+
 	args.push_back("--setup");
 
-	if (cpu_type == CPU_RTC) {
-		persistent_config_t<event_setting> const & cfg = event_cfgs[0];
-		op_event_descr const * descr = current_event[0];
-		args.push_back("--rtc-value=" + tostr(cfg[descr->name].count));
-	} else {
-		bool one_enabled = false;
+	bool one_enabled = false;
 
-		vector<string> tmpargs;
-		tmpargs.push_back("--setup");
+	vector<string> tmpargs;
+	tmpargs.push_back("--setup");
 
-		for (uint ctr = 0; ctr < op_nr_counters; ++ctr) {
-			if (!current_event[ctr] || !ctr_enabled[ctr]) {
-				tmpargs.push_back("--ctr" + tostr(ctr) + "-event=none");
-				continue;
-			}
+	for (uint ctr = 0; ctr < op_nr_counters; ++ctr) {
+		if (!current_events[ctr])
+			continue;
 
-			one_enabled = true;
+		one_enabled = true;
 
-			persistent_config_t<event_setting> const & cfg = event_cfgs[ctr];
+		event_setting_map & cfg = event_cfgs[ctr];
 
-			op_event_descr const * descr = current_event[ctr];
+		op_event_descr const * descr = current_events[ctr];
 
-			tmpargs.push_back("--ctr" + tostr(ctr) + "-event=" + descr->name);
-			tmpargs.push_back("--ctr" + tostr(ctr) + "-count=" + tostr(cfg[descr->name].count));
-			tmpargs.push_back("--ctr" + tostr(ctr) + "-kernel=" + tostr(cfg[descr->name].os_ring_count));
-			tmpargs.push_back("--ctr" + tostr(ctr) + "-user=" + tostr(cfg[descr->name].user_ring_count));
+		string arg = "--event=" + descr->name;
+		arg += ":" + tostr(cfg[descr->name].count);
+		arg += ":" + tostr(cfg[descr->name].umask);
+		arg += ":" + tostr(cfg[descr->name].os_ring_count);
+		arg += ":" + tostr(cfg[descr->name].user_ring_count);
 
-			if (descr->unit)
-				tmpargs.push_back("--ctr" + tostr(ctr) + "-unit-mask=" + tostr(cfg[descr->name].umask));
-		}
-
-		// only set counters if at leat one is enabled
-		if (one_enabled)
-			args = tmpargs;
+		tmpargs.push_back(arg);
 	}
+
+	// only set counters if at leat one is enabled
+	if (one_enabled)
+		args = tmpargs;
 
 	if (config.no_kernel) {
 		args.push_back("--no-vmlinux");
@@ -918,17 +834,18 @@ void oprof_start::on_stop_profiler()
 
 
 /// function object for matching against name
-class event_name_eq : public unary_function<op_event_descr, bool> {
+class event_name_eq {
 	string name_;
 public:
 	explicit event_name_eq(string const & s) : name_(s) {}
-	bool operator()(op_event_descr & d) const {
+	bool operator()(op_event_descr const & d) const {
 		return d.name == name_;
 	}
 };
 
+
 // helper to retrieve an event descr through its name.
-op_event_descr const & oprof_start::locate_event(string const & name)
+op_event_descr const & oprof_start::locate_event(string const & name) const
 {
 	return *(find_if(v_events.begin(), v_events.end(), event_name_eq(name)));
 }

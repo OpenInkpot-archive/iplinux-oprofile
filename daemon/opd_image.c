@@ -552,9 +552,8 @@ static void opd_put_sample(struct transient * trans, vma_t eip)
 		if (kernel_image) {
 			verbprintf("Putting kernel sample 0x%llx - application %s\n",
 				eip, app_image ? app_image->name : "kernel");
-			opd_put_image_sample(kernel_image, eip, trans->event);
+			opd_put_image_sample(kernel_image, eip, event);
 		}
-		trans->last_image = kernel_image;
 		return;
 	}
 

@@ -236,10 +236,23 @@ static void resolve_events(struct list_head * events)
 }
 
 
-static int showvers;
+static void show_default_event()
+{
+	struct op_default_event_descr descr;
+
+	op_default_event(cpu_type, &descr);
+
+	if (descr.name[0] == '\0')
+		return;
+
+	printf("%s:%lu:%lu:1:1\n", descr.name, descr.count, descr.um);
+}
+
+
+static int show_vers;
 static int get_cpu_type;
 static int check_events;
-static int get_cpu_frequency;
+static int get_default_event;
 
 static struct poptOption options[] = {
 	{ "cpu-type", 'c', POPT_ARG_INT, &cpu_type, 0,
@@ -248,9 +261,10 @@ static struct poptOption options[] = {
 	  "check the given event descriptions for validity", NULL, },
 	{ "get-cpu-type", 'r', POPT_ARG_NONE, &get_cpu_type, 0,
 	  "show the auto-detected CPU type", NULL, },
-	{ "get-cpu-frequency", '\0', POPT_ARG_NONE|POPT_ARGFLAG_DOC_HIDDEN,
-	  &get_cpu_frequency, 0, "show the cpu frequency in MHz", NULL, },
-	{ "version", 'v', POPT_ARG_NONE, &showvers, 0, "show version", NULL, },
+	{ "get-default-event", 'd', POPT_ARG_NONE, &get_default_event, 0,
+	  "get the default event", NULL, },
+	{ "version", 'v', POPT_ARG_NONE, &show_vers, 0,
+	   "show version", NULL, },
 	POPT_AUTOHELP
 	{ NULL, 0, 0, NULL, 0, NULL, NULL, },
 };
@@ -268,7 +282,7 @@ static void get_options(int argc, char const * argv[])
 
 	optcon = op_poptGetContext(NULL, argc, argv, options, 0);
 
-	if (showvers) {
+	if (show_vers) {
 		show_version(argv[0]);
 	}
 
@@ -285,14 +299,9 @@ int main(int argc, char const *argv[])
 	struct list_head * pos;
 	char const * pretty;
 
-	get_options(argc, argv);
-
-	if (get_cpu_frequency) {
-		printf("%f\n", op_cpu_frequency());
-		exit(EXIT_SUCCESS);
-	}
-
 	cpu_type = op_get_cpu_type();
+
+	get_options(argc, argv);
 
 	if (cpu_type < 0 || cpu_type >= MAX_CPU_TYPE) {
 		fprintf(stderr, "cpu_type '%d' is not valid\n", cpu_type);
@@ -306,9 +315,15 @@ int main(int argc, char const *argv[])
 		exit(EXIT_SUCCESS);
 	}
 
+	if (get_default_event) {
+		show_default_event();
+		exit(EXIT_SUCCESS);
+	}
+
 	if (cpu_type == CPU_TIMER_INT) {
-		printf("using timer interrupt\n");
-		exit(chosen_events[0] ? EXIT_FAILURE : EXIT_SUCCESS);
+		if (!check_events)
+			printf("Using timer interrupt.\n");
+		exit(EXIT_SUCCESS);
 	}
 
 	events = op_events(cpu_type);

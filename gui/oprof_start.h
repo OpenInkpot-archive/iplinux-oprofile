@@ -13,11 +13,11 @@
 #define OPROF_START_H
 
 #include <vector>
+#include <map>
 
 #include "ui/oprof_start.base.h"
 #include "oprof_start_config.h"
 #include "oprof_start_util.h"
-#include "persistent_config.h"
 
 #include "op_hw_config.h"
 #include "op_events.h"
@@ -66,8 +66,6 @@ protected slots:
 	void event_selected(QListViewItem *);
 	/// the mouse is over an event
 	void event_over(QListViewItem *);
-	/// enabled has been changed
-	void enabled_toggled(bool);
 
 	/// close the dialog
 	void accept();
@@ -79,8 +77,11 @@ protected slots:
 	void timerEvent(QTimerEvent * e);
 
 private:
+	/// fill the event details and gui setup
+	void fill_events();
+
 	/// find an event description by name
-	op_event_descr const & locate_event(std::string const & name);
+	op_event_descr const & locate_event(std::string const & name) const;
 
 	/// update config on user change
 	void record_selected_event_config();
@@ -108,10 +109,6 @@ private:
 
 	/// read the events set in daemonrc
 	void read_set_events();
-	/// load the event config file
-	void load_event_config_file(uint ctr);
-	/// save the event config file
-	bool save_event_config_file(uint ctr);
 	/// load the extra config file
 	void load_config_file();
 	/// save the config
@@ -123,14 +120,14 @@ private:
 	/// all available events for this hardware
 	std::vector<op_event_descr> v_events;
 
-	/// the current counter in the GUI
-	uint current_ctr;
-	/// current event selections for each counter
-	op_event_descr const * current_event[OP_MAX_COUNTERS];
+	/// the current event in the GUI
+	uint current_event;
+	/// current event selections
+	std::vector<op_event_descr const *> current_events;
+
 	/// current event configs for each counter
-	persistent_config_t<event_setting> event_cfgs[OP_MAX_COUNTERS];
-	/// enabled status for each counter
-	bool ctr_enabled[OP_MAX_COUNTERS];
+	typedef std::map<std::string, event_setting> event_setting_map;
+	event_setting_map event_cfgs[OP_MAX_COUNTERS];
 
 	/// current config
 	config_setting config;

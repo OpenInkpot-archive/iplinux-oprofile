@@ -11,8 +11,8 @@
         <rect>
             <x>0</x>
             <y>0</y>
-            <width>712</width>
-            <height>500</height>
+            <width>573</width>
+            <height>735</height>
         </rect>
     </property>
     <property stdset="1">
@@ -61,7 +61,7 @@
                         <class>QLayoutWidget</class>
                         <property stdset="1">
                             <name>name</name>
-                            <cstring>Layout14</cstring>
+                            <cstring>Layout9</cstring>
                         </property>
                         <hbox>
                             <property stdset="1">
@@ -72,6 +72,21 @@
                                 <name>spacing</name>
                                 <number>6</number>
                             </property>
+                            <widget>
+                                <class>QLabel</class>
+                                <property stdset="1">
+                                    <name>name</name>
+                                    <cstring>TextLabel1_3</cstring>
+                                </property>
+                                <property stdset="1">
+                                    <name>text</name>
+                                    <string>&amp;Event:</string>
+                                </property>
+                                <property>
+                                    <name>buddy</name>
+                                    <cstring>counter_combo</cstring>
+                                </property>
+                            </widget>
                             <widget>
                                 <class>QComboBox</class>
                                 <property stdset="1">
@@ -90,27 +105,6 @@
                                     <string>Select a counter to setup</string>
                                 </property>
                             </widget>
-                            <spacer>
-                                <property>
-                                    <name>name</name>
-                                    <cstring>Spacer8</cstring>
-                                </property>
-                                <property stdset="1">
-                                    <name>orientation</name>
-                                    <enum>Horizontal</enum>
-                                </property>
-                                <property stdset="1">
-                                    <name>sizeType</name>
-                                    <enum>Expanding</enum>
-                                </property>
-                                <property>
-                                    <name>sizeHint</name>
-                                    <size>
-                                        <width>20</width>
-                                        <height>20</height>
-                                    </size>
-                                </property>
-                            </spacer>
                         </hbox>
                     </widget>
                     <widget>
@@ -121,7 +115,7 @@
                         </property>
                         <property stdset="1">
                             <name>title</name>
-                            <string>Counter settings</string>
+                            <string>Settings</string>
                         </property>
                         <vbox>
                             <property stdset="1">
@@ -133,25 +127,10 @@
                                 <number>6</number>
                             </property>
                             <widget>
-                                <class>QCheckBox</class>
-                                <property stdset="1">
-                                    <name>name</name>
-                                    <cstring>enabled</cstring>
-                                </property>
-                                <property stdset="1">
-                                    <name>text</name>
-                                    <string>&amp;Enabled</string>
-                                </property>
-                                <property>
-                                    <name>toolTip</name>
-                                    <string>Is this counter enabled ?</string>
-                                </property>
-                            </widget>
-                            <widget>
                                 <class>QLayoutWidget</class>
                                 <property stdset="1">
                                     <name>name</name>
-                                    <cstring>Layout17</cstring>
+                                    <cstring>Layout10</cstring>
                                 </property>
                                 <hbox>
                                     <property stdset="1">
@@ -167,7 +146,7 @@
                                         <column>
                                             <property>
                                                 <name>text</name>
-                                                <string>Event</string>
+                                                <string>Removedincode</string>
                                             </property>
                                             <property>
                                                 <name>clickable</name>
@@ -182,6 +161,13 @@
                                             <name>name</name>
                                             <cstring>events_list</cstring>
                                         </property>
+                                        <property stdset="1">
+                                            <name>minimumSize</name>
+                                            <size>
+                                                <width>250</width>
+                                                <height>0</height>
+                                            </size>
+                                        </property>
                                         <property>
                                             <name>toolTip</name>
                                             <string>Available events</string>
@@ -191,7 +177,7 @@
                                         <class>QLayoutWidget</class>
                                         <property stdset="1">
                                             <name>name</name>
-                                            <cstring>Layout18</cstring>
+                                            <cstring>Layout9</cstring>
                                         </property>
                                         <vbox>
                                             <property stdset="1">
@@ -324,7 +310,7 @@
                                                     <name>toolTip</name>
                                                     <string>Unit mask settings for this event</string>
                                                 </property>
-                                                <vbox>
+                                                <grid>
                                                     <property stdset="1">
                                                         <name>margin</name>
                                                         <number>11</number>
@@ -333,7 +319,7 @@
                                                         <name>spacing</name>
                                                         <number>6</number>
                                                     </property>
-                                                    <widget>
+                                                    <widget row="0"  column="0" >
                                                         <class>QCheckBox</class>
                                                         <property stdset="1">
                                                             <name>name</name>
@@ -344,7 +330,7 @@
                                                             <string>check0</string>
                                                         </property>
                                                     </widget>
-                                                    <widget>
+                                                    <widget row="1"  column="0"  rowspan="2"  colspan="2" >
                                                         <class>QCheckBox</class>
                                                         <property stdset="1">
                                                             <name>name</name>
@@ -355,7 +341,7 @@
                                                             <string>check1</string>
                                                         </property>
                                                     </widget>
-                                                    <widget>
+                                                    <widget row="3"  column="0"  rowspan="2"  colspan="2" >
                                                         <class>QCheckBox</class>
                                                         <property stdset="1">
                                                             <name>name</name>
@@ -366,7 +352,7 @@
                                                             <string>check2</string>
                                                         </property>
                                                     </widget>
-                                                    <widget>
+                                                    <widget row="5"  column="0" >
                                                         <class>QCheckBox</class>
                                                         <property stdset="1">
                                                             <name>name</name>
@@ -377,7 +363,7 @@
                                                             <string>check3</string>
                                                         </property>
                                                     </widget>
-                                                    <widget>
+                                                    <widget row="6"  column="0" >
                                                         <class>QCheckBox</class>
                                                         <property stdset="1">
                                                             <name>name</name>
@@ -388,7 +374,7 @@
                                                             <string>check4</string>
                                                         </property>
                                                     </widget>
-                                                    <widget>
+                                                    <widget row="7"  column="0" >
                                                         <class>QCheckBox</class>
                                                         <property stdset="1">
                                                             <name>name</name>
@@ -399,7 +385,7 @@
                                                             <string>check5</string>
                                                         </property>
                                                     </widget>
-                                                    <widget>
+                                                    <widget row="8"  column="0"  rowspan="2"  colspan="2" >
                                                         <class>QCheckBox</class>
                                                         <property stdset="1">
                                                             <name>name</name>
@@ -410,7 +396,7 @@
                                                             <string>check6</string>
                                                         </property>
                                                     </widget>
-                                                    <widget>
+                                                    <widget row="10"  column="0" >
                                                         <class>QCheckBox</class>
                                                         <property stdset="1">
                                                             <name>name</name>
@@ -421,95 +407,7 @@
                                                             <string>check7</string>
                                                         </property>
                                                     </widget>
-                                                    <widget>
-                                                        <class>QCheckBox</class>
-                                                        <property stdset="1">
-                                                            <name>name</name>
-                                                            <cstring>check8</cstring>
-                                                        </property>
-                                                        <property stdset="1">
-                                                            <name>text</name>
-                                                            <string>check8</string>
-                                                        </property>
-                                                    </widget>
-                                                    <widget>
-                                                        <class>QCheckBox</class>
-                                                        <property stdset="1">
-                                                            <name>name</name>
-                                                            <cstring>check9</cstring>
-                                                        </property>
-                                                        <property stdset="1">
-                                                            <name>text</name>
-                                                            <string>check9</string>
-                                                        </property>
-                                                    </widget>
-                                                    <widget>
-                                                        <class>QCheckBox</class>
-                                                        <property stdset="1">
-                                                            <name>name</name>
-                                                            <cstring>check10</cstring>
-                                                        </property>
-                                                        <property stdset="1">
-                                                            <name>text</name>
-                                                            <string>check10</string>
-                                                        </property>
-                                                    </widget>
-                                                    <widget>
-                                                        <class>QCheckBox</class>
-                                                        <property stdset="1">
-                                                            <name>name</name>
-                                                            <cstring>check11</cstring>
-                                                        </property>
-                                                        <property stdset="1">
-                                                            <name>text</name>
-                                                            <string>check11</string>
-                                                        </property>
-                                                    </widget>
-                                                    <widget>
-                                                        <class>QCheckBox</class>
-                                                        <property stdset="1">
-                                                            <name>name</name>
-                                                            <cstring>check12</cstring>
-                                                        </property>
-                                                        <property stdset="1">
-                                                            <name>text</name>
-                                                            <string>check12</string>
-                                                        </property>
-                                                    </widget>
-                                                    <widget>
-                                                        <class>QCheckBox</class>
-                                                        <property stdset="1">
-                                                            <name>name</name>
-                                                            <cstring>check13</cstring>
-                                                        </property>
-                                                        <property stdset="1">
-                                                            <name>text</name>
-                                                            <string>check13</string>
-                                                        </property>
-                                                    </widget>
-                                                    <widget>
-                                                        <class>QCheckBox</class>
-                                                        <property stdset="1">
-                                                            <name>name</name>
-                                                            <cstring>check14</cstring>
-                                                        </property>
-                                                        <property stdset="1">
-                                                            <name>text</name>
-                                                            <string>check14</string>
-                                                        </property>
-                                                    </widget>
-                                                    <widget>
-                                                        <class>QCheckBox</class>
-                                                        <property stdset="1">
-                                                            <name>name</name>
-                                                            <cstring>check15</cstring>
-                                                        </property>
-                                                        <property stdset="1">
-                                                            <name>text</name>
-                                                            <string>check15</string>
-                                                        </property>
-                                                    </widget>
-                                                    <spacer>
+                                                    <spacer row="11"  column="1" >
                                                         <property>
                                                             <name>name</name>
                                                             <cstring>Spacer14</cstring>
@@ -530,7 +428,95 @@
                                                             </size>
                                                         </property>
                                                     </spacer>
-                                                </vbox>
+                                                    <widget row="5"  column="1" >
+                                                        <class>QCheckBox</class>
+                                                        <property stdset="1">
+                                                            <name>name</name>
+                                                            <cstring>check11</cstring>
+                                                        </property>
+                                                        <property stdset="1">
+                                                            <name>text</name>
+                                                            <string>check11</string>
+                                                        </property>
+                                                    </widget>
+                                                    <widget row="7"  column="1" >
+                                                        <class>QCheckBox</class>
+                                                        <property stdset="1">
+                                                            <name>name</name>
+                                                            <cstring>check13</cstring>
+                                                        </property>
+                                                        <property stdset="1">
+                                                            <name>text</name>
+                                                            <string>check13</string>
+                                                        </property>
+                                                    </widget>
+                                                    <widget row="10"  column="1" >
+                                                        <class>QCheckBox</class>
+                                                        <property stdset="1">
+                                                            <name>name</name>
+                                                            <cstring>check15</cstring>
+                                                        </property>
+                                                        <property stdset="1">
+                                                            <name>text</name>
+                                                            <string>check15</string>
+                                                        </property>
+                                                    </widget>
+                                                    <widget row="4"  column="1" >
+                                                        <class>QCheckBox</class>
+                                                        <property stdset="1">
+                                                            <name>name</name>
+                                                            <cstring>check10</cstring>
+                                                        </property>
+                                                        <property stdset="1">
+                                                            <name>text</name>
+                                                            <string>check10</string>
+                                                        </property>
+                                                    </widget>
+                                                    <widget row="9"  column="1" >
+                                                        <class>QCheckBox</class>
+                                                        <property stdset="1">
+                                                            <name>name</name>
+                                                            <cstring>check14</cstring>
+                                                        </property>
+                                                        <property stdset="1">
+                                                            <name>text</name>
+                                                            <string>check14</string>
+                                                        </property>
+                                                    </widget>
+                                                    <widget row="2"  column="1" >
+                                                        <class>QCheckBox</class>
+                                                        <property stdset="1">
+                                                            <name>name</name>
+                                                            <cstring>check9</cstring>
+                                                        </property>
+                                                        <property stdset="1">
+                                                            <name>text</name>
+                                                            <string>check9</string>
+                                                        </property>
+                                                    </widget>
+                                                    <widget row="0"  column="1" >
+                                                        <class>QCheckBox</class>
+                                                        <property stdset="1">
+                                                            <name>name</name>
+                                                            <cstring>check8</cstring>
+                                                        </property>
+                                                        <property stdset="1">
+                                                            <name>text</name>
+                                                            <string>check8</string>
+                                                        </property>
+                                                    </widget>
+                                                    <widget row="6"  column="1" >
+                                                        <class>QCheckBox</class>
+                                                        <property stdset="1">
+                                                            <name>name</name>
+                                                            <cstring>check12</cstring>
+                                                        </property>
+                                                        <property stdset="1">
+                                                            <name>text</name>
+                                                            <string>check12</string>
+                                                        </property>
+                                                    </widget>
+                                                </grid>
                                             </widget>
                                         </vbox>
                                     </widget>
@@ -549,7 +535,7 @@
                                 <property stdset="1">
                                     <name>sizePolicy</name>
                                     <sizepolicy>
-                                        <hsizetype>3</hsizetype>
+                                        <hsizetype>1</hsizetype>
                                         <vsizetype>1</vsizetype>
                                     </sizepolicy>
                                 </property>
@@ -1091,12 +1077,6 @@
         <slot>counter_selected(int)</slot>
     </connection>
     <connection>
-        <sender>enabled</sender>
-        <signal>toggled(bool)</signal>
-        <receiver>oprof_start_base</receiver>
-        <slot>enabled_toggled(bool)</slot>
-    </connection>
-    <connection>
         <sender>events_list</sender>
         <signal>onItem(QListViewItem*)</signal>
         <receiver>oprof_start_base</receiver>
@@ -1145,7 +1125,6 @@
 <tabstops>
     <tabstop>setup_config_tab</tabstop>
     <tabstop>counter_combo</tabstop>
-    <tabstop>enabled</tabstop>
     <tabstop>events_list</tabstop>
     <tabstop>os_ring_count_cb</tabstop>
     <tabstop>user_ring_count_cb</tabstop>
@@ -1163,7 +1142,15 @@
     <tabstop>check10</tabstop>
     <tabstop>check11</tabstop>
     <tabstop>check12</tabstop>
+    <tabstop>check13</tabstop>
+    <tabstop>check14</tabstop>
+    <tabstop>check15</tabstop>
+    <tabstop>start_profiler_btn</tabstop>
+    <tabstop>flush_profiler_data_btn</tabstop>
+    <tabstop>stop_profiler_btn</tabstop>
+    <tabstop>quit_and_save_btn</tabstop>
     <tabstop>kernel_filename_edit</tabstop>
+    <tabstop>no_vmlinux</tabstop>
     <tabstop>buffer_size_edit</tabstop>
     <tabstop>pid_filter_edit</tabstop>
     <tabstop>pgrp_filter_edit</tabstop>
@@ -1172,12 +1159,5 @@
     <tabstop>verbose</tabstop>
     <tabstop>separate_kernel_samples_cb</tabstop>
     <tabstop>separate_lib_samples_cb</tabstop>
-    <tabstop>start_profiler_btn</tabstop>
-    <tabstop>flush_profiler_data_btn</tabstop>
-    <tabstop>stop_profiler_btn</tabstop>
-    <tabstop>quit_and_save_btn</tabstop>
-    <tabstop>check13</tabstop>
-    <tabstop>check14</tabstop>
-    <tabstop>check15</tabstop>
 </tabstops>
 </UI>
