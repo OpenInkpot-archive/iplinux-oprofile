@@ -1,5 +1,37 @@
 2003-04-16  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* dae works, daemon compiles but not tested.
+
+	* libop/op_config.h:
+	* libpp/op_session.h:
+	* libpp/session.cpp:
+	* pp/op_merge: handle new path to samples files.
+
+	* libutil++/file_manip.h:
+	* libutil++/file_manip.cpp: move create_dir(), create_path() ...
+	* libutil/op_file.h:
+	* libutil/op_file.c: here. Remove op_move_regular_file()
+
+	* daemon/opd_image.c:
+	* daemon/opd_sample_files.h:
+	* daemon/opd_sample_files.c:
+	* dae/opd_image.c:
+	* dae/opd_sample_files.h:
+	* dae/opd_sample_files.c: use new filename scheme
+
+	* daemon/oprofiled.c:
+	* dae/oprofiled.c: remove samples files backup stuff
+
+	* libop/op_mangle.h:
+	* libop/op_mangle.c: ugly modification to handle new samples filename
+
+	* utils/opcontrol: handle new samples files path, --save and --reset
+	  are working too.
+
+	* gui/oprof_start_util.cpp: use new create_path() API
+
+2003-04-16  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* pp/common_option.cpp:
 	* pp/common_option.h:
 	* libregex/demangle_symbol.cpp: rename demangle_and_shrink to
@@ -40,9 +72,9 @@
 	* libpp/Makefile.am: new file build libpp.a
 
 	* pp/common_option.h:
-	* pp/common_option.cpp: common option to pp tools. Implement comon
+	* pp/common_option.cpp: common option to pp tools. Implement common
 	  entry point to pp tools.
-	* pp/opannoate.cpp:
+	* pp/opannotate.cpp:
 	* pp/opdiff.cpp:
 	* pp/opgprof.cpp:
 	* pp/opreport.cpp:

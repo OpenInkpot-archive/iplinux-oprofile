@@ -94,13 +94,13 @@ static void create_file_list(list<string> & result,
 		os << "*}}" << remangle_filename(images_filename[0])
 		   << "#" << counter;
 
-		// FIXME: why we hardcode OP_SAMPLES_DIR: should be an options?
-		get_sample_file_list(result, OP_SAMPLES_DIR, os.str());
+		// FIXME: why we hardcode OP_SAMPLES_CURRENT_DIR: should be an options?
+		get_sample_file_list(result, OP_SAMPLES_CURRENT_DIR, os.str());
 
 		// get_sample_file_list() shrink the #nr suffix so re-add it
 		list<string>::iterator it;
 		for (it = result.begin() ; it != result.end() ; ++it) {
-			*it = sample_filename(OP_SAMPLES_DIR, *it, counter);
+			*it = sample_filename(OP_SAMPLES_CURRENT_DIR, *it, counter);
 		}
 	} else {
 		/* Note than I don't check against filename i.e. all filename

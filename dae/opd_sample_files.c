@@ -14,11 +14,13 @@
 #include "opd_sample_files.h"
 #include "opd_image.h"
 #include "opd_printf.h"
+#include "op_file.h"
 
 #include "op_sample_file.h"
 #include "op_interface.h"
 #include "op_cpu_type.h"
 #include "op_mangle.h"
+#include "op_events.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -33,6 +35,26 @@ extern u8 ctr_event[OP_MAX_COUNTERS];
 extern u16 ctr_um[OP_MAX_COUNTERS];
 extern double cpu_speed;
 extern op_cpu cpu_type;
+
+char * opd_mangle_filename(struct opd_image const * image, int counter,
+			   int create_path_)
+{
+	char * mangled;
+	char const * app_name = separate_lib_samples ? image->app_name : NULL;
+
+	struct op_event * event = op_find_event(cpu_type, ctr_event[counter]); 
+
+	mangled = op_mangle_filename(image->name, app_name,
+				     event->name, ctr_count[counter],
+				     ctr_um[counter], (pid_t)-1,
+				     (pid_t)-1, -1, image->kernel);
+
+	if (create_path_) {
+		create_path(mangled);
+	}
+
+	return mangled;
+}
 
 /**
  * opd_handle_old_sample_file - deal with old sample file
@@ -102,20 +124,14 @@ out:
 void opd_handle_old_sample_files(struct opd_image const * image)
 {
 	uint i;
-	char * mangled;
-	uint len;
-	char const * app_name = separate_lib_samples ? image->app_name : NULL;
-
-	mangled = op_mangle_filename(image->name, app_name);
-
-	len = strlen(mangled);
 
 	for (i = 0 ; i < op_nr_counters ; ++i) {
-		sprintf(mangled + len, "#%d", i);
-		opd_handle_old_sample_file(mangled,  image->mtime);
+		if (ctr_event[i]) {
+			char * mangled = opd_mangle_filename(image, i, 0);
+			opd_handle_old_sample_file(mangled,  image->mtime);
+			free(mangled);
+		}
 	}
-
-	free(mangled);
 }
 
 
@@ -134,16 +150,12 @@ void opd_open_sample_file(struct opd_image * image, int counter)
 	char * mangled;
 	samples_odb_t * sample_file;
 	struct opd_header * header;
-	char const * app_name;
 	char * err_msg;
 	int rc;
 
 	sample_file = &image->sample_files[counter];
 
-	app_name = separate_lib_samples ? image->app_name : NULL;
-	mangled = op_mangle_filename(image->name, app_name);
-
-	sprintf(mangled + strlen(mangled), "#%d", counter);
+	mangled = opd_mangle_filename(image, counter, 1);
 
 	verbprintf("Opening \"%s\"\n", mangled);
 

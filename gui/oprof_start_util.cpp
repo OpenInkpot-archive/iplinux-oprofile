@@ -27,6 +27,7 @@
 #include "string_manip.h"
 #include "file_manip.h"
 #include "child_reader.h"
+#include "op_libiberty.h"
 
 #include "oprof_start.h"
 #include "oprof_start_util.h"
@@ -194,13 +195,19 @@ bool check_and_create_config_dir()
 {
 	string dir = get_user_filename(".oprofile");
 
-	if (!create_dir(dir)) {
+	char * name = xstrdup(dir.c_str());
+
+	if (!create_dir(name)) {
 		ostringstream out;
 		out << "unable to create " << dir << " directory: ";
 		QMessageBox::warning(0, 0, out.str().c_str());
 
+		free(name);
+
 		return false;
 	}
+
+	free(name);
 	return true;
 }
 

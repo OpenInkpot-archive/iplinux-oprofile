@@ -24,7 +24,7 @@ namespace {
 string handle_session_options()
 {
 	if (session.empty()) {
-		return OP_SAMPLES_DIR;
+		return OP_SAMPLES_CURRENT_DIR;
 	}
 
 	if (session[0] == '/') {
