@@ -1,3 +1,13 @@
+2003-05-10  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libutil++/string_manip.h:
+	* libutil++/string_manip.cpp: replace format_percent() by
+	  format_double()
+
+	* libpp/format_output.cpp:
+	* pp/opannotate.cpp:
+	* pp/opreport.cpp: use format_double()
+
 2003-05-09  John Levon  <levon@movementarian.org>
 
 	* libpp/opp_symbol.h: app name, image name should

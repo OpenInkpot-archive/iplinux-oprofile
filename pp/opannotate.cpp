@@ -51,9 +51,7 @@ string const in_comment(" * ");
 string const end_comment(" */");
 
 /// field width for the sample count
-unsigned int const count_width = 7;
-/// field width for the sample relative percent
-unsigned int const percent_width = 6;
+unsigned int const count_width = 6;
 
 
 // FIXME share with opgprof.cpp and opreport.cpp
@@ -194,7 +192,8 @@ string counter_str(size_t counter, size_t total)
 	ostringstream os;
 	os << setw(count_width) << counter << ' ';
 
-	os << format_percent(op_ratio(counter, total) * 100.0, percent_width);
+	os << format_double(op_ratio(counter, total) * 100.0,
+			    percent_int_width, percent_fract_width);
 	return os.str();
 }
 

@@ -10,6 +10,7 @@
  */
 
 #include <sstream>
+#include <iomanip>
 
 #include "string_manip.h"
 
@@ -137,40 +138,22 @@ string trim(string const & str, string const & totrim)
 }
 
 
-string const format_percent(double value, unsigned int width)
+string const format_double(double value, size_t int_width, size_t fract_width)
 {
 	ostringstream os;
-	// we don't use os << fixed << value; to support gcc 2.95
-	os.setf(ios::fixed, ios::floatfield);
-	os << value;
-	string const orig = os.str();
-	if (orig.length() < width) {
-		string pad = string(width - (orig.length() + 1), ' ');
-		return pad + orig + '%';
-	}
 
-	string integer = orig;
-	string const fractional = trim(split(integer, '.'));
-
-	// we just overflow here
-	if (integer.length() >= width - 2)
-		return integer + '%';
-
-	// take off integer, '.', and '%';
-	string::size_type remaining = width - (integer.length() + 2);
-
-	string frac;
-	string pad;
-
-	if (fractional.length() < remaining) {
-		pad = string(remaining - fractional.length(), ' ');
-		frac = fractional;
+	if (value > .001) {
+		// os << fixed << value unsupported by gcc 2.95
+		os.setf(ios::fixed, ios::floatfield);
+		os << setw(int_width + fract_width + 1)
+		   << setprecision(fract_width) << value;
 	} else {
-		// FIXME: round
-		frac = fractional.substr(0, remaining);
+		// os << scientific << value unsupported by gcc 2.95
+		os.setf(ios::scientific, ios::floatfield);
+		os << setw(int_width + fract_width + 1)
+		   // - 3 to count exponent part
+		   << setprecision(fract_width-3) << value;
 	}
 
-	return pad + integer + '.' + frac + '%';
+	return os.str();
 }
-
-

@@ -13,6 +13,7 @@
 #include <iomanip>
 
 #include "file_manip.h"
+#include "string_manip.h"
 
 #include "opp_symbol.h"
 #include "format_output.h"
@@ -308,8 +309,8 @@ string formatter::format_percent(field_datum const & f)
 {
 	ostringstream out;
 	double ratio = op_ratio(f.sample.count, total_count);
-	out << ratio * 100.0;
-	return out.str();
+	return format_double(ratio * 100, percent_int_width,
+			     percent_fract_width);
 }
 
  
@@ -318,8 +319,8 @@ string formatter::format_cumulated_percent(field_datum const & f)
 	ostringstream out;
 	cumulated_percent += f.sample.count;
 	double ratio = op_ratio(cumulated_percent, total_count);
-	out << ratio * 100.0;
-	return out.str();
+	return format_double(ratio * 100, percent_int_width,
+			     percent_fract_width);
 }
 
  
@@ -327,8 +328,8 @@ string formatter::format_percent_details(field_datum const & f)
 {
 	ostringstream out;
 	double ratio = op_ratio(f.sample.count, total_count_details);
-	out << ratio * 100.0;
-	return out.str();
+	return format_double(ratio * 100, percent_int_width,
+			     percent_fract_width);
 }
 
  
@@ -338,8 +339,8 @@ string formatter::format_cumulated_percent_details(field_datum const & f)
 	cumulated_percent_details += f.sample.count;
 	double ratio = op_ratio(cumulated_percent_details,
 				total_count_details);
-	out << ratio * 100.0;
-	return out.str();
+	return format_double(ratio * 100, percent_int_width,
+			     percent_fract_width);
 }
 
 }; // namespace format_output

@@ -29,20 +29,6 @@ using namespace std;
 namespace {
 
 
-// FIXME: intended to replace format_percent
-string const format_double(double value, size_t int_width, size_t frac_width)
-{
-	ostringstream os;
-
-	// os << fixed << value unsupported by gcc 2.95
-	os.setf(ios::fixed, ios::floatfield);
-	os << setw(int_width + frac_width + 1)
-	   << setprecision(frac_width) << value;
-
-	return os.str();
-}
-
-
 void output_header(partition_files const & files)
 {
 	if (files.nr_set()) {
@@ -168,7 +154,8 @@ void output_counter(double total_count, size_t count)
 //	cout.setf(ios::left, ios::adjustfield);
 	cout << setw(9) << count << " ";
 	double ratio = op_ratio(count, total_count);
-	cout << format_double(ratio * 100, 3, 4) << " ";
+	cout << format_double(ratio * 100, percent_int_width,
+			      percent_fract_width) << " ";
 }
 
 

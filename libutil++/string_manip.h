@@ -71,15 +71,23 @@ std::string rtrim(std::string const & str, std::string const & totrim = "\t ");
 std::string trim(std::string const & str, std::string const & totrim = "\t ");
 
 /**
- * format_percent - smart format a percentage value
+ * format_double - smart format of double value
  * @param value - the value
- * @param width - the maximum width
+ * @param int_width - the maximum integer integer width default to 2
+ * @param frac_width - the fractionnary width default to 4
  *
  * This formats a percentage into exactly the given width and returns
- * it. If the integer part is larger than the given width, the
+ * it. If the integer part is larger than the given int_width, the
  * returned string will be wider. The returned string is never
- * shorter than the given width.
+ * shorter than (fract_with + int_width + 1)
+ *
  */
-std::string const format_percent(double value, unsigned int width);
+std::string const format_double(double value, size_t int_width,
+				size_t frac_width);
+
+/// prefered width to format percentage
+static unsigned int const percent_int_width = 2;
+static unsigned int const percent_fract_width = 4;
+static unsigned int const percent_width = percent_int_width + percent_fract_width + 1;
 
 #endif /* !STRING_MANIP_H */
