@@ -17,10 +17,9 @@
 
 #include <cerrno>
 
+#include "op_header.h"
 #include "op_config.h"
-#include "op_file.h"
 #include "op_sample_file.h"
-#include "op_print_event.h"
 
 #include "profile.h"
 
@@ -43,27 +42,6 @@ profile_t::profile_t(string const & sample_file)
 
 profile_t::~profile_t()
 {
-}
-
-
-void profile_t::check_mtime(string const & file) const
-{
-	time_t const newmtime = op_get_mtime(file.c_str());
-
-	if (newmtime == first_header().mtime)
-	       return;
-
-	// Files we couldn't get mtime of have zero mtime
-	if (!first_header().mtime) {
-		cerr << "oprofpp: warning: could not check that the binary file "
-		     << file << "\nhas not been modified since "
-			"the profile was taken. Results may be inaccurate.\n";
-	} else {
-		cerr << "oprofpp: warning: the last modified time of the binary file\n"
-			<< file << "\ndoes not match that of the sample file.\n"
-		        "Either this is the wrong binary or the binary "
-			"has been modified since the sample file was created.\n";
-	}
 }
 
 
@@ -93,62 +71,10 @@ unsigned int profile_t::accumulate_samples(uint start, uint end) const
 
 void profile_t::set_start_offset(u32 start_offset_)
 {
-	if (!first_header().is_kernel)
+	if (!get_header().is_kernel)
 		return;
 
 	start_offset = start_offset_;
-}
-
-
-void profile_t::output_header() const
-{
-	opd_header const & header = first_header();
-
-	op_cpu cpu = static_cast<op_cpu>(header.cpu_type);
-
-	cout << "Cpu type: " << op_get_cpu_type_str(cpu) << endl;
-
-	cout << "Cpu speed was (MHz estimation) : " << header.cpu_speed << endl;
-
-	op_print_event(cout, cpu, header.ctr_event,
-		       header.ctr_um, header.ctr_count);
-}
-
-
-void profile_t::check_headers(profile_t const & rhs) const
-{
-	opd_header const & f1 = first_header();
-	opd_header const & f2 = rhs.first_header();
-	if (f1.mtime != f2.mtime) {
-		cerr << "oprofpp: header timestamps are different ("
-		     << f1.mtime << ", " << f2.mtime << ")\n";
-		exit(EXIT_FAILURE);
-	}
-
-	if (f1.is_kernel != f2.is_kernel) {
-		cerr << "oprofpp: header is_kernel flags are different\n";
-		exit(EXIT_FAILURE);
-	}
-
-	if (f1.cpu_speed != f2.cpu_speed) {
-		cerr << "oprofpp: header cpu speeds are different ("
-		     << f1.cpu_speed << ", " << f2.cpu_speed << ")\n";
-		exit(EXIT_FAILURE);
-	}
-
-	if (f1.separate_lib_samples != f2.separate_lib_samples) {
-		cerr << "oprofpp: header separate_lib_samples are different ("
-		     << f1.separate_lib_samples << ", " 
-		     << f2.separate_lib_samples << ")\n";
-		exit(EXIT_FAILURE);
-	}
-
-	if (f1.separate_kernel_samples != f2.separate_kernel_samples) {
-		cerr << "oprofpp: header separate_kernel_samples are different ("
-		     << f1.separate_kernel_samples << ", " 
-		     << f2.separate_kernel_samples << ")\n";
-		exit(EXIT_FAILURE);
-	}
 }
 
 
@@ -173,6 +99,10 @@ void profile_t::build_ordered_samples(string const & filename)
 			"running a daemon and post-profile tools with version "
 			"mismatch ?" << endl;
 		exit(EXIT_FAILURE);
+	}
+
+	if (file_header.get()) {
+		op_check_header(head, *file_header);
 	}
 
 	file_header.reset(new opd_header(head));

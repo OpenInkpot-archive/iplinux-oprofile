@@ -1,0 +1,43 @@
+/**
+ * @file op_header.h
+ * various free function acting on a sample file header
+ *
+ * @remark Copyright 2002 OProfile authors
+ * @remark Read the file COPYING
+ *
+ * @author John Levon
+ * @author Philippe Elie
+ */
+
+// FIXME: merge this file in op_sample_file.h after dae re-write
+
+#ifndef OP_HEADER_H
+#define OP_HEADER_H
+
+#include <iosfwd>
+#include <string>
+
+#include "op_sample_file.h"
+
+/**
+ * @param h1 sample file header
+ * @param h2 sample file header
+ *
+ * check that the h1 and h2 are coherent (same size, same mtime etc.)
+ * all error are fatal
+ */
+void op_check_header(opd_header const & h1, opd_header const & h2);
+
+/**
+ * check mtime of samples file header against file
+ * all error are fatal
+ */
+void check_mtime(std::string const & file, opd_header const & header);
+
+
+/**
+ * output a readable form of header to out
+ */
+void output_header(ostream & out, opd_header const & header);
+
+#endif // OP_HEADER_H

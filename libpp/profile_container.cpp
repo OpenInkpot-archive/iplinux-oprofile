@@ -17,6 +17,7 @@
 
 #include "string_filter.h"
 
+#include "op_header.h"
 #include "profile.h"
 #include "symbol_functors.h"
 #include "profile_container.h"
@@ -324,7 +325,7 @@ bool add_samples(profile_container & samples,
 {
 	profile_t profile(sample_filename);
 
-	profile.check_mtime(abfd.get_filename());
+	check_mtime(abfd.get_filename(), profile.get_header());
 	profile.set_start_offset(abfd.get_start_offset());
 	
 	samples.add(profile, abfd, app_name);

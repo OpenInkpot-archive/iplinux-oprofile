@@ -6,6 +6,6 @@ AM_CPPFLAGS = \
 noinst_LIBRARIES = libop++.a
 libop___a_SOURCES = \
 	op_print_event.cpp \
-	op_mangling.cpp \
-	op_mangling.h \
+	op_header.cpp \
+	op_header.h \
 	op_print_event.h

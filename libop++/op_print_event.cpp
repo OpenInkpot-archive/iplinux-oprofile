@@ -35,9 +35,12 @@ void op_print_event(ostream & out, op_cpu cpu_type, u8 type, u16 um, u32 count)
 
 	out << "Counted " << event->name << " events (" << event->desc << ")";
 	if (cpu_type != CPU_RTC) {
+		int old_width = out.width();
+		char old_fill = out.fill();
 		out << " with a unit mask of 0x"
 		    << hex << setw(2) << setfill('0') << unsigned(um) << " ("
 		    << um_desc << ")";
+		out << setfill(old_fill) << setw(old_width) << dec;
 	}
 	out << " count " << dec << count << endl;
 }

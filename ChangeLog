@@ -1,5 +1,27 @@
 2003-05-06  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* libpop++/op_mangling.h:
+	* libpop++/op_mangling.cpp: removed file
+	* libop++/op_header.h:
+	* libop++/op_header.cpp: new file, misc function acting on sample
+	  file header stolen from libpp/profile.(cpp|h)
+	* libop++/op_print_event.h: typo
+	* libop++/op_print_event.cpp: save/restore ostream state
+	* libop++/Makefile.am: update
+	
+	* libop/op_sample_file.h: remove dead #define OPD_MANGLE_CHAR
+
+	* libpp/profile.h:
+	* libpp/profile.cpp: move some member function to free function in
+	  libop++/op_header.(cpp|h)
+	* libpp/profile_container.cpp: minor call change
+
+	* libpp/Makefile.am: op_merge can't be compiled currently inhibit build
+
+	* libpp/opreport.cpp: output sample file header
+
+2003-05-06  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libutil++/path_filter.h: default param to empty string not "*"
 
 	* libpp/symbol_functors.h: remove dead code

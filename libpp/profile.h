@@ -39,11 +39,6 @@ public:
 	~profile_t();
  
 	/**
-	 * check_mtime - check mtime of samples file against file
-	 */
-	void check_mtime(std::string const & file) const;
-
-	/**
 	 * accumulate_samples - lookup samples from a vma address
 	 * @param vma index of the samples.
 	 *
@@ -61,27 +56,10 @@ public:
 	 */
 	unsigned int accumulate_samples(uint start, uint end) const;
 
-	/**
-	 * output_header() - output counter setup
-	 *
-	 * output to stdout the cpu type, cpu speed
-	 * and all counter description available
-	 */
-	void output_header() const;
-
-	/// return the header of the first opened samples file
-	opd_header const & first_header() const {
+	/// return the header of the last opened samples file
+	opd_header const & get_header() const {
 		return *file_header;
 	}
-
-	/**
-	 * check_headers - check that the lhs and rhs headers are
-	 * coherent (same size, same mtime etc.)
-	 * @param headers the other _profile_t
-	 *
-	 * all errors are fatal
-	 */
-	void check_headers(profile_t const & headers) const;
 
 	/**
 	 * Set the start offset of the underlying samples files

@@ -15,6 +15,7 @@
 #include <algorithm>
 #include <sstream>
 
+#include "op_header.h"
 #include "string_manip.h"
 #include "file_manip.h"
 #include "opreport_options.h"
@@ -108,6 +109,15 @@ string const format_double(double value, size_t int_width, size_t frac_width)
 	   << setprecision(frac_width) << value;
 
 	return os.str();
+}
+
+void output_header(partition_files const & files)
+{
+	if (files.nr_set()) {
+		partition_files::filename_set const & file_set = files.set(0);
+		profile_t profile(file_set.begin()->sample_filename);
+		output_header(cout, profile.get_header());
+	}
 }
 
 
@@ -240,6 +250,8 @@ void output_symbols_count(partition_files const & files)
 int opreport(vector<string> const & non_options)
 {
 	handle_options(non_options);
+
+	output_header(*sample_file_partition);
 
 	if (options::symbols) {
 		output_symbols_count(*sample_file_partition);
