@@ -26,4 +26,6 @@ struct sfile;
  */
 int opd_open_sample_file(struct sfile * sf, int counter);
 
+int opd_open_cg_sample_file(struct sfile * sf, int counter);
+
 #endif /* OPD_MANGLING_H */

@@ -48,7 +48,8 @@ static char const * get_dep_name(struct sfile const * sf)
 }
 
 
-static char * mangle_filename(struct sfile const * sf, int counter)
+static char *
+mangle_filename(struct sfile const * sf, int counter, int cg)
 {
 	char * mangled;
 	struct mangle_values values;
@@ -81,6 +82,9 @@ static char * mangle_filename(struct sfile const * sf, int counter)
 		values.cpu = sf->cpu;
 	}
 
+	if (cg)
+		values.flags |= MANGLE_CALLGRAPH;
+
 	values.event_name = event->name;
 	values.count = event->count;
 	values.unit_mask = event->um;
@@ -100,7 +104,7 @@ int opd_open_sample_file(struct sfile * sf, int counter)
 
 	file = &sf->files[counter];
 
-	mangled = mangle_filename(sf, counter);
+	mangled = mangle_filename(sf, counter, 0);
 
 	if (!mangled)
 		return EINVAL;
@@ -119,6 +123,59 @@ retry:
 		if (err == EMFILE) {
 			if (sfile_lru_clear()) {
 				printf("LRU cleared but odb_open() fails for %s.\n", mangled);
+				abort();
+			}
+			goto retry;
+		}
+
+		fprintf(stderr, "oprofiled: open of %s failed: %s\n",
+		        mangled, strerror(err));
+		goto out;
+	}
+
+	if (!sf->kernel)
+		binary = find_cookie(sf->cookie);
+	else
+		binary = sf->kernel->name;
+
+	fill_header(file->base_memory, counter, !!sf->kernel,
+	            binary ? op_get_mtime(binary) : 0);
+
+out:
+	sfile_put(sf);
+	free(mangled);
+	return err;
+}
+
+
+int opd_open_cg_sample_file(struct sfile * sf, int counter)
+{
+	char * mangled;
+	samples_ocg_t * file;
+	char const * binary;
+	int err;
+
+	file = &sf->cg_files[counter];
+
+	mangled = mangle_filename(sf, counter, 1);
+
+	if (!mangled)
+		return EINVAL;
+
+	verbprintf("Opening \"%s\"\n", mangled);
+
+	create_path(mangled);
+
+	sfile_get(sf);
+
+retry:
+	err = ocg_open(file, mangled, OCG_RDWR, sizeof(struct opd_header));
+
+	/* This can naturally happen when racing against opcontrol --reset. */
+	if (err) {
+		if (err == EMFILE) {
+			if (sfile_lru_clear()) {
+				printf("LRU cleared but ocg_open() fails for %s.\n", mangled);
 				abort();
 			}
 			goto retry;
