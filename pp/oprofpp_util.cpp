@@ -949,7 +949,7 @@ bool opp_samples_files::accumulate_samples(counter_array_t& counter,
  */
 samples_file_t::samples_file_t(const std::string & filename)
 {
-	db_open(&db_tree, filename.c_str(), sizeof(struct opd_header));
+	db_open(&db_tree, filename.c_str(), DB_RDONLY, sizeof(struct opd_header));
 }
 
 /**

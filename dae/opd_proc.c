@@ -321,7 +321,7 @@ static void opd_open_sample_file(struct opd_image *image, int counter)
 
 	verbprintf("Opening \"%s\"\n", mangled);
 
-	db_open(&sample_file->tree, mangled, sizeof(struct opd_header));
+	db_open(&sample_file->tree, mangled, DB_RDWR, sizeof(struct opd_header));
 	if (!sample_file->tree.base_memory) {
 		fprintf(stderr, 
 			"oprofiled: db_open() of image sample file \"%s\" failed: %s\n", 
