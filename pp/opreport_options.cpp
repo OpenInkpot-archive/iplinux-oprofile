@@ -159,6 +159,49 @@ void handle_output_file()
 	cout.rdbuf(os.rdbuf());
 }
 
+/**
+ * check incompatible or meaningless options
+ *
+ */
+void check_options()
+{
+	using namespace options;
+
+	bool do_exit = false;
+
+	if (!symbols) {
+		if (debug_info || accumulated) {
+			cerr << "--debug-info and --accumulated are "
+			     << "meaningless without --symbols" << endl;
+			do_exit = true;
+		}
+
+		if (!exclude_symbols.empty() || !include_symbols.empty()) {
+			cerr << "--exclude-symbols and --include-symbols are "
+			     << "meaningless without --symbols" << endl;
+			do_exit = true;
+		}
+
+		if (find(sort_by.options.begin(), sort_by.options.end(), 
+			 sort_options::vma) != sort_by.options.end()) {
+			cerr << "--sort=vma is "
+			     << "meaningless without --symbols" << endl;
+			do_exit = true;
+		}
+	}
+
+	if (exclude_dependent) {
+		if (merge_by.lib) {
+			cerr << "--merge=lib is meaningless "
+			     << "with --exclude-dependent" << endl;
+			do_exit = true;
+		}
+	}
+
+	if (do_exit)
+		exit(EXIT_FAILURE);
+}
+
 } // namespace anon
 
 
@@ -172,6 +215,7 @@ void handle_options(vector<string> const & non_options)
 	handle_sort_option();
 	handle_merge_option();
 	handle_output_file();
+	check_options();
 
 	options::symbol_filter =
 		string_filter(include_symbols, exclude_symbols);

@@ -83,13 +83,12 @@ void handle_options(vector<string> const & non_options)
 	using namespace options;
 
 	if (!assembly && !source) {
-		throw invalid_argument(
-			"you must specify at least --source or --assembly\n");
+		cerr <<	"you must specify at least --source or --assembly\n";
+		exit(EXIT_FAILURE);
 	}
 
 	if (!objdump_params.empty() && !assembly) {
-		cerr << "You can't specify --objdump-params without assembly "
-		     << "output" << endl;
+		cerr << "--objdump-params is meaningless without --assembly\n"
 		exit(EXIT_FAILURE);
 	}
 

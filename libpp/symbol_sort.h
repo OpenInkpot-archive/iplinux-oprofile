@@ -39,7 +39,6 @@ struct sort_options {
 	void sort(symbol_collection & syms, bool reverse_sort,
 		  bool long_filenames) const;
 
-private:
 	std::vector<sort_order> options;
 };
 

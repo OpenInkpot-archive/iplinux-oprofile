@@ -1,5 +1,12 @@
 2003-05-26  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* libpp/symbol_sort.h:
+	* pp/opannotate_options.cpp:
+	* pp/opgprof_options.cpp:
+	* pp/opreport_options.cpp: handle meaningless options combinations
+
+2003-05-26  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* pp/opgprof_options.cpp: no need to use unmergeable_profile here
 
 2003-05-25  Philippe Elie  <phil.el@wanadoo.fr>
