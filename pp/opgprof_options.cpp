@@ -43,7 +43,7 @@ popt::option options_array[] = {
 
 bool try_merge_profiles(profile_spec const & spec, bool exclude_dependent)
 {
-	list<string> sample_files = spec.generate_file_list(exclude_dependent);
+	list<string> sample_files = spec.generate_file_list(exclude_dependent, true);
 
 	cverb << "Matched sample files: " << sample_files.size() << endl;
 	copy(sample_files.begin(), sample_files.end(),

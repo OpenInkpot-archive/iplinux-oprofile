@@ -44,11 +44,12 @@ public:
 
 	/**
 	 * @param exclude_dependent  whether to exclude dependent sub-images
+	 * @param exclude_cg  whether to exclude call graph file
 	 *
 	 * Use the spec to generate the list of candidate sample files.
 	 */
 	std::list<std::string>
-	generate_file_list(bool exclude_dependent) const;
+	generate_file_list(bool exclude_dependent, bool exclude_cg) const;
 
 	/**
 	 * @param filename  the filename to check

@@ -1,3 +1,11 @@
+2003-11-15  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/profile_spec.cpp:
+	* libpp/profile_spec.h:
+	* pp/opannotate_options.cpp:
+	* pp/opgprof_options.cpp:
+	* pp/opreport_options.cpp: filter call graph samples files
+
 2003-11-14  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* daemon/opd_mangling.c: oops, it's better to really open the cg file
