@@ -258,7 +258,7 @@ bool profile_spec::match(string const & filename) const
 		// PP:3.7 3.8
 		if (!image.empty()) {
 			glob_filter filter(image, image_exclude);
-			if (filter.match(spec.image)) {
+			if (!filter.match(spec.image)) {
 				return false;
 			}
 		} else if (!image_or_lib_image.empty()) {

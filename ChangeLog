@@ -1,5 +1,9 @@
 2003-05-28  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* libpp/profile_spec.cpp: make image:/path/to:image working
+
+2003-05-28  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libutil++/string_manip.h:
 	* libutil++/string_manip.cpp: specialize
 	  lexical_cast_no_ws<unsigned int> to accept hexadecimal input
