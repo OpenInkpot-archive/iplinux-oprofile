@@ -162,7 +162,7 @@ do_options() {
  
 		if test "$IS_TIMER" -eq 1; then
 			case "$arg" in
-				--ctr*-unit-mask|--ctr*-event|--ctr*-count|--ctr*-user|--ctr*-kernel)
+				--kernel-only|--ctr*-unit-mask|--ctr*-event|--ctr*-count|--ctr*-user|--ctr*-kernel)
 					echo "Cannot use option $arg in timer mode."
 					exit 1;
 					;;
@@ -334,7 +334,6 @@ do_sysctl_setup() {
 	if [ $BUF_SIZE != 0 ]; then
 		echo $BUF_SIZE >$MOUNT/buffer_size
 	fi
-	echo $KERNEL_ONLY >$MOUNT/kernel_only
 
 	if test "$IS_TIMER" -ne 1; then
 		# Necessary in this case :
@@ -344,6 +343,8 @@ do_sysctl_setup() {
 			echo 0 >$MOUNT/$f/event
 			echo 0 >$MOUNT/$f/count
 		done
+
+		echo $KERNEL_ONLY >$MOUNT/kernel_only
 
 		for f in $OP_COUNTERS ; do
 			if [ "${CTR_EVENT[$f]}" != "" ]; then
