@@ -260,6 +260,14 @@ AC_SUBST(BFD_CXXFLAGS)
 AC_PATH_XTRA 
 LIBS="$X_PRE_LIBS $LIBS $X_LIBS -lX11 $X_EXTRA_LIBS"
 QT_DO_IT_ALL
+
+# try to find the docbook stylesheets
+if test -e /usr/share/sgml/docbook/stylesheet/xsl/nwalsh/xhtml/docbook.xsl; then
+	db_xsl=/usr/share/sgml/docbook/stylesheet/xsl/nwalsh/xhtml/docbook.xsl
+else
+	db_xsl=/usr/share/sgml/docbook/xsl-stylesheets/xhtml/docbook.xsl
+fi
+AC_SUBST(db_xsl)
  
 # do NOT put tests here, they will fail in the case X is not installed !
  
@@ -281,6 +289,7 @@ AC_OUTPUT(make.common \
 	daemon/Makefile \
 	utils/Makefile \
 	doc/Makefile \
+	doc/xsl/xhtml.xsl \
 	doc/oprofile.1 \
 	pp/Makefile \
 	gui/Makefile \
