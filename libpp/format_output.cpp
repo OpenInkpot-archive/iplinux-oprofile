@@ -32,7 +32,7 @@ formatter::formatter(profile_container const & profile_)
 	first_output(true),
 	vma_64(false),
 	need_details(false),
-	need_header(false),
+	need_header(true),
 	short_filename(false)
 {
 	total_count = profile.samples_count();
@@ -98,9 +98,9 @@ void formatter::show_details()
 }
 
 
-void formatter::show_header()
+void formatter::hide_header()
 {
-	need_header = true;
+	need_header = false;
 }
 
 
@@ -216,7 +216,7 @@ void formatter::output_header(ostream & out)
 
 	first_output = false;
 
-	if (need_header) {
+	if (!need_header) {
 		return;
 	}
 

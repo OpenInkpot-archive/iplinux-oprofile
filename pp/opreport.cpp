@@ -211,9 +211,14 @@ void output_symbols_count(partition_files const & files)
 				app_name = image_name;
 			}
 
-			// FIXME
 			// if the image files does not exist try to retrieve it
-//			image_name = check_image_name(options::alternate_filename, image_name, samples_filename);
+			image_name =
+				check_image_name(options::alternate_filename,
+						 image_name,
+						 it->sample_filename);
+
+			// no need to warn if image_name is not readable
+			// check_image_name() already do that
 			if (op_file_readable(image_name)) {
 				// FIXME: inneficient since we can have
 				// multiple time the same binary file open bfd
@@ -236,12 +241,13 @@ void output_symbols_count(partition_files const & files)
 		out.show_details();
 	if (options::short_filename)
 		out.show_short_filename();
+	if (!options::show_header)
+		out.hide_header();
+
 	out.add_format(flags);
 
 	out.output(cout, symbols, options::reverse_sort, need_vma64);
 }
-
-}  // anonymous namespace
 
 
 int opreport(int argc, char const * argv[])
@@ -255,6 +261,8 @@ int opreport(int argc, char const * argv[])
 	}
 	return 0;
 }
+
+}  // anonymous namespace
 
 
 int main(int argc, char const * argv[])

@@ -15,6 +15,7 @@
 
 using namespace std;
 
+namespace {
 
 int opgprof(int argc, char const * argv[])
 {
@@ -24,6 +25,7 @@ int opgprof(int argc, char const * argv[])
 	return 0;
 }
 
+} // anonymous namespace
 
 int main(int argc, char const * argv[])
 {

@@ -12,7 +12,6 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
 
    - race with opcontrol --shutdown on odb_open() ?
 
- o -EPERM on the binary is not reported to the user
  o "no samples files found". Make that check if there were some, but they
    didn't match, and if so, give a different message w/o mentioning --dump
  o move oprofiled.log to OP_SAMPLE_DIR/current ?
@@ -28,11 +27,15 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
  o inhibit build of opdiff in pp/Makefile.am
  o consider to do the symbol (details too ?) sort at output, format_output receive
   a vector of symbol to consider, we can perhaps sort in format_output
+ o implement pp_interface alias
+ o when a library is not accessible we warn each time we try to bfd_open this
+  lib so on multiple time with --seperate=lib, we must warn once. The best way
+  is to bfd_open only one time each binary. It will also speed up opreport
+  (see opreport.cpp:output_symbols_count() comment above add_samples() call)
  o opreport unhandled option (probably not exhaustive) 
+  --global-percent is not handled according to pp_interface
   --accumulated
   --sort= (?)
-  --no-header
-  --image-path
  
  o opreport /usr/bin/whatever should imply -l (like oprofpp back-compat) but NOT
    if opreport <some spec> and it just *happens* to match one image.
@@ -43,6 +46,7 @@ After merging with trunk
 ------------------------
 
  o look if we must remove help_str support from libopt++
+ o implement pp_interface alias
 
 
 Before 1.0 big stuff

@@ -15,6 +15,7 @@
 
 using namespace std;
 
+namespace {
 
 int opannotate(int argc, char const * argv[])
 {
@@ -23,6 +24,8 @@ int opannotate(int argc, char const * argv[])
 	cerr << "N/A\n";
 	return 0;
 }
+
+} // anonymous namespace
 
 
 int main(int argc, char const * argv[])

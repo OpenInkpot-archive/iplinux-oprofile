@@ -48,8 +48,8 @@ public:
 
 	/// set the output_details boolean
 	void show_details();
-	/// set the output_header boolean
-	void show_header();
+	/// set the need_header boolean to false
+	void hide_header();
 	/// set the short_filename boolean
 	void show_short_filename();
 private:
@@ -140,7 +140,7 @@ private:
 	bool vma_64;
 	/// true if we need to show details for each symbols
 	bool need_details;
-	/// true if we need to show header before the beforethe first output
+	/// true if we need to show header before the before the first output
 	bool need_header;
 	/// true if we use basename(filename) in output rather filename
 	bool short_filename;

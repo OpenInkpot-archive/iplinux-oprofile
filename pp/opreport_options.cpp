@@ -44,11 +44,12 @@ namespace options {
 	string_filter symbol_filter;
 	vector<string> image_path;
 	merge_option merge_by;
-	bool no_header;
+	bool show_header = true;
 	bool short_filename;
 	bool accumulated;
 	bool reverse_sort;
 	bool global_percent;
+	alt_filename_t alternate_filename;
 }
 
 
@@ -85,7 +86,7 @@ popt::option options_array[] = {
 		     "comma separated path to search missing binaries","path"),
 	popt::option(merge, "merge", 'm',
 		     "comma separated list", "cpu,pid,lib"),
-	popt::option(options::no_header, "no-header", '\0',
+	popt::option(options::show_header, "no-header", '\0',
 		     "remove all header from output"),
 	popt::option(options::short_filename, "short-filename", '\0',
 		     "use basename of filename in output"),
@@ -271,6 +272,8 @@ void get_options(int argc, char const * argv[])
 	handle_sort_option();
 
 	handle_merge_option();
+
+	add_to_alternate_filename(alternate_filename, image_path);
 
 	options::symbol_filter = string_filter(include_symbols, exclude_symbols);
 
