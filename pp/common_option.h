@@ -40,6 +40,6 @@ int run_pp_tool(int argc, char const * argv[], pp_fct_run_t fct);
  *
  * convert threshold to a double and return it. All error are fatal
  */
-double handle_threshold(string threshold);
+double handle_threshold(std::string threshold);
 
 #endif /* !COMMON_OPTION_H */

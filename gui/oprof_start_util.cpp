@@ -175,7 +175,7 @@ daemon_status::daemon_status()
 
 
 /**
- * get_user_filename - get absoluate filename of file in user $HOME
+ * get_user_filename - get absolute filename of file in user $HOME
  * @param filename  the relative filename
  *
  * Get the absolute path of a file in a user's home directory.

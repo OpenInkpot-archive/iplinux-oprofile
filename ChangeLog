@@ -1,3 +1,7 @@
+2003-05-11  John Levon  <levon@movementarian.org>
+
+	* pp/common_option.h: use std::
+
 2003-05-11  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* pp/opreport_options.cpp: move handle_threshold()

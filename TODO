@@ -12,11 +12,6 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
 
    - race with opcontrol --shutdown on odb_open() ?
 
- o  new format percent in opreport can exceed field width by at least one :
-
-08049610 1        13            2.22786e-05 0.000289621 simple_strtoul          /usr/bin/od
-080496a8 1        14            2.22786e-05 0.0003119  __do_global_dtors_aux   /bin/grep
-
  o default to opreport -n as discussed
  o we show a header but not column headers for image report
  o write the man page and xml doc (i'll do this right at the end - john)

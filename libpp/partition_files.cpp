@@ -184,7 +184,6 @@ image_set sort_by_image(partition_files const & files,
 			string image_name = it->lib_image.empty() ?
 				it->image : it->lib_image;
 
-
 			// if the image files does not exist try to retrieve it
 			image_name = find_image_path(extra_images,
 				image_name, it->sample_filename);
