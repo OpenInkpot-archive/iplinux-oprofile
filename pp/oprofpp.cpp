@@ -134,7 +134,7 @@ static void opp_get_options(int argc, const char **argv, string & image_file,
 	}
 
 	if (!ctr_str)
-		ctr_str = "0";
+		ctr_str = "";
 
 	counter = counter_mask(ctr_str);
 

@@ -257,12 +257,12 @@ void opp_treat_options(const char* file, poptContext optcon,
 		sscanf(file_ctr_str + 1, "%d", &temp_counter);
 	}
 
-	if (temp_counter != -1 && counter != -1) {
+	if (temp_counter != -1 && counter != -1 && counter != 0) {
 		if ((counter & (1 << temp_counter)) == 0)
 			quit_error(optcon, "oprofpp: conflict between given counter and counter of samples file.\n");
 	}
 
-	if (counter == -1) {
+	if (counter == -1 || counter == 0) {
 		if (temp_counter != -1)
 			counter = 1 << temp_counter;
 		else
