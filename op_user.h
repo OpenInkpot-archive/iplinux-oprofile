@@ -27,7 +27,8 @@
 #define OP_DEVICE OP_BASE_DIR "opdev"
 #define OP_NOTE_DEVICE OP_BASE_DIR "opnotedev"
 #define OP_HASH_DEVICE OP_BASE_DIR "ophashmapdev"
-#define OP_LOG_FILE OP_BASE_DIR "oprofiled.log"
+#define OP_LOG_FILENAME "oprofiled.log"
+#define OP_LOG_FILE OP_BASE_DIR OP_LOG_FILENAME
  
 /*@{\name miscellaneous types */
 #ifndef u8
