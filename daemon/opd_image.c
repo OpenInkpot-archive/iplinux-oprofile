@@ -365,6 +365,12 @@ static inline int is_escape_code(uint64_t code)
 }
 
 
+enum tracing_type {
+	TRACING_OFF,
+	TRACING_START,
+	TRACING_ON
+};
+
 /**
  * Transient values used for parsing the event buffer.
  * Note that these are reset for each buffer read, but
@@ -378,6 +384,8 @@ struct transient {
 	cookie_t app_cookie;
 	struct opd_image * image;
 	int in_kernel;
+	enum tracing_type tracing;
+	unsigned long event;
 	unsigned long cpu;
 	pid_t pid;
 	pid_t tgid;
@@ -431,6 +439,14 @@ static void opd_put_sample(struct transient * trans, vma_t eip)
 		return;
 	}
 
+	event = pop_buffer_value(trans);
+
+	if (trans->tracing != TRACING_ON)
+		trans->event = event;
+
+	if (trans->tracing == TRACING_START)
+		trans->tracing = TRACING_ON;
+
 	/* There is a small race where this *can* happen, see
 	 * caller of cpu_buffer_reset() in the kernel
 	 */
@@ -442,8 +458,6 @@ static void opd_put_sample(struct transient * trans, vma_t eip)
 		return;
 	}
 
-	event = pop_buffer_value(trans);
-
 	opd_stats[OPD_SAMPLES]++;
 
 	if (trans->in_kernel > 0) {
@@ -453,8 +467,8 @@ static void opd_put_sample(struct transient * trans, vma_t eip)
 		if (separate_kernel_samples && trans->image)
 			app_image = trans->image->app_image;
 		verbprintf("Putting kernel sample 0x%llx, counter %lu - application %s\n",
-			eip, event, app_image ? app_image->name : "kernel");
-		opd_handle_kernel_sample(eip, event, app_image);
+			eip, trans->event, app_image ? app_image->name : "kernel");
+		opd_handle_kernel_sample(eip, trans->event, app_image);
 		return;
 	}
 
@@ -462,8 +476,8 @@ static void opd_put_sample(struct transient * trans, vma_t eip)
 
 	if (trans->image != NULL) {
 		verbprintf("Putting image sample (%s) offset 0x%llx, counter %lu\n",
-			trans->image->name, eip, event);
-		opd_put_image_sample(trans->image, eip, event);
+			trans->image->name, eip, trans->event);
+		opd_put_image_sample(trans->image, eip, trans->event);
 		return;
 	}
 
@@ -562,6 +576,20 @@ static void code_module_loaded(struct transient * trans __attribute__((unused)))
 }
 
 
+static void code_trace_begin(struct transient * trans)
+{
+	verbprintf("TRACE_BEGIN\n");
+	trans->tracing = TRACING_START;
+}
+
+
+static void code_trace_end(struct transient * trans)
+{
+	verbprintf("TRACE_END\n");
+	trans->tracing = TRACING_OFF;
+}
+
+
 typedef void (*handler_t)(struct transient *);
 
 static handler_t handlers[LAST_CODE + 1] = {
@@ -572,7 +600,9 @@ static handler_t handlers[LAST_CODE + 1] = {
 	&code_kernel_enter,
 	&code_kernel_exit,
 	&code_module_loaded,
-	&code_unknown /* tgid handled differently */
+	&code_unknown, /* tgid handled differently */
+	&code_trace_begin,
+	&code_trace_end
 };
 
 
@@ -585,6 +615,8 @@ void opd_process_samples(char const * buffer, size_t count)
 		.app_cookie = 0,
 		.image = NULL,
 		.in_kernel = -1,
+		.tracing = TRACING_OFF,
+		.event = 0,
 		.cpu = -1,
 		.pid = -1,
 		.tgid = -1
