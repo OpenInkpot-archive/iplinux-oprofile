@@ -71,7 +71,10 @@ private:
 	void validate();
 
 	/**
-	 * @param image  an image or a libray name given on command line
+	 * @param image an image or a libray name given on command line
+	 *
+	 * Used for e.g. "opreport /bin/mybinary". We don't know yet
+	 * if this is an application or a dependent image.
 	 */
 	void set_image_or_lib_name(std::string const & tag_value);
 
@@ -115,14 +118,6 @@ private:
 	action_t get_handler(std::string const & tag_value,
 			     std::string & value);
 
-	/**
-	 * PP:3.3/3.4 constraint: tag sample-file and binary: cannot be used
-	 * with any other tag
-	 * 
-	 * FIXME: mis-named ? is_set_except_sample_file_or_binary() ...
-	 */
-	bool is_empty() const;
-
 	filename_spec file_spec;
 	std::string binary;
 	std::vector<std::string> session;
@@ -141,9 +136,9 @@ private:
 	std::vector<std::string> image_or_lib_image;
 
 	/// tree if any tag except sample-file: and binary: are seen
-	bool set_p;
-	/// true if samples-file: tag has been seen
-	bool file_spec_set_p;
+	bool normal_tag_set;
+	/// true if sample-file: tag has been seen
+	bool sample_file_set;
 };
 
-#endif /* !PARSE_CMDLINE_H */
+#endif /* !PROFILE_SPEC_H */

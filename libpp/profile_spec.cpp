@@ -26,8 +26,8 @@ using namespace std;
 
 profile_spec::profile_spec()
 	:
-	set_p(false),
-	file_spec_set_p(false)
+	normal_tag_set(false),
+	sample_file_set(false)
 {
 	parse_table["sample-file"] = &profile_spec::parse_sample_file;
 	parse_table["binary"] = &profile_spec::parse_binary;
@@ -60,12 +60,6 @@ void profile_spec::parse(string const & tag_value)
 	(this->*action)(value);
 }
 
-void profile_spec::set_image_or_lib_name(string const & str)
-{
-	set_p = true;
-	image_or_lib_image.push_back(str);
-}
-
 
 bool profile_spec::is_valid_tag(string const & tag_value)
 {
@@ -78,10 +72,9 @@ void profile_spec::validate()
 {
 	// 3.3 sample_file can be used only with binary
 	// 3.4 binary can be used only with sample_file
-	if (file_spec_set_p || !binary.empty()) {
-		if (!is_empty()) {
-			throw invalid_argument("Cannot specify sample-file: or binary: tag with another tag");
-		}
+	if (normal_tag_set && (sample_file_set || !binary.empty())) {
+		throw invalid_argument("Cannot specify sample-file: or "
+			"binary: tag with another tag");
 	}
 
 	// PP:3.5 no session given means use the current session.
@@ -95,9 +88,16 @@ void profile_spec::validate()
 }
 
 
+void profile_spec::set_image_or_lib_name(string const & str)
+{
+	normal_tag_set = true;
+	image_or_lib_image.push_back(str);
+}
+
+
 void profile_spec::parse_sample_file(string const & str)
 {
-	file_spec_set_p = true;
+	sample_file_set = true;
 	file_spec.set_sample_filename(str);
 }
 
@@ -110,84 +110,84 @@ void profile_spec::parse_binary(string const & str)
 
 void profile_spec::parse_session(string const & str)
 {
-	set_p = true;
+	normal_tag_set = true;
 	separate_token(session, str, ',');
 }
 
 
 void profile_spec::parse_session_exclude(string const & str)
 {
-	set_p = true;
+	normal_tag_set = true;
 	separate_token(session_exclude, str, ',');
 }
 
 
 void profile_spec::parse_image(string const & str)
 {
-	set_p = true;
+	normal_tag_set = true;
 	separate_token(image, str, ',');
 }
 
 
 void profile_spec::parse_image_exclude(string const & str)
 {
-	set_p = true;
+	normal_tag_set = true;
 	separate_token(image_exclude, str, ',');
 }
 
 
 void profile_spec::parse_lib_image(string const & str)
 {
-	set_p = true;
+	normal_tag_set = true;
 	separate_token(lib_image, str, ',');
 }
 
 
 void profile_spec::parse_lib_image_exclude(string const & str)
 {
-	set_p = true;
+	normal_tag_set = true;
 	separate_token(lib_image_exclude, str, ',');
 }
 
 
 void profile_spec::parse_event(string const & str)
 {
-	set_p = true;
+	normal_tag_set = true;
 	event.set(str);
 }
 
 
 void profile_spec::parse_unitmask(string const & str)
 {
-	set_p = true;
+	normal_tag_set = true;
 	unitmask.set(str);
 }
 
 
 void profile_spec::parse_count(string const & str)
 {
-	set_p = true;
+	normal_tag_set = true;
 	count.set(str);
 }
 
 
 void profile_spec::parse_tid(string const & str)
 {
-	set_p = true;
+	normal_tag_set = true;
 	tid.set(str, false);
 }
 
 
 void profile_spec::parse_tgid(string const & str)
 {
-	set_p = true;
+	normal_tag_set = true;
 	tgid.set(str, false);
 }
 
 
 void profile_spec::parse_cpu(string const & str)
 {
-	set_p = true;
+	normal_tag_set = true;
 	cpu.set(str, false);
 }
 
@@ -217,7 +217,7 @@ bool profile_spec::match(string const & filename) const
 	filename_spec spec(filename);
 
 	// PP:3.3 if spec was defined through sample-file: match it directly
-	if (file_spec_set_p) {
+	if (sample_file_set) {
 		return file_spec.match(spec, binary);
 	}
 
@@ -284,12 +284,6 @@ bool profile_spec::match(string const & filename) const
 	}
 
 	return true;
-}
-
-
-bool profile_spec::is_empty() const
-{
-	return !set_p;
 }
 
 

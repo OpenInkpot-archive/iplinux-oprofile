@@ -138,5 +138,4 @@ void handle_options(vector<string> const & non_options)
 
 	sample_file_partition.reset(
 		new partition_files(sample_files, merge_by));
-
 }

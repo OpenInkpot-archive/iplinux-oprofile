@@ -50,7 +50,7 @@ vma      samples  cum. samples  %           cum. %     symbol name             i
   --global-percent is not handled according to pp_interface
   --sort= (?)
  o pp/opreport --merge lib /lib/i686/libc-2.3.2.so doesn't do anything when using
-   separate
+   separate, you need to specify --include-dependent ... makes sense ???
  o pp/opreport --merge=lib. This should give a list of all the binaries shown separately,
    including the libs, e.g.
 

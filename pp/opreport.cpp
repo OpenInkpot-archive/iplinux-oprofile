@@ -28,81 +28,6 @@ using namespace std;
 
 namespace {
 
-struct merged_file_count {
-	merged_file_count() : count(0) {}
-	size_t count;
-	string image_name;
-	string lib_image;
-};
-
-struct compare_merged_file_count {
-	bool operator()(merged_file_count const & lhs,
-			merged_file_count const & rhs) const;
-};
-
-struct files_count {
-	files_count() : count(0) {}
-	size_t count;
-	string image_name;
-	string lib_image;
-	vector<merged_file_count> files;
-};
-
-struct compare_files_count {
-	bool operator()(files_count const & lhs, files_count const & rhs) const;
-};
-
-
-bool compare_merged_file_count::operator()(merged_file_count const & lhs,
-					   merged_file_count const & rhs) const
-{
-	return options::reverse_sort 
-		? lhs.count < rhs.count
-		: rhs.count < lhs.count;
-}
-
-
-bool compare_files_count::operator()(files_count const & lhs,
-				     files_count const & rhs) const
-{
-	return options::reverse_sort 
-		? lhs.count < rhs.count
-		: rhs.count < lhs.count;
-}
-
-
-files_count counts(partition_files::filename_set const & files)
-{
-	files_count count;
-
-	count.image_name = files.begin()->image;
-	count.lib_image = files.begin()->lib_image;
-
-	partition_files::filename_set::const_iterator it;
-	for (it = files.begin(); it != files.end(); ++it) {
-		merged_file_count sub_count;
-
-		sub_count.image_name = it->image;
-		sub_count.lib_image  = it->lib_image;
-
-		profile_t samples;
-		samples.add_sample_file(it->sample_filename, 0);
-		// THere's another FIXME on this elsewhere. Note
-		// that the use of profile_t for this means we
-		// pass in an offset of "0" instead of the real
-		// abfd offset. This is perhaps a bit dubious...
-		sub_count.count = samples.accumulate_samples(0, ~0);
-
-		count.count += sub_count.count;
-		count.files.push_back(sub_count);
-	}
-
-	sort(count.files.begin(), count.files.end(),
-	     compare_merged_file_count());
-
-	return count;
-}
-
 
 // FIXME: intended to replace format_percent
 string const format_double(double value, size_t int_width, size_t frac_width)
@@ -117,6 +42,7 @@ string const format_double(double value, size_t int_width, size_t frac_width)
 	return os.str();
 }
 
+
 void output_header(partition_files const & files)
 {
 	if (files.nr_set()) {
@@ -129,6 +55,113 @@ void output_header(partition_files const & files)
 }
 
 
+string get_filename(string const & filename)
+{
+	return options::short_filename ? basename(filename) : filename;
+}
+
+
+/// storage for a merged file summary
+struct summary {
+	summary() : count(0) {}
+	size_t count;
+	string image_name;
+	string lib_image;
+
+	struct compare {
+		bool operator()(summary const & lhs,
+		                summary const & rhs) const {
+			return options::reverse_sort 
+				? lhs.count < rhs.count
+				: rhs.count < lhs.count;
+		}
+	};
+};
+
+
+/**
+ * Summary of a group. A group is a set of image summaries
+ * for one application, i.e. an application image and all
+ * dependent images such as libraries.
+ */
+struct group_summary {
+	group_summary() : count(0) {}
+	size_t count;
+	string image_name;
+	string lib_image;
+	vector<summary> files;
+
+	struct compare {
+		bool operator()(group_summary const & lhs,
+		                group_summary const & rhs) const {
+			return options::reverse_sort 
+				? lhs.count < rhs.count
+				: rhs.count < lhs.count;
+		}
+	};
+};
+
+
+/**
+ * Generate summaries for each of the profiles in this
+ * partition set.
+ */
+group_summary summarize(partition_files::filename_set const & files)
+{
+	group_summary group;
+
+	group.image_name = files.begin()->image;
+	group.lib_image = files.begin()->lib_image;
+
+	partition_files::filename_set::const_iterator it;
+	for (it = files.begin(); it != files.end(); ++it) {
+		profile_t samples;
+		// THere's another FIXME on this elsewhere. Note
+		// that the use of profile_t for this means we
+		// pass in an offset of "0" instead of the real
+		// abfd offset. This is perhaps a bit dubious...
+		samples.add_sample_file(it->sample_filename, 0);
+
+		summary dep_summary;
+		dep_summary.image_name = it->image;
+		dep_summary.lib_image  = it->lib_image;
+		dep_summary.count = samples.accumulate_samples(0, ~0);
+
+		group.count += dep_summary.count;
+		group.files.push_back(dep_summary);
+	}
+
+	sort(group.files.begin(), group.files.end(),
+	     summary::compare());
+
+	return group;
+}
+
+
+/**
+ * Create summary data for each of the given files
+ */
+double populate_summaries(partition_files const & files,
+                          vector<group_summary> & summaries)
+{
+	double total_count = 0;
+
+	for (size_t i = 0 ; i < files.nr_set(); ++i) {
+		partition_files::filename_set const & file_set = files.set(i);
+
+		summaries.push_back(summarize(file_set));
+
+		total_count += summaries.back().count;
+	}
+
+	sort(summaries.begin(), summaries.end(),
+	     group_summary::compare());
+
+	return total_count;
+}
+
+
+/// Output a count and a percentage
 void output_counter(double total_count, size_t count)
 {
 	// FIXME: left or right, op_time was using left
@@ -140,50 +173,40 @@ void output_counter(double total_count, size_t count)
 }
 
 
-string get_filename(string const & filename)
+/**
+ * Show an image summary for the dependent images.
+ */
+void output_dep_summaries(group_summary const & group, double total_count)
 {
-	return options::short_filename ? basename(filename) : filename;
-}
-
-
-void output_sub_count(files_count const & files, double total_count)
-{
-	for (size_t i = 0; i < files.files.size(); ++i) {
-		merged_file_count const & count = files.files[i];
+	for (size_t i = 0; i < group.files.size(); ++i) {
+		summary const & summ = group.files[i];
 
 		options::cout << "\t";
 		double tot_count = options::global_percent 
-			? total_count : files.count;
-		output_counter(tot_count, count.count);
+			? total_count : group.count;
+		output_counter(tot_count, summ.count);
 
-		if (count.lib_image.empty())
-			options::cout << " " << get_filename(count.image_name);
+		if (summ.lib_image.empty())
+			options::cout << " " << get_filename(summ.image_name);
 		else
-			options::cout << " " << get_filename(count.lib_image);
+			options::cout << " " << get_filename(summ.lib_image);
 		options::cout << endl;
 	}
 }
 
 
-void output_files_count(partition_files const & files)
+/**
+ * Display all the given summary information
+ */
+void
+output_summaries(vector<group_summary> const & summaries, double total_count)
 {
-	vector<files_count> set_file_count;
+	vector<group_summary>::const_iterator it = summaries.begin();
+	vector<group_summary>::const_iterator end = summaries.end();
 
-	double total_count = 0;
-	for (size_t i = 0 ; i < files.nr_set(); ++i) {
-		partition_files::filename_set const & file_set = files.set(i);
-
-		set_file_count.push_back(counts(file_set));
-
-		total_count += set_file_count.back().count;
-	}
-
-	sort(set_file_count.begin(), set_file_count.end(),
-	     compare_files_count());
-
-	vector<files_count>::const_iterator it;
-	for (it = set_file_count.begin(); it != set_file_count.end(); ++it) {
+	for (; it != end; ++it) {
 		output_counter(total_count, it->count);
+
 		if (!options::merge_by.merge_lib) {
 			options::cout << get_filename(it->image_name);
 		} else {
@@ -192,20 +215,26 @@ void output_files_count(partition_files const & files)
 			else
 				options::cout << get_filename(it->lib_image);
 		}
+
 		options::cout << endl;
-		if (options::include_dependent && !options::hide_dependent &&
-		    !options::merge_by.merge_lib) {
-			output_sub_count(*it, total_count);
+
+		bool const showdep = options::include_dependent
+			&& !options::hide_dependent;
+
+		if (showdep && !options::merge_by.merge_lib) {
+			output_dep_summaries(*it, total_count);
 		}
 	}
 }
 
 
-void output_symbols_count(partition_files const & files)
+/**
+ * Load the given samples container with the profile data from
+ * the files container, merging as appropriate.
+ */
+void populate_profiles(partition_files const & files, profile_container & samples)
 {
 	image_set images = sort_by_image(files, options::extra_found_images);
-
-	profile_container samples(false, options::debug_info, options::details);
 
 	image_set::const_iterator it;
 	for (it = images.begin(); it != images.end(); ) {
@@ -250,7 +279,11 @@ void output_symbols_count(partition_files const & files)
 			}
 		}
 	}
+}
 
+
+void output_symbols(profile_container const & samples)
+{
 	// FIXME: it's a weird API that requires a string() as first
 	// arg here ...
 	vector<symbol_entry const *> symbols =
@@ -296,9 +329,15 @@ int opreport(vector<string> const & non_options)
 	output_header(*sample_file_partition);
 
 	if (options::symbols) {
-		output_symbols_count(*sample_file_partition);
+		profile_container samples(false,
+			options::debug_info, options::details);
+		populate_profiles(*sample_file_partition, samples);
+		output_symbols(samples);
 	} else {
-		output_files_count(*sample_file_partition);
+		vector<group_summary> summaries;
+		double const total =
+			populate_summaries(*sample_file_partition, summaries);
+		output_summaries(summaries, total);
 	}
 	return 0;
 }

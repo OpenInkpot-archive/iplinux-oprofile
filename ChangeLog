@@ -1,5 +1,16 @@
 2003-05-08  John Levon  <levon@movementarian.org>
 
+	* libpp/profile_spec.h:
+	* libpp/profile_spec.c: rename the set_p variables,
+	remove pointless is_empty() function
+
+	* pp/opreport.cpp: split collation and output into
+	two separate functions. Rename the temporary structures
+	so it's hopefully a bit more obvious what's happening.
+	Add sourcedocs.
+
+2003-05-08  John Levon  <levon@movementarian.org>
+
 	* pp/opreport_options.h:
 	* pp/opreport_options.cpp: add options::cout,
 	  --output-file option
