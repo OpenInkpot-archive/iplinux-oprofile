@@ -123,6 +123,7 @@ static struct opd_image * opd_create_image(unsigned long hash)
 
 	for (i = 0 ; i < op_nr_counters ; ++i) {
 		odb_init(&image->sample_files[i]);
+		ocg_init(&image->cg_files[i]);
 	}
 
 	list_add(&image->hash_list, &opd_images[hash]);
@@ -250,6 +251,31 @@ void opd_put_image_sample(struct opd_image * image, vma_t offset, int counter)
 	/* Possible narrowing to 32-bit value only. */
 	if (odb_insert(sample_file, (unsigned long)offset, 1) != EXIT_SUCCESS) {
 		fprintf(stderr, "odb_insert() %s\n", sample_file->err_msg);
+		exit(EXIT_FAILURE);
+	}
+}
+
+
+void opd_put_cg_sample(struct opd_image * image, vma_t from, vma_t to, int counter)
+{
+	samples_ocg_t * cg_file;
+	uint64_t key;
+
+	cg_file = &image->cg_files[counter];
+
+	if (!cg_file->base_memory) {
+		opd_open_cg_file(image, counter);
+		if (!cg_file->base_memory) {
+			/* opd_open_cg_file output an error message */
+			return;
+		}
+	}
+
+	/* Possible narrowings to 32-bit value only. */
+	key = to & (0xffffffff);
+	key |= ((uint64_t)from) << 32;
+	if (ocg_insert(cg_file, key, 1) != EXIT_SUCCESS) {
+		fprintf(stderr, "ocg_insert() %s\n", cg_file->err_msg);
 		exit(EXIT_FAILURE);
 	}
 }
@@ -439,7 +465,6 @@ static void opd_put_arc(struct transient * trans, vma_t eip)
 	struct opd_image * from_image;
 	struct opd_image * to_image;
 
-
 	if (trans->in_kernel > 0) {
 		struct opd_image * app_image = 0;
 
@@ -454,14 +479,21 @@ static void opd_put_arc(struct transient * trans, vma_t eip)
 		to_image = trans->image;
 	}
 
+	// FIXME: why does this happen
 	if (!from_image || !to_image) {
-		verbprintf("opd_put_arc() nil image, sample lost\n");
+		verbprintf("opd_put_arc() nil image, sample lost, "
+			"0x%llx -> 0x%llx (kernel %d)\n",
+			from_pc, to_pc, trans->in_kernel);
 		opd_stats[OPD_NIL_IMAGE]++;
 		return;
 	}
 
 	verbprintf("ARC: 0x%llx (%s) -> 0x%llx (%s)\n",
 		from_pc, from_image->name, to_pc, to_image->name);
+
+	/* We don't handle cross-binary arcs */
+	if (from_image == to_image)
+		opd_put_cg_sample(to_image, from_pc, to_pc, trans->event);
 
 	trans->last_image = to_image;
 	trans->last_offset = eip;

@@ -5,6 +5,7 @@ SUBDIRS = \
 	libutil++ \
 	libopt++ \
 	libdb \
+	libcgdb \
 	libabi \
 	libregex \
 	daemon \

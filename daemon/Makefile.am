@@ -21,7 +21,8 @@ AM_CPPFLAGS = \
 	-I ${top_srcdir}/libabi \
 	-I ${top_srcdir}/libutil \
 	-I ${top_srcdir}/libop \
-	-I ${top_srcdir}/libdb
+	-I ${top_srcdir}/libdb \
+	-I ${top_srcdir}/libcgdb
 
 AM_CFLAGS = @OP_CFLAGS@
 
@@ -33,12 +34,14 @@ if enable_abi
 oprofiled_LDADD = \
 	../libabi/libabi.a \
 	../libdb/libodb.a \
+	../libcgdb/libocgdb.a \
 	../libop/libop.a \
 	../libutil/libutil.a
 LINKER=$(CXX)
 else
 oprofiled_LDADD = \
 	../libdb/libodb.a \
+	../libcgdb/libocgdb.a \
 	../libop/libop.a \
 	../libutil/libutil.a
 LINKER=$(CC)

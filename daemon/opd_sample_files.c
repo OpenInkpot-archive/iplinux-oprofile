@@ -37,20 +37,21 @@ extern double cpu_speed;
 extern op_cpu cpu_type;
 
 char * opd_mangle_filename(struct opd_image const * image, int counter,
-			   int create)
+			   int create, int cg)
 {
 	char * mangled;
+	struct mangle_values values;
 	char const * dep_name = separate_lib_samples ? image->app_name : NULL;
-
 	struct op_event * event = op_find_event(cpu_type, ctr_event[counter]); 
 
-	struct mangle_values values;
 	/* Here we can add TGID, TID, CPU, later.  */
 	values.flags = 0;
 	if (image->kernel)
 		values.flags |= MANGLE_KERNEL;
-	if  (dep_name && strcmp(dep_name, image->name))
+	if (dep_name && strcmp(dep_name, image->name))
 		values.flags |= MANGLE_DEP_NAME;
+	if (cg)
+		values.flags |= MANGLE_CALLGRAPH;
 
 	values.event_name = event->name;
 	values.count = ctr_count[counter];
@@ -67,6 +68,7 @@ char * opd_mangle_filename(struct opd_image const * image, int counter,
 
 	return mangled;
 }
+
 
 /**
  * opd_handle_old_sample_file - deal with old sample file
@@ -139,7 +141,10 @@ void opd_handle_old_sample_files(struct opd_image const * image)
 
 	for (i = 0 ; i < op_nr_counters ; ++i) {
 		if (ctr_event[i]) {
-			char * mangled = opd_mangle_filename(image, i, 0);
+			char * mangled = opd_mangle_filename(image, i, 0, 0);
+			opd_handle_old_sample_file(mangled,  image->mtime);
+			free(mangled);
+			mangled = opd_mangle_filename(image, i, 0, 1);
 			opd_handle_old_sample_file(mangled,  image->mtime);
 			free(mangled);
 		}
@@ -147,8 +152,7 @@ void opd_handle_old_sample_files(struct opd_image const * image)
 }
 
 
-/*
- * opd_open_sample_file - open an image sample file
+/* opd_open_sample_file - open an image sample file
  * @param image  image to open file for
  * @param counter  counter number
  *
@@ -166,7 +170,7 @@ void opd_open_sample_file(struct opd_image * image, int counter)
 
 	sample_file = &image->sample_files[counter];
 
-	mangled = opd_mangle_filename(image, counter, 1);
+	mangled = opd_mangle_filename(image, counter, 1, 0);
 
 	verbprintf("Opening \"%s\"\n", mangled);
 
@@ -203,6 +207,61 @@ err:
 }
 
 
+/* opd_open_cg_file - open an image sample file
+ * @param image  image to open file for
+ * @param counter  counter number
+ *
+ * Open image sample file for the image, counter
+ * counter and set up memory mappings for it.
+ * image->kernel and image->name must have meaningful
+ * values.
+ */
+void opd_open_cg_file(struct opd_image * image, int counter)
+{
+	char * mangled;
+	samples_ocg_t * sample_file;
+	struct opd_header * header;
+	int rc;
+
+	sample_file = &image->cg_files[counter];
+
+	mangled = opd_mangle_filename(image, counter, 1, 1);
+
+	verbprintf("Opening \"%s\"\n", mangled);
+
+	rc = ocg_open(sample_file, mangled, ODB_RDWR, sizeof(struct opd_header));
+	if (rc != EXIT_SUCCESS) {
+		fprintf(stderr, "%s", sample_file->err_msg);
+		exit(EXIT_FAILURE);
+	}
+	if (!sample_file->base_memory) {
+		fprintf(stderr,
+			"oprofiled: ocg_open() of image sample file \"%s\" failed: %s\n",
+			mangled, strerror(errno));
+		goto err;
+	}
+
+	header = sample_file->base_memory;
+
+	memset(header, '\0', sizeof(struct opd_header));
+	header->version = OPD_VERSION;
+	memcpy(header->magic, OPD_MAGIC, sizeof(header->magic));
+	header->is_kernel = image->kernel;
+	header->ctr_event = ctr_event[counter];
+	header->ctr_um = ctr_um[counter];
+	header->ctr = counter;
+	header->cpu_type = cpu_type;
+	header->ctr_count = ctr_count[counter];
+	header->cpu_speed = cpu_speed;
+	header->mtime = image->mtime;
+	header->separate_lib_samples = separate_lib_samples;
+	header->separate_kernel_samples = separate_kernel_samples;
+
+err:
+	free(mangled);
+}
+
+
 /**
  * @param image  the image pointer to work on
  *
@@ -213,6 +272,7 @@ void opd_sync_image_samples_files(struct opd_image * image)
 	uint i;
 	for (i = 0 ; i < op_nr_counters ; ++i) {
 		odb_sync(&image->sample_files[i]);
+		ocg_sync(&image->cg_files[i]);
 	}
 }
 
@@ -227,5 +287,6 @@ void opd_close_image_samples_files(struct opd_image * image)
 	uint i;
 	for (i = 0 ; i < op_nr_counters ; ++i) {
 		odb_close(&image->sample_files[i]);
+		ocg_close(&image->cg_files[i]);
 	}
 }

@@ -158,6 +158,7 @@ AC_OUTPUT(Makefile \
 	libop/Makefile \
 	libopt++/Makefile \
 	libdb/Makefile \
+	libcgdb/Makefile \
 	libabi/Makefile \
 	libregex/Makefile \
 	libregex/stl.pat \

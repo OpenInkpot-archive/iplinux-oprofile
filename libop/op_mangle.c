@@ -40,7 +40,7 @@ char * op_mangle_filename(struct mangle_values const * values)
 
 	/* provision for tgid, tid, unit_mask, cpu and three {root}, {dep} or
 	 * {kern} marker */
-	len += 128;	/* FIXME: too ugly */
+	len += 256;	/* FIXME: too ugly */
 
 	mangled = xmalloc(len);
 
@@ -66,6 +66,9 @@ char * op_mangle_filename(struct mangle_values const * values)
 		strcat(mangled, dep_name);
 		strcat(mangled, "/");
 	}
+
+	if (values->flags & MANGLE_CALLGRAPH)
+		strcat(mangled, "{cg}" "/");
 
 	strcat(mangled, values->event_name);
 	sprintf(mangled + strlen(mangled), ".%d.%d.",

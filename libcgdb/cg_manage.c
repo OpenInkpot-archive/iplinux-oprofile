@@ -1,6 +1,6 @@
 /**
  * @file db_manage.c
- * Management of a DB hash
+ * Management of a callgraph hash db
  *
  * @remark Copyright 2002 OProfile authors
  * @remark Read the file COPYING
@@ -18,48 +18,48 @@
 #include <string.h>
 #include <stdio.h>
 
-#include "odb_hash.h"
+#include "ocg_hash.h"
 
  
-static inline odb_descr_t * odb_to_descr(samples_odb_t * hash)
+static inline ocg_descr_t * ocg_to_descr(samples_ocg_t * hash)
 {
-	return (odb_descr_t *)(((char*)hash->base_memory) + hash->sizeof_header);
+	return (ocg_descr_t *)(((char*)hash->base_memory) + hash->sizeof_header);
 }
 
  
-static inline odb_node_t * odb_to_node_base(samples_odb_t * hash)
+static inline ocg_node_t * ocg_to_node_base(samples_ocg_t * hash)
 {
-  return (odb_node_t *)(((char *)hash->base_memory) + hash->offset_node);
+  return (ocg_node_t *)(((char *)hash->base_memory) + hash->offset_node);
 }
 
  
-static inline odb_index_t * odb_to_hash_base(samples_odb_t * hash)
+static inline ocg_index_t * ocg_to_hash_base(samples_ocg_t * hash)
 {
-	return (odb_index_t *)(((char *)hash->base_memory) + 
+	return (ocg_index_t *)(((char *)hash->base_memory) + 
 				hash->offset_node +
-				(hash->descr->size * sizeof(odb_node_t)));
+				(hash->descr->size * sizeof(ocg_node_t)));
 }
 
  
 /**
  * return the number of bytes used by hash table, node table and header.
  */
-static unsigned int tables_size(samples_odb_t const * hash, odb_node_nr_t node_nr)
+static unsigned int tables_size(samples_ocg_t const * hash, ocg_node_nr_t node_nr)
 {
 	size_t size;
 
-	size = node_nr * (sizeof(odb_index_t) * BUCKET_FACTOR);
-	size += node_nr * sizeof(odb_node_t);
+	size = node_nr * (sizeof(ocg_index_t) * BUCKET_FACTOR);
+	size += node_nr * sizeof(ocg_node_t);
 	size += hash->offset_node;
 
 	return size;
 }
 
 
-void odb_set_error(samples_odb_t * hash, char const * err_msg)
+void ocg_set_error(samples_ocg_t * hash, char const * err_msg)
 {
 	if (hash->err_msg) {
-		fprintf(stderr, "FATAL: odb_set_error() attempt to set error "
+		fprintf(stderr, "FATAL: ocg_set_error() attempt to set error "
 			"whilst an error already occured\n first error is: %s",
 			hash->err_msg);
 		exit(EXIT_FAILURE);
@@ -69,7 +69,7 @@ void odb_set_error(samples_odb_t * hash, char const * err_msg)
 }
 
 
-odb_index_t odb_hash_add_node(samples_odb_t * hash)
+ocg_index_t ocg_hash_add_node(samples_ocg_t * hash)
 {
 	if (hash->descr->current_size >= hash->descr->size) {
 		unsigned int old_file_size;
@@ -87,23 +87,23 @@ odb_index_t odb_hash_add_node(samples_odb_t * hash)
 			asprintf(&err_msg, "unable to resize file to %d "
 				"length, cause : %s\n",
 				new_file_size, strerror(errno));
-			odb_set_error(hash, err_msg);
-			return ODB_NODE_NR_INVALID;
+			ocg_set_error(hash, err_msg);
+			return OCG_NODE_NR_INVALID;
 		}
 
 		hash->base_memory = mremap(hash->base_memory,
 				old_file_size, new_file_size, MREMAP_MAYMOVE);
 
 		if (hash->base_memory == MAP_FAILED) {
-			asprintf(&err_msg, "odb_hash_add_page() mremap"
+			asprintf(&err_msg, "ocg_hash_add_page() mremap"
 				" failure cause: %s\n", strerror(errno));
-			odb_set_error(hash, err_msg);
-			return ODB_NODE_NR_INVALID;
+			ocg_set_error(hash, err_msg);
+			return OCG_NODE_NR_INVALID;
 		}
 
-		hash->descr = odb_to_descr(hash);
-		hash->node_base = odb_to_node_base(hash);
-		hash->hash_base = odb_to_hash_base(hash);
+		hash->descr = ocg_to_descr(hash);
+		hash->node_base = ocg_to_node_base(hash);
+		hash->hash_base = ocg_to_hash_base(hash);
 		hash->hash_mask = (hash->descr->size * BUCKET_FACTOR) - 1;
 
 		/* rebuild the hash table, node zero is never used. This works
@@ -128,19 +128,19 @@ odb_index_t odb_hash_add_node(samples_odb_t * hash)
 #endif
 
 		for (pos = 1; pos < hash->descr->current_size; ++pos) {
-			odb_node_t * node = &hash->node_base[pos];
-			size_t index = odb_do_hash(hash, node->key);
+			ocg_node_t * node = &hash->node_base[pos];
+			size_t index = ocg_do_hash(hash, node->key);
 			node->next = hash->hash_base[index];
 			hash->hash_base[index] = pos;
 		}
 	}
 
-	return (odb_index_t)hash->descr->current_size++;
+	return (ocg_index_t)hash->descr->current_size++;
 }
 
-void odb_init(samples_odb_t * hash)
+void ocg_init(samples_ocg_t * hash)
 {
-	memset(hash, '\0', sizeof(samples_odb_t));
+	memset(hash, '\0', sizeof(samples_ocg_t));
 	hash->fd = -1;
 	hash->err_msg = NULL;
 }
@@ -148,43 +148,43 @@ void odb_init(samples_odb_t * hash)
 /* the default number of page, calculated to fit in 4096 bytes */
 #define DEFAULT_NODE_NR(offset_node)	128
 
-int odb_open(samples_odb_t * hash, char const * filename, enum odb_rw rw,
+int ocg_open(samples_ocg_t * hash, char const * filename, enum ocg_rw rw,
 	size_t sizeof_header)
 {
 	struct stat stat_buf;
-	odb_node_nr_t nr_node;
+	ocg_node_nr_t nr_node;
 	char * err_msg;
 
-	int flags = (rw == ODB_RDWR) ? (O_CREAT | O_RDWR) : O_RDONLY;
-	int mmflags = (rw == ODB_RDWR) ? (PROT_READ | PROT_WRITE) : PROT_READ;
+	int flags = (rw == OCG_RDWR) ? (O_CREAT | O_RDWR) : O_RDONLY;
+	int mmflags = (rw == OCG_RDWR) ? (PROT_READ | PROT_WRITE) : PROT_READ;
 
-	memset(hash, '\0', sizeof(samples_odb_t));
+	memset(hash, '\0', sizeof(samples_ocg_t));
 
-	hash->offset_node = sizeof_header + sizeof(odb_descr_t);
+	hash->offset_node = sizeof_header + sizeof(ocg_descr_t);
 	hash->sizeof_header = sizeof_header;
 
 	hash->fd = open(filename, flags, 0644);
 	if (hash->fd < 0) {
-		asprintf(&err_msg, "odb_open(): fail to open %s cause: %s\n",
+		asprintf(&err_msg, "ocg_open(): fail to open %s cause: %s\n",
 			filename, strerror(errno));
-		odb_set_error(hash, err_msg);
+		ocg_set_error(hash, err_msg);
 		return EXIT_FAILURE;
 	}
 
 	if (fstat(hash->fd, &stat_buf)) {
-		asprintf(&err_msg, "odb_open(): unable to stat %s cause %s\n",
+		asprintf(&err_msg, "ocg_open(): unable to stat %s cause %s\n",
 			filename, strerror(errno));
-		odb_set_error(hash, err_msg);
+		ocg_set_error(hash, err_msg);
 		return EXIT_FAILURE;
 	}
 
 	if (stat_buf.st_size == 0) {
 		size_t file_size;
 
-		if (rw == ODB_RDONLY) {
-			asprintf(&err_msg, "odb_open() %s sample file empty\n",
+		if (rw == OCG_RDONLY) {
+			asprintf(&err_msg, "ocg_open() %s sample file empty\n",
 				 filename);
-			odb_set_error(hash, err_msg);
+			ocg_set_error(hash, err_msg);
 			return EXIT_FAILURE;
 		}
 
@@ -192,30 +192,30 @@ int odb_open(samples_odb_t * hash, char const * filename, enum odb_rw rw,
 
 		file_size = tables_size(hash, nr_node);
 		if (ftruncate(hash->fd, file_size)) {
-			asprintf(&err_msg, "odb_open() unable to resize file "
+			asprintf(&err_msg, "ocg_open() unable to resize file "
 				"%s to %ld length, cause : %s\n",
 				filename, (unsigned long)file_size,
 				strerror(errno));
-			odb_set_error(hash, err_msg);
+			ocg_set_error(hash, err_msg);
 			return EXIT_FAILURE;
 		}
 	} else {
 		/* Calculate nr node allowing a sanity check later */
 		nr_node = (stat_buf.st_size - hash->offset_node) /
-			((sizeof(odb_index_t) * BUCKET_FACTOR) + sizeof(odb_node_t));
+			((sizeof(ocg_index_t) * BUCKET_FACTOR) + sizeof(ocg_node_t));
 	}
 
 	hash->base_memory = mmap(0, tables_size(hash, nr_node), mmflags,
 				MAP_SHARED, hash->fd, 0);
 
 	if (hash->base_memory == MAP_FAILED) {
-		asprintf(&err_msg, "odb_open() mmap failure cause: %s\n",
+		asprintf(&err_msg, "ocg_open() mmap failure cause: %s\n",
 			strerror(errno));
-		odb_set_error(hash, err_msg);
+		ocg_set_error(hash, err_msg);
 		return EXIT_FAILURE;
 	}
 
-	hash->descr = odb_to_descr(hash);
+	hash->descr = ocg_to_descr(hash);
 
 	if (stat_buf.st_size == 0) {
 		hash->descr->size = nr_node;
@@ -224,24 +224,24 @@ int odb_open(samples_odb_t * hash, char const * filename, enum odb_rw rw,
 	} else {
 		/* file already exist, sanity check nr node */
 		if (nr_node != hash->descr->size) {
-			asprintf(&err_msg, "odb_open(): nr_node != "
+			asprintf(&err_msg, "ocg_open(): nr_node != "
 				"hash->descr->size\n");
-			odb_set_error(hash, err_msg);
+			ocg_set_error(hash, err_msg);
 			return EXIT_FAILURE;
 		}
 	}
 
-	hash->hash_base = odb_to_hash_base(hash);
-	hash->node_base = odb_to_node_base(hash);
+	hash->hash_base = ocg_to_hash_base(hash);
+	hash->node_base = ocg_to_node_base(hash);
 	hash->hash_mask = (hash->descr->size * BUCKET_FACTOR) - 1;
 
 	return EXIT_SUCCESS;
 }
 
 
-void odb_close(samples_odb_t * hash)
+void ocg_close(samples_ocg_t * hash)
 {
-	odb_clear_error(hash);
+	ocg_clear_error(hash);
 
 	if (hash->base_memory) {
 		size_t size = tables_size(hash, hash->descr->size);
@@ -257,7 +257,7 @@ void odb_close(samples_odb_t * hash)
 }
 
 
-void odb_clear_error(samples_odb_t * hash)
+void ocg_clear_error(samples_ocg_t * hash)
 {
 	if (hash->err_msg) {
 		free((char *)hash->err_msg);
@@ -266,7 +266,7 @@ void odb_clear_error(samples_odb_t * hash)
 }
 
 
-void odb_sync(samples_odb_t const * hash)
+void ocg_sync(samples_ocg_t const * hash)
 {
 	size_t size;
 
