@@ -220,7 +220,7 @@ void handle_options(vector<string> const & non_options)
 
 	if (unmerged_profile.size() > 1) {
 		// quick and dirty check for now
-		cerr << "Can't handle multiple counter!" << endl;
+		cerr << "Can't handle multiple counters." << endl;
 		cerr << "use event:xxxx and/or count:yyyyy to restrict "
 		     << "samples files set considered\n" << endl;
 		exit(EXIT_FAILURE);

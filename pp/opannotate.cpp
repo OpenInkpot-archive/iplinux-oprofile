@@ -161,7 +161,8 @@ void output_info(ostream & out)
 		    << endl;
 
 		if (!objdump_params.empty()) {
-			out << in_comment << "Passing the following additional arguments to objdump ; \"";
+			out << in_comment << "Passing the following "
+				"additional arguments to objdump ; \"";
 			for (size_t i = 0 ; i < objdump_params.size() ; ++i)
 				out << objdump_params[i] << " ";
 			out << "\"" << endl;
@@ -238,15 +239,30 @@ string symbol_annotation(symbol_entry const * symbol)
 }
 
 
+namespace {
+
+/// return true if  this line contains a symbol name in objdump formatting
+/// symbol are on the form 08030434 <symbol_name>:  we need to be strict
+/// here to avoid any interpretation of a source line as a symbol line
+bool is_symbol_line(string const & str, string::size_type pos)
+{
+	if (str[pos] != ' ' || str[pos + 1] != '<')
+		return false;
+
+	return str[str.length() - 1] == ':';
+}
+
+}
+
+
 symbol_entry const * output_objdump_asm_line(symbol_entry const * last_symbol,
-		string const & app_name,
-		string const & str,
+		string const & app_name, string const & str,
 		vector<symbol_entry const *> const & output_symbols,
 		bool & do_output)
 {
-	// output of objdump is a human read-able form and can contain some
-	// ambiguity so this code is dirty. It is also optimized a little what
-	// so it is difficult to simplify it without beraking something ...
+	// output of objdump is a human readable form and can contain some
+	// ambiguity so this code is dirty. It is also optimized a little bit
+	// so it is difficult to simplify it without breaking something ...
 
 	// line of interest are: "[:space:]*[:xdigit:]?[ :]", the last char of
 	// this regexp dis-ambiguate between a symbol line and an asm line. If
@@ -274,9 +290,7 @@ symbol_entry const * output_objdump_asm_line(symbol_entry const * last_symbol,
 		}
 	}
 
-	// symbol are on the form 08030434 <symbol_name>:  we need to be strict
-	// here to avoid any interpretation of a source line as a symbol line
-	if (str[pos] == ' ' && str[pos+1] == '<' && str[str.length() - 1] == ':') {  // is the line contain a symbol
+	if (is_symbol_line(str, pos)) {
 		last_symbol = find_symbol(app_name, str);
 
 		// ! complexity: linear in number of symbol must use sorted

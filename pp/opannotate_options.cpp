@@ -83,7 +83,8 @@ void handle_options(vector<string> const & non_options)
 	using namespace options;
 
 	if (!assembly && !source) {
-		throw invalid_argument("you must specify at least --source or --assembly\n");
+		throw invalid_argument(
+			"you must specify at least --source or --assembly\n");
 	}
 
 	if (!objdump_params.empty() && !assembly) {

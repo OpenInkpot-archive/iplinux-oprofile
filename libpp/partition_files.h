@@ -102,7 +102,7 @@ typedef std::multimap<std::string, split_sample_filename const> image_set;
  * to bfd_open more than one time each binary image
  */
 image_set sort_by_image(partition_files const & files,
-			extra_images const & extra_images);
+                        extra_images const & extra_images);
 
 
 #endif /* !PARTITION_FILES_H */
