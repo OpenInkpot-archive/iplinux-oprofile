@@ -17,60 +17,25 @@
 
 #include <cerrno>
 
+#include "op_config.h"
 #include "op_file.h"
-#include "op_cpu_type.h"
-#include "counter_array.h"
 #include "op_sample_file.h"
-#include "string_manip.h"
 #include "op_print_event.h"
 
 #include "profile.h"
 
 using namespace std;
 
-profile_t::profile_t(string const & sample_file, int counter_)
+profile_t::profile_t(string const & sample_file)
 	:
-	nr_counters(2),
-	sample_filename(sample_file),
-	counter_mask(counter_),
-	first_file(-1)
+	sample_filename(sample_file)
 {
-	uint i, j;
-	time_t mtime = 0;
-
-	for (i = 0; i < OP_MAX_COUNTERS ; ++i) {
-		if ((counter_mask &  (1 << i)) != 0) {
-			/* if only the i th bit is set in counter spec we do
-			 * not allow opening failure to get a more precise
-			 * error message */
-			open_samples_file(i, (counter_mask & ~(1 << i)) != 0);
-		}
-	}
-
-	/* find first open file */
-	for (first_file = 0; first_file < OP_MAX_COUNTERS ; ++first_file) {
-		if (samples[first_file].get() != 0)
-			break;
-	}
-
-	if (first_file == OP_MAX_COUNTERS) {
-		cerr << "Can not open any samples files for " << sample_filename
-			<< ". Last error " << strerror(errno) << endl;
+	if (access(sample_filename.c_str(), R_OK) == 0) {
+		build_ordered_samples(sample_file);
+	} else {
+		cerr << "profile_t:profile_t() Opening " << sample_filename
+		     <<  "failed." << strerror(errno) << endl;
 		exit(EXIT_FAILURE);
-	}
-
-	opd_header const & header = samples[first_file]->header();
-	mtime = header.mtime;
-
-	/* determine how many counters are possible via the sample file */
-	op_cpu cpu = static_cast<op_cpu>(header.cpu_type);
-	nr_counters = op_get_nr_counters(cpu);
-
-	/* check sample files match */
-	for (j = first_file + 1; j < OP_MAX_COUNTERS; ++j) {
-		if (samples[j].get() == 0)
-			continue;
-		samples[first_file]->check_headers(*samples[j]);
 	}
 }
 
@@ -101,61 +66,31 @@ void profile_t::check_mtime(string const & file) const
 }
 
 
-void profile_t::open_samples_file(u32 counter, bool can_fail)
+unsigned int profile_t::accumulate_samples(uint index) const
 {
-	string filename = ::sample_filename(string(), sample_filename, counter);
-
-	if (access(filename.c_str(), R_OK) == 0) {
-		samples[counter].reset(new counter_profile_t(filename));
-	} else {
-		if (!can_fail) {
-			cerr << "oprofpp: Opening " << filename <<  "failed."
-			     << strerror(errno) << endl;
-			exit(EXIT_FAILURE);
-		}
-	}
+	return accumulate_samples(index, index + 1);
 }
 
-bool profile_t::accumulate_samples(counter_array_t & counter, uint index) const
+unsigned int profile_t::accumulate_samples(uint start, uint end) const
 {
-	bool found_samples = false;
+	unsigned int count = 0;
 
-	for (uint k = 0; k < nr_counters; ++k) {
-		u32 count = samples_count(k, index);
-		if (count) {
-			counter[k] += count;
-			found_samples = true;
-		}
+	ordered_samples_t::const_iterator first, last;
+	first = ordered_samples.lower_bound(start - start_offset);
+	last = ordered_samples.lower_bound(end - start_offset);
+	for ( ; first != last ; ++first) {
+		count += first->second;
 	}
 
-	return found_samples;
+	return count;
 }
 
-bool profile_t::accumulate_samples(counter_array_t & counter,
-	uint start, uint end) const
-{
-	bool found_samples = false;
-
-	for (uint k = 0; k < nr_counters; ++k) {
-		if (is_open(k)) {
-			counter[k] += samples[k]->count(start, end);
-			if (counter[k])
-				found_samples = true;
-		}
-	}
-
-	return found_samples;
-}
-
-void profile_t::set_start_offset(u32 start_offset)
+void profile_t::set_start_offset(u32 start_offset_)
 {
 	if (!first_header().is_kernel)
 		return;
 
-	for (uint k = 0; k < nr_counters; ++k) {
-		if (is_open(k))
-			samples[k]->set_start_offset(start_offset);
-	}
+	start_offset = start_offset_;
 }
 
 /**
@@ -174,11 +109,81 @@ void profile_t::output_header() const
 
 	cout << "Cpu speed was (MHz estimation) : " << header.cpu_speed << endl;
 
-	for (uint i = 0 ; i < OP_MAX_COUNTERS; ++i) {
-		if (samples[i].get() != 0) {
-			opd_header const & header = samples[i]->header();
-			op_print_event(cout, i, cpu, header.ctr_event,
-				       header.ctr_um, header.ctr_count);
+	op_print_event(cout, cpu, header.ctr_event,
+		       header.ctr_um, header.ctr_count);
+}
+
+void profile_t::check_headers(profile_t const & rhs) const
+{
+	opd_header const & f1 = first_header();
+	opd_header const & f2 = rhs.first_header();
+	if (f1.mtime != f2.mtime) {
+		cerr << "oprofpp: header timestamps are different ("
+		     << f1.mtime << ", " << f2.mtime << ")\n";
+		exit(EXIT_FAILURE);
+	}
+
+	if (f1.is_kernel != f2.is_kernel) {
+		cerr << "oprofpp: header is_kernel flags are different\n";
+		exit(EXIT_FAILURE);
+	}
+
+	if (f1.cpu_speed != f2.cpu_speed) {
+		cerr << "oprofpp: header cpu speeds are different ("
+		     << f1.cpu_speed << ", " << f2.cpu_speed << ")\n";
+		exit(EXIT_FAILURE);
+	}
+
+	if (f1.separate_lib_samples != f2.separate_lib_samples) {
+		cerr << "oprofpp: header separate_lib_samples are different ("
+		     << f1.separate_lib_samples << ", " 
+		     << f2.separate_lib_samples << ")\n";
+		exit(EXIT_FAILURE);
+	}
+
+	if (f1.separate_kernel_samples != f2.separate_kernel_samples) {
+		cerr << "oprofpp: header separate_kernel_samples are different ("
+		     << f1.separate_kernel_samples << ", " 
+		     << f2.separate_kernel_samples << ")\n";
+		exit(EXIT_FAILURE);
+	}
+}
+
+void profile_t::build_ordered_samples(string const & filename)
+{
+	samples_odb_t samples_db;
+	char * err_msg;
+
+	int rc = odb_open(&samples_db, filename.c_str(), ODB_RDONLY,
+		sizeof(struct opd_header), &err_msg);
+
+	if (rc != EXIT_SUCCESS) {
+		cerr << err_msg << endl;
+		free(err_msg);
+		exit(EXIT_FAILURE);
+	}
+
+	opd_header const & head = *static_cast<opd_header *>(samples_db.base_memory);
+
+	if (head.version != OPD_VERSION) {
+		cerr << "oprofpp: samples files version mismatch, are you "
+			"running a daemon and post-profile tools with version "
+			"mismatch ?" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	file_header.reset(new opd_header(head));
+
+	odb_node_nr_t node_nr, pos;
+	odb_node_t * node = odb_get_iterator(&samples_db, &node_nr);
+
+	for ( pos = 0 ; pos < node_nr ; ++pos) {
+		if (node[pos].key) {
+			ordered_samples_t::value_type val(node[pos].key,
+							node[pos].value);
+			ordered_samples.insert(val);
 		}
 	}
+
+	odb_close(&samples_db);
 }

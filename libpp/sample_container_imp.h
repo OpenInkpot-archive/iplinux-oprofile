@@ -21,14 +21,12 @@ public:
 
 	sample_index_t size() const;
 
-	bool accumulate_samples(counter_array_t & counter,
-				std::string const & filename,
-				uint max_counters) const;
+	unsigned int accumulate_samples(std::string const & filename) const;
 
 	sample_entry const * find_by_vma(bfd_vma vma) const;
 
-	bool accumulate_samples(counter_array_t &, std::string const & filename,
-				size_t linenr, uint max_counters) const;
+	unsigned int accumulate_samples(std::string const & filename,
+					size_t linenr) const;
 
 	void push_back(sample_entry const &);
 

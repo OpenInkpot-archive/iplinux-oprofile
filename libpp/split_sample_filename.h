@@ -18,6 +18,7 @@
  */
 struct split_sample_filename
 {
+	std::string base_dir;
 	std::string image;
 	std::string lib_image;
 	std::string event;

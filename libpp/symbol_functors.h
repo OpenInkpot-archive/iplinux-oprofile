@@ -30,18 +30,13 @@ struct less_sample_entry_by_vma {
 
 /// compare based on number of accumulated samples
 struct less_symbol_entry_by_samples_nr {
-	// Precondition: index < op_nr_counters. Used also as default ctr.
-	less_symbol_entry_by_samples_nr(size_t index_ = 0) : index(index_) {}
-
 	bool operator()(symbol_entry const * lhs, symbol_entry const * rhs) const {
 		// sorting by vma when samples count are identical is better
-		if (lhs->sample.counter[index] != rhs->sample.counter[index])
-			return lhs->sample.counter[index] > rhs->sample.counter[index];
+		if (lhs->sample.count != rhs->sample.count)
+			return lhs->sample.count > rhs->sample.count;
 
 		return lhs->sample.vma > rhs->sample.vma;
 	}
-
-	size_t index;
 };
 
 /// compare based on file location

@@ -20,8 +20,6 @@
 
 #include <bfd.h>
 
-#include "counter_array.h"
-
 typedef size_t sample_index_t;
 
 /// A simple container for a fileno:linenr location.
@@ -51,7 +49,7 @@ struct sample_entry {
 	/// From where virtual memory address comes the samples
 	bfd_vma vma;
 	/// the samples count
-	counter_array_t counter;
+	unsigned int count;
 };
 
 

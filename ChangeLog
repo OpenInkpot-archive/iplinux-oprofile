@@ -1,3 +1,46 @@
+2003-04-21  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libutil++/filename_match.h:
+	* libutil++/filename_match.cpp: add strict_match()
+
+	* libutil++/generic_spec.cpp: generic_spec<string>::set() was not
+	  setting is_all member leading to bad matching
+
+	* libpp/filename_spec.cpp: minor tidy
+
+	* libpp/parse_cmdline.h:
+	* libpp/parse_cmdline.cpp: fix match()
+
+	* libpp/split_sample_filename.h:
+	* libpp/split_sample_filename.cpp: handle sample file base directory
+
+	* libop++/op_print_event.h:
+	* libop++/op_print_event.cpp:
+	* libpp/format_output.h:
+	* libpp/format_output.cpp:
+	* libpp/opp_symbol.h:
+	* libpp/profile.h:
+	* libpp/profile.cpp:
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp:
+	* libpp/sample_container_imp.h:
+	* libpp/sample_container_imp.cpp:
+	* libpp/symbol_container_imp.h:
+	* libpp/symbol_container_imp.cpp:
+	* libpp/symbol_functors.h: remove all use of counter number
+
+	* libpp/counter_array.h:
+	* libpp/counter_array.cpp:
+	* libpp/counter_profile.h:
+	* libpp/counter_profile.cpp: no longer used, move some bits to
+	  libpp/profile.(h|cpp) and remove these files.
+	* libpp/Makefile.am: update according
+
+	* pp/op_merge.cpp: use profile_t not counter_profile_t
+	* pp/makefile.am: correct lib for op_merge
+
+	* pp/opreport_options.cpp: more options handling
+
 2003-04-19  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libopt++/popt_options.cpp: don't show help_str with --usage

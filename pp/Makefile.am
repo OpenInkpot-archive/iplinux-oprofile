@@ -42,5 +42,6 @@ op_merge_LDADD = \
 	../libopt++/libopt++.a \
 	../libop++/libop++.a \
 	../libutil++/libutil++.a \
+	../libop/libop.a \
 	../libutil/libutil.a \
 	../libdb/libodb.a

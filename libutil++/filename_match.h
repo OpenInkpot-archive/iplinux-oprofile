@@ -29,9 +29,13 @@ class filename_match {
 		       std::vector<std::string> const & exclude_patterns);
 
 
-	/// return if true filename match include_pattern and does not match
-	/// exclude_pattern
+	/// return true if any path component of filename match include_pattern
+	/// and does not match exclude_pattern
 	bool match(std::string const & filename) const;
+
+	/// return true if filename match include_pattern and does not match
+	/// exclude_pattern
+	bool strict_match(std::string const & filename) const;
 
  private:
 	// match helper

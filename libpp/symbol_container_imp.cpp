@@ -91,13 +91,11 @@ symbol_entry const * symbol_container_imp_t::find_by_vma(bfd_vma vma) const
 	return 0;
 }
 
-void symbol_container_imp_t::get_symbols_by_count(size_t counter,
+void symbol_container_imp_t::get_symbols_by_count(
 	profile_container_t::symbol_collection & v) const
 {
 	for (symbol_index_t i = 0 ; i < symbols.size() ; ++i)
 		v.push_back(&symbols[i]);
 
-	less_symbol_entry_by_samples_nr compare(counter);
-
-	stable_sort(v.begin(), v.end(), compare);
+	stable_sort(v.begin(), v.end(), less_symbol_entry_by_samples_nr());
 }

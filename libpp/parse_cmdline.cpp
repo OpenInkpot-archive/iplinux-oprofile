@@ -93,20 +93,6 @@ vector<string> parse_cmdline::get_session_exclude() const
 }
 
 
-vector<string> parse_cmdline::match(vector<string> const & files) const
-{
-	vector<string> result;
-
-	for (size_t i = 0; i < files.size(); ++i) {
-		if (match(files[i])) {
-			result.push_back(files[i]);
-		}
-	}
-
-	return result;
-}
-
-
 void parse_cmdline::parse_sample_file(string const & str)
 {
 	file_spec_set_p = true;
@@ -233,19 +219,16 @@ bool parse_cmdline::match(string const & filename) const
 		return file_spec.match(spec, binary);
 	}
 
-	// FIXME: pp_interface don't specify exactly match algorithm on
-	// filename, I use the once already in oprofile but it's probably
-	// wrong. (matching one component path return positive match)
 	if (!image.empty()) {
 		filename_match fnmatch(image, image_exclude);
-		if (!fnmatch.match(spec.image)) {
+		if (!fnmatch.strict_match(spec.image)) {
 			return false;
 		}
 	}
 
 	if (!lib_image.empty()) {
 		filename_match fnmatch(lib_image, lib_image_exclude);
-		if (!fnmatch.match(spec.lib_image)) {
+		if (!fnmatch.strict_match(spec.lib_image)) {
 			return false;
 		}
 	}
@@ -302,4 +285,6 @@ void handle_non_options(parse_cmdline & parser,
 			parser.set("image:" + args[i]);
 		}
 	}
+
+	parser.validate();
 }

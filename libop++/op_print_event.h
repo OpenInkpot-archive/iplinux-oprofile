@@ -22,7 +22,7 @@
  * Output a description of the given event paramters
  * to the stream.
  */
-void op_print_event(std::ostream & out, int counter_nr,
-	op_cpu cpu_type, u8 type, u16 um, u32 count);
+void op_print_event(std::ostream & out, op_cpu cpu_type, u8 type,
+		    u16 um, u32 count);
 
 #endif // OP_PRINT_EVENT

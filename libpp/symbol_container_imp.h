@@ -32,7 +32,7 @@ public:
 
 	symbol_entry const * find_by_vma(bfd_vma vma) const;
 
-	void get_symbols_by_count(size_t counter, profile_container_t::symbol_collection& v) const;
+	void get_symbols_by_count(profile_container_t::symbol_collection& v) const;
 
 private:
 	void build_by_file_loc() const;

@@ -14,29 +14,27 @@
 #define PROFILE_H
 
 #include <string>
+#include <map>
 
+#include "odb_hash.h"
 #include "op_types.h"
 #include "op_hw_config.h"
 #include "utility.h"
-#include "counter_profile.h"
+
+class opd_header;
 
 /** A class to store sample files over all counters */
 class profile_t /*:*/  noncopyable {
 public:
 	/**
 	 * profile_t - construct an profile_t object
-	 * @param sample_file the base name of sample file
-	 * @param counter which samples files to open, -1 means try to open
-	 * all samples files.
+	 * @param sample_file  sample file name
 	 *
-	 * at least one sample file (based on sample_file name)
-	 * must be opened. If more than one sample file is open
-	 * their header must be coherent. Each header is also
-	 * sanitized.
+	 * store samples for one sample file, sample file header is sanitized.
 	 *
 	 * all error are fatal
 	 */
-	profile_t(std::string const & sample_file, int counter);
+	profile_t(std::string const & sample_file);
 
 	~profile_t();
  
@@ -46,35 +44,12 @@ public:
 	void check_mtime(std::string const & file) const;
 
 	/**
-	 * is_open - test if a samples file is open
-	 * @param i index of the samples file to check.
-	 *
-	 * return true if the samples file index is open
-	 */
-	bool is_open(int i) const {
-		return samples[i].get() != 0;
-	}
-
-	/**
-	 * @param i index of the samples files
-	 * @param sample_nr number of the samples to test.
-	 *
-	 * return the number of samples for samples file index at position
-	 * sample_nr. return 0 if the samples file is close or there is no
-	 * samples at position sample_nr
-	 */
-	uint samples_count(int i, int sample_nr) const {
-		return is_open(i) ? samples[i]->count(sample_nr) : 0;
-	}
-
-	/**
 	 * accumulate_samples - lookup samples from a vma address
-	 * @param counter where to accumulate the samples
 	 * @param vma index of the samples.
 	 *
-	 * return false if no samples has been found
+	 * return zero if no samples has been found
 	 */
-	bool accumulate_samples(counter_array_t & counter, uint vma) const;
+	unsigned int accumulate_samples(uint vma) const;
 
 	/**
 	 * accumulate_samples - lookup samples from a range of vma address
@@ -82,10 +57,9 @@ public:
 	 * @param start start index of the samples.
 	 * @param end end index of the samples.
 	 *
-	 * return false if no samples has been found
+	 * return zero if no samples has been found
 	 */
-	bool accumulate_samples(counter_array_t & counter,
-				uint start, uint end) const;
+	unsigned int accumulate_samples(uint start, uint end) const;
 
 	/**
 	 * output_header() - output counter setup
@@ -97,8 +71,17 @@ public:
 
 	/// return the header of the first opened samples file
 	opd_header const & first_header() const {
-		return samples[first_file]->header();
+		return *file_header;
 	}
+
+	/**
+	 * check_headers - check that the lhs and rhs headers are
+	 * coherent (same size, same mtime etc.)
+	 * @param headers the other _profile_t
+	 *
+	 * all errors are fatal
+	 */
+	void check_headers(profile_t const & headers) const;
 
 	/**
 	 * Set the start offset of the underlying samples files
@@ -107,33 +90,37 @@ public:
 	 */
 	void set_start_offset(u32 start_offset);
 
-	// FIXME privatize when we can
-	scoped_ptr<counter_profile_t> samples[OP_MAX_COUNTERS];
-	uint nr_counters;
 private:
 	std::string sample_filename;
 
-	// used in do_list_xxxx/do_dump_gprof.
-	size_t counter_mask;
+	/// storage type for samples sorted by eip
+	typedef std::map<odb_key_t, odb_value_t> ordered_samples_t;
 
-	// cached value: index to the first opened file, setup as nearly as we
-	// can in ctor.
-	int first_file;
+	/// helper to build ordered samples by eip
+	void build_ordered_samples(std::string const & filename);
+
+	/// copy of the samples file header
+	scoped_ptr<opd_header> file_header;
 
 	/**
-	 * open_samples_file - ctor helper
-	 * @param counter the counter number
-	 * @param can_fail allow to fail gracefully
-	 *
-	 * open and mmap the given samples files,
-	 * the member var samples[counter], header[counter]
-	 * etc. are updated in case of success.
-	 * The header is checked but coherence between
-	 * header can not be sanitized at this point.
-	 *
-	 * if !can_fail all errors are fatal.
+	 * Samples are stored in hash table, iterating over hash table don't
+	 * provide any ordering, the above count() interface rely on samples
+	 * ordered by eip. This map is only a temporary storage where samples
+	 * are ordered by eip.
 	 */
-	void open_samples_file(u32 counter, bool can_fail);
+	ordered_samples_t ordered_samples;
+
+	/**
+	 * For the kernel and kernel modules, this value is non-zero and
+	 * equal to the offset of the .text section. This is done because
+	 * we use the information provided in /proc/ksyms, which only gives
+	 * the mapped position of .text, and the symbol _text from
+	 * vmlinux. This value is used to fix up the sample offsets
+	 * for kernel code as a result of this difference (in user-space
+	 * samples, the sample offset is from the start of the mapped
+	 * file, as seen in /proc/pid/maps).
+	 */
+	u32 start_offset;
 };
 
 #endif /* !PROFILE_H */

@@ -19,7 +19,6 @@
 #include <vector>
 #include <iosfwd>
 
-#include "counter_array.h"
 #include "outsymbflag.h"
 #include "opp_symbol.h"
 
@@ -40,7 +39,7 @@ class formatter {
 public:
 	/// build an output_symbol object, the profile_container_t life time
 	/// object must be > of the life time of the output_symbol object.
-	formatter(profile_container_t const & profile_container, int counter);
+	formatter(profile_container_t const & profile_container);
 
 	/// convenience to add output options flags w/o worrying about cast
 	void add_format(outsymbflag flag);
@@ -63,11 +62,10 @@ private:
 
 	/// data passed for output
 	struct field_datum {
-		field_datum(std::string const & n, sample_entry const & s, size_t c, bool vma_64_)
-			: name(n), sample(s), ctr(c), vma_64(vma_64_) {}
+		field_datum(std::string const & n, sample_entry const & s, bool vma_64_)
+			: name(n), sample(s), vma_64(vma_64_) {}
 		std::string const & name;
 		sample_entry const & sample;
-		size_t ctr;
 		bool vma_64;
 	};
  
@@ -123,7 +121,7 @@ private:
 	/// returns the nr of char needed to pad this field
 	size_t output_field(std::ostream & out, std::string const & name,
 			   sample_entry const & sample,
-			   outsymbflag fl, size_t ctr, size_t padding);
+			   outsymbflag fl, size_t padding);
  
 	/// returns the nr of char needed to pad this field
 	size_t output_header_field(std::ostream & out, outsymbflag fl,
@@ -136,17 +134,15 @@ private:
 	profile_container_t const & profile_container;
  
 	/// total sample count
-	u32 total_count[OP_MAX_COUNTERS];
+	unsigned int total_count;
 	/// samples so far
-	u32 cumulated_samples[OP_MAX_COUNTERS];
+	unsigned int cumulated_samples;
 	/// percentage so far
-	u32 cumulated_percent[OP_MAX_COUNTERS];
+	unsigned int cumulated_percent;
 	/// detailed total count
-	u32 total_count_details[OP_MAX_COUNTERS];
+	unsigned int total_count_details;
 	/// detailed percentage so far
-	u32 cumulated_percent_details[OP_MAX_COUNTERS];
-	/// counter to use
-	int counter;
+	unsigned int cumulated_percent_details;
 	/// used for outputting header
 	bool first_output;
 	/// true if we need to format as 64 bits quantities

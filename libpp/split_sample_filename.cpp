@@ -17,22 +17,23 @@
 
 using namespace std;
 
+namespace {
+
 
 // PP:3.19 event_name.count.unitmask.tgid.tid.cpu
-static split_sample_filename split_event_spec(string const & event_spec)
+split_sample_filename split_event_spec(string const & event_spec)
 {
 	size_t const nr_spec = 6;
 
 	vector<string> temp;
 	separate_token(temp, event_spec, '.');
 	if (temp.size() != nr_spec) {
-		throw invalid_argument("bad event specification" + event_spec);
+		throw invalid_argument("split_event_spec(): bad event specification: " + event_spec);
 	}
 
 	for (size_t i = 0; i < nr_spec ; ++i) {
 		if (temp[i].empty()) {
-			throw invalid_argument("bad event specification" +
-					       event_spec);
+			throw invalid_argument("split_event_spec(): bad event specification: " + event_spec);
 		}
 	}
 
@@ -48,6 +49,29 @@ static split_sample_filename split_event_spec(string const & event_spec)
 
 	return result;
 }
+
+/**
+ * @param component  path component
+ *
+ * remove from path_component all directory left to {root} or {kern}
+ *
+ * return the directory name formed from this
+ */
+string remove_base_dir(vector<string> & path)
+{
+	string dir_name;
+
+	while (!path.empty()) {
+		if (path[0] == "{root}" || path[0] == "{kern}")
+			break;
+		dir_name += path[0] + '/';
+		path.erase(path.begin());
+	}
+
+	return dir_name;
+}
+
+}  // anonymous namespace
 
 
 /*
@@ -75,6 +99,8 @@ split_sample_filename split_sample_file(string const & filename)
 	vector<string> path;
 	separate_token(path, filename_spec, '/');
 
+	result.base_dir = remove_base_dir(path);
+
 	// pp_interface PP:3.19 to PP:3.23 path must start either with {root}
 	// or {kern} and we must found at least 2 component
 	if (path.size() < 2 || (path[0] != "{root}" && path[0] != "{kern}")) {
@@ -92,10 +118,8 @@ split_sample_filename split_sample_file(string const & filename)
 	for (i = 1 ; i < path.size() ; ++i) {
 		if (path[i] == "{dep}")
 			break;
-		if (i != 1)
-			result.image += "/";
 
-		result.image += path[i];
+		result.image += "/" + path[i];
 	}
 
 	if (i == path.size())
@@ -118,10 +142,7 @@ split_sample_filename split_sample_file(string const & filename)
 	++i;
 
 	for (size_t pos = i ; pos < path.size() ; ++pos) {
-		if (i != pos)
-			result.lib_image += "/";
-
-		result.lib_image += path[pos];
+		result.lib_image += "/" + path[pos];
 	}
 
 	return result;

@@ -9,10 +9,6 @@ AM_CPPFLAGS = \
 
 noinst_LIBRARIES = libpp.a
 libpp_a_SOURCES = \
-	counter_array.cpp \
-	counter_array.h \
-	counter_profile.cpp \
-	counter_profile.h \
 	counter_util.cpp \
 	counter_util.h \
 	derive_files.cpp \

@@ -37,12 +37,11 @@ public:
 	 * @param flags optimize hint to add samples. The flags is a promise
 	 * on what will be required as information in future. Avoid to pass
 	 * osf_linenr_info greatly improve performance of add.
-	 * @param counter_mask which counter we must record
 	 * @param need details true if we need to record all samples or to
 	 * to record them at symbol level. This is an optimization hint
 	 */
 	profile_container_t(bool add_zero_samples_symbols, outsymbflag flags,
-			    int counter_mask, bool need_details);
+			    bool need_details);
 
 	~profile_container_t();
  
@@ -86,8 +85,6 @@ public:
 
 	/**
 	 * select_symbols - create a set of symbols sorted by sample count
-	 * @param ctr on what counter sorting must be made and threshold
-	 *   selection must be made
 	 * @param threshold select symbols which contains more than
 	 *   threshold percent of samples
 	 * @param until_threshold rather to get symbols with more than
@@ -101,30 +98,23 @@ public:
 	 * threshold == 0.0 and !until_threshold
 	 */
 	symbol_collection const select_symbols(
-		size_t ctr, double threshold,
-		bool until_threshold,
+		double threshold, bool until_threshold,
 		bool sort_by_vma = false) const;
 
 	/// Like select_symbols for filename without allowing sort by vma.
-	std::vector<std::string> const select_filename(size_t ctr,
+	std::vector<std::string> const select_filename(
 		double threshold, bool until_threshold) const;
 
-	/// return the total number of samples for counter_nr
-	u32 samples_count(size_t counter_nr) const;
+	/// return the total number of samples
+	unsigned int samples_count() const;
 
 	/// Get the samples count which belongs to filename. Return false if
 	/// no samples found.
-	bool samples_count(counter_array_t & result,
-			   std::string const & filename) const;
+	unsigned int samples_count(std::string const & filename) const;
 	/// Get the samples count which belongs to filename, linenr. Return
 	/// false if no samples found.
-	bool samples_count(counter_array_t & result,
-			   std::string const & filename,
+	unsigned int samples_count(std::string const & filename,
 			   size_t linenr) const;
-	/// you can call this *after* the first call to add() else the
-	/// application exit(1) with a meaningfull error message
-	uint get_nr_counters() const;
-
 private:
 	/// helper for do_add()
 	void add_samples(profile_t const & profile,
@@ -156,14 +146,11 @@ private:
 	scoped_ptr<sample_container_imp_t> samples;
 	/// build() must count samples count for each counter so cache it here
 	/// since user of profile_container_t often need it later.
-	counter_array_t counter;
-	/// maximum number of counter available
-	uint nr_counters;
+	unsigned int total_count;
 
 	/// parameters passed to ctor
 	bool add_zero_samples_symbols;
 	outsymbflag flags;
-	int counter_mask;
 
 	/// optimization hint to add_samples, true if we need to record
 	/// at symbol level or vma level
@@ -174,8 +161,6 @@ private:
  * add_samples - populate a samples container with samples
  * @param samples the samples container to populate
  * @param sample_filename samples filename
- * @param counter_mask the counter nr mask each bit at pos i on mean open
- *  this samples files nr i
  * @param binary_name the name of the binary image
  * @param app_name the owning application of these samples, identical to binary
  *  name if profiling session did not separate samples for shared libs or
@@ -186,11 +171,12 @@ private:
  * open a bfd object getting symbols name, then populate samples with the
  * relevant samples
  */
-bool add_samples(profile_container_t & samples, std::string sample_filename,
-		 size_t counter_mask, std::string const & binary_name,
+bool add_samples(profile_container_t & samples,
+		 std::string const & sample_filename,
+		 std::string const & binary_name,
 		 std::string const & app_name,
 		 std::vector<std::string> const & excluded_symbols =
 		 	std::vector<std::string>(),
-		 std::string symbol = std::string());
+		 std::string const & symbol = std::string());
 
 #endif /* !PROFILE_CONTAINER_H */

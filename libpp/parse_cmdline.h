@@ -60,12 +60,11 @@ public:
 	std::vector<std::string> get_session_exclude() const;
 
 	/**
-	 * @param filenames  sample filename candidate to inclusion in list
-	 *  of sample file to process
+	 * @param filename  the filename to check
 	 *
-	 * implement 3.24 matching algorithm.
+	 * return true if filename match the spec. PP:3.24 internal loop
 	 */
-	std::vector<std::string> match(std::vector<std::string> const &) const;
+	bool match(std::string const & filename) const;
 private:
 	/**
 	 * implement tag parsing: PP:3.3 to 3.16
@@ -99,13 +98,6 @@ private:
 	 */
 	action_t get_handler(std::string const & tag_value,
 			     std::string & value);
-
-	/**
-	 * @param filename  the filename to check
-	 *
-	 * return true if filename match the spec. PP:3.24 internal loop
-	 */
-	bool match(std::string const & filename) const;
 
 	/**
 	 * PP:3.3/3.4 constraint: tag sample-file and binary: cannot be used
@@ -147,6 +139,6 @@ private:
  *
  */
 void handle_non_options(parse_cmdline & parser, 
-			vector<string> const & args);
+			std::vector<std::string> const & args);
 
 #endif /* !PARSE_CMDLINE_H */

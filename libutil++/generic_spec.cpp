@@ -16,5 +16,6 @@ using namespace std;
 template <>
 void generic_spec<string>::set(string const & str)
 {
+	is_all = false;
 	data = str;
 }

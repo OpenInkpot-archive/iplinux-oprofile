@@ -74,6 +74,17 @@ bool filename_match::match(string const & filename) const
 	return false;
 }
 
+bool filename_match::strict_match(std::string const & filename) const
+{
+	if (match(exclude_pattern, filename))
+		return false;
+
+	if (match(include_pattern, filename))
+		return true;
+
+	return false;
+}
+
 bool filename_match::match(vector<string> const & patterns,
 			   string const & filename)
 {

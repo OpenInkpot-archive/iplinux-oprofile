@@ -15,11 +15,9 @@
 // FIXME
 
 /**
- * flags passed to the ctr of an output_symbol object. This also specify the
+ * flags passed to the ctor of an output_symbol object. This also specify the
  * order of field output: lower enum tag ==> comes first in output order
- * Note than changing value of enum is not safe. See output_symbol and
- * the osf_repeat_mask use. So you can't reorder easily the output order
- * of field
+ * Note than changing value of enum is not safe.
  */
 enum outsymbflag {
 	osf_none = 0,
@@ -44,10 +42,6 @@ enum outsymbflag {
 	osf_app_name = 1 << 12,		// owning application
 	osf_short_app_name = 1 << 13,	// basename of owning application
 
-	/// used internally
-	osf_repeat_mask = osf_nr_samples + osf_nr_samples_cumulated +
-                         osf_percent + osf_percent_cumulated +
-			 osf_percent_details + osf_percent_cumulated_details,
 	/// These fields are considered imutable when showing details for one
 	/// symbol, we show them only when outputting the symbol itself but
 	/// we avoid to display them during details output

@@ -42,8 +42,7 @@ bool filename_spec::match(filename_spec const & rhs,
 	}
 
 	if (binary.empty()) {
-		return image == rhs.image &&
-			lib_image == rhs.lib_image;
+		return image == rhs.image && lib_image == rhs.lib_image;
 	}
 
 	// PP:3.3 if binary is not empty we must match either the

@@ -22,9 +22,9 @@ using namespace std;
 
 namespace {
 
-inline counter_array_t & add_counts(counter_array_t & arr, sample_entry const * s)
+inline unsigned int add_counts(unsigned int count, sample_entry const * s)
 {
-	return arr += s->counter;
+	return count + s->count;
 }
 
 } // namespace anon
@@ -44,9 +44,8 @@ void sample_container_imp_t::push_back(sample_entry const & sample)
 	samples.push_back(sample);
 }
 
-bool sample_container_imp_t::accumulate_samples(counter_array_t & counter,
-						string const & filename,
-						uint max_counters) const
+unsigned int sample_container_imp_t::accumulate_samples(
+			string const & filename) const
 {
 	flush_input_counter();
 
@@ -61,9 +60,7 @@ bool sample_container_imp_t::accumulate_samples(counter_array_t & counter,
 	iterator it1 = samples_by_file_loc.lower_bound(&lower);
 	iterator it2 = samples_by_file_loc.upper_bound(&upper);
 
-	counter += accumulate(it1, it2, counter, add_counts);
-
-	return !counter.empty(max_counters);
+	return accumulate(it1, it2, 0, add_counts);
 }
 
 sample_entry const * sample_container_imp_t::find_by_vma(bfd_vma vma) const
@@ -82,8 +79,8 @@ sample_entry const * sample_container_imp_t::find_by_vma(bfd_vma vma) const
 	return 0;
 }
 
-bool sample_container_imp_t::accumulate_samples(counter_array_t & counter,
-	string const & filename, size_t linenr, uint max_counters) const
+unsigned int sample_container_imp_t::accumulate_samples(
+	string const & filename, size_t linenr) const
 {
 	flush_input_counter();
 
@@ -97,9 +94,7 @@ bool sample_container_imp_t::accumulate_samples(counter_array_t & counter,
 
 	p_it_t p_it = samples_by_file_loc.equal_range(&sample);
 
-	counter += accumulate(p_it.first, p_it.second, counter, add_counts);
-
-	return !counter.empty(max_counters);
+	return accumulate(p_it.first, p_it.second, 0, add_counts);
 }
 
 void sample_container_imp_t::flush_input_counter() const
