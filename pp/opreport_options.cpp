@@ -275,8 +275,6 @@ void get_options(int argc, char const * argv[])
 	copy(sample_files.begin(), sample_files.end(),
 	     ostream_iterator<string>(cverb, "\n"));
 
-	// FIXME: crash here if we do opreport /usr/bin/doesntexist
-
 	vector<unmergeable_profile>
 		unmerged_profile = merge_profile(sample_files);
 
@@ -284,6 +282,11 @@ void get_options(int argc, char const * argv[])
 	copy(unmerged_profile.begin(), unmerged_profile.end(),
 	     ostream_iterator<unmergeable_profile>(cverb, "\n"));
 
+	if (unmerged_profile.empty()) {
+		cerr << "no samples files found: try running opcontrol --dump"
+		     << endl;
+		exit(EXIT_FAILURE);
+	}
 
 	if (unmerged_profile.size() > 1) {
 		// quick and dirty check for now
@@ -292,7 +295,6 @@ void get_options(int argc, char const * argv[])
 		     << "samples files set considered\n" << endl;
 		exit(EXIT_FAILURE);
 	}
-
 
 	sample_file_partition.reset(
 		new partition_files(sample_files, options::merge_by));

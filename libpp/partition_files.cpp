@@ -39,6 +39,9 @@ ostream & operator<<(ostream & out, unmergeable_profile const & lhs)
 
 vector<unmergeable_profile> merge_profile(list<string> const & files)
 {
+	if (files.empty())
+		return vector<unmergeable_profile>();
+
 	set<unmergeable_profile> spec_set;
 
 	split_sample_filename model = split_sample_file(*files.begin());
