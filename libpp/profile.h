@@ -28,7 +28,7 @@ class opd_header;
  * i.e. set of count values for VMA offsets for
  * a particular binary.
  */
-class profile_t /*:*/  noncopyable {
+class profile_t : noncopyable {
 public:
 	/**
 	 * profile_t - construct an empty  profile_t object
