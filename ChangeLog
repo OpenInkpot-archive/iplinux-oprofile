@@ -1,5 +1,13 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp:
+	* pp/opreport.cpp:
+	* pp/opannotate.cpp:
+	* pp/opgprof.cpp: another select_symbols() API cleanup
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* pp/opgprof.cpp: use select_symbols so we can
 	handle --threshold
 

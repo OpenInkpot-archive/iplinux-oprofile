@@ -91,10 +91,10 @@ public:
 
 	/**
 	 * select_symbols - create a set of symbols sorted by sample count
-	 * @param image_name select symbols belonging to this binary image
-	 *  or all if image_name is empty
 	 * @param threshold select symbols which contains more than
 	 *   threshold percent of samples
+	 * @param image_name select symbols belonging to this binary image
+	 *  or all if not set
 	 * @param sort_by_vma sort symbols by vma not counter samples
 	 * @return a sorted vector of symbols
 	 *
@@ -102,8 +102,9 @@ public:
 	 * of op_to_source. If you need to get all symbols call it with
 	 * threshold == 0.0
 	 */
-	symbol_collection const select_symbols(std::string const & image_name,
-		double threshold, bool sort_by_vma = false) const;
+	symbol_collection const select_symbols(double threshold,
+		std::string const & image_name = std::string(),
+		bool sort_by_vma = false) const;
 
 	/// Like select_symbols for filename without allowing sort by vma.
 	std::vector<std::string> const select_filename(

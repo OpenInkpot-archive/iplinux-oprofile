@@ -157,8 +157,8 @@ profile_container::add_samples(profile_t const & profile,
 
 
 profile_container::symbol_collection const
-profile_container::select_symbols(string const & image_name,
-				  double threshold, bool sort_by_vma) const
+profile_container::select_symbols(double threshold, string const & image_name,
+                                  bool sort_by_vma) const
 {
 	symbol_collection v;
 	symbol_collection result;

@@ -36,7 +36,7 @@ popt::option options_array[] = {
 	popt::option(image_path, "image-path", 'p',
 		     "comma-separated path to search missing binaries","path"),
 	popt::option(threshold, "threshold", 't',
-		     "threshold of minimum percentage before a symbol is printed",
+		     "minimum percentage needed to produce output",
 		     "percent"),
 };
 

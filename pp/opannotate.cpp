@@ -413,7 +413,7 @@ void output_asm(string const & app_name)
 {
 	// select the subset of symbols which satisfy the user requests
 	vector<symbol_entry const *> output_symbols =
-		samples->select_symbols(app_name, options::threshold);
+		samples->select_symbols(options::threshold, app_name);
 
 	output_info(cout);
 

@@ -151,7 +151,7 @@ void output_gprof(profile_container const & samples,
 	u16 * hist = (u16*)xcalloc(histsize, sizeof(u16));
 
 	profile_container::symbol_collection const symbols =
-		samples.select_symbols(string(), options::threshold);
+		samples.select_symbols(options::threshold);
 
 	profile_container::symbol_collection::const_iterator sit
 		= symbols.begin();
