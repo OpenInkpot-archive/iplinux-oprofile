@@ -48,7 +48,6 @@ namespace options {
 	bool accumulated;
 	bool reverse_sort;
 	bool global_percent;
-	std::ostream cout(::cout.rdbuf());
 }
 
 
@@ -205,7 +204,7 @@ void handle_output_file()
 		exit(EXIT_FAILURE);
 	}
 
-	options::cout.rdbuf(os.rdbuf());
+	cout.rdbuf(os.rdbuf());
 }
 
 } // namespace anon

@@ -50,7 +50,7 @@ void output_header(partition_files const & files)
 		// See FIXME in opannotate.cpp  for similar code
 		profile_t profile;
 		profile.add_sample_file(file_set.begin()->sample_filename, 0);
-		output_header(options::cout, profile.get_header());
+		output_header(cout, profile.get_header());
 	}
 }
 
@@ -166,10 +166,10 @@ void output_counter(double total_count, size_t count)
 {
 	// FIXME: left or right, op_time was using left
 	// left io manipulator doesn't exist in 2.95
-//	options::cout.setf(ios::left, ios::adjustfield);
-	options::cout << setw(9) << count << " ";
+//	cout.setf(ios::left, ios::adjustfield);
+	cout << setw(9) << count << " ";
 	double ratio = op_ratio(count, total_count);
-	options::cout << format_double(ratio * 100, 3, 4) << " ";
+	cout << format_double(ratio * 100, 3, 4) << " ";
 }
 
 
@@ -181,16 +181,16 @@ void output_dep_summaries(group_summary const & group, double total_count)
 	for (size_t i = 0; i < group.files.size(); ++i) {
 		summary const & summ = group.files[i];
 
-		options::cout << "\t";
+		cout << "\t";
 		double tot_count = options::global_percent 
 			? total_count : group.count;
 		output_counter(tot_count, summ.count);
 
 		if (summ.lib_image.empty())
-			options::cout << " " << get_filename(summ.image_name);
+			cout << " " << get_filename(summ.image_name);
 		else
-			options::cout << " " << get_filename(summ.lib_image);
-		options::cout << endl;
+			cout << " " << get_filename(summ.lib_image);
+		cout << endl;
 	}
 }
 
@@ -208,15 +208,15 @@ output_summaries(vector<group_summary> const & summaries, double total_count)
 		output_counter(total_count, it->count);
 
 		if (!options::merge_by.merge_lib) {
-			options::cout << get_filename(it->image_name);
+			cout << get_filename(it->image_name);
 		} else {
 			if (it->lib_image.empty())
-				options::cout << get_filename(it->image_name);
+				cout << get_filename(it->image_name);
 			else
-				options::cout << get_filename(it->lib_image);
+				cout << get_filename(it->lib_image);
 		}
 
-		options::cout << endl;
+		cout << endl;
 
 		bool const showdep = options::include_dependent
 			&& !options::hide_dependent;
@@ -318,7 +318,7 @@ void output_symbols(profile_container const & samples)
 
 	out.add_format(flags);
 
-	out.output(options::cout, symbols, options::reverse_sort, need_vma64);
+	out.output(cout, symbols, options::reverse_sort, need_vma64);
 }
 
 

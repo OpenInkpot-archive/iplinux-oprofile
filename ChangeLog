@@ -1,5 +1,12 @@
 2003-05-08  John Levon  <levon@movementarian.org>
 
+	* pp/opreport.cpp:
+	* pp/opreport_options.cpp:
+	* pp/opreport_options.h: clean up cout stuff as
+	suggested by Phil
+
+2003-05-08  John Levon  <levon@movementarian.org>
+
 	* libpp/profile_spec.h:
 	* libpp/profile_spec.c: rename the set_p variables,
 	remove pointless is_empty() function
