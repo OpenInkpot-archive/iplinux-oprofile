@@ -12,6 +12,8 @@
 #include <sstream>
 #include <iomanip>
 
+#include <cstdlib>
+
 #include "string_manip.h"
 
 using namespace std;
@@ -156,4 +158,16 @@ string const format_double(double value, size_t int_width, size_t fract_width)
 	}
 
 	return os.str();
+}
+
+template <>
+unsigned int lexical_cast_no_ws<unsigned int>(std::string const & str)
+{
+	char* endptr;
+
+	unsigned long ret = strtoul(str.c_str(), &endptr, 0);
+	if (*endptr) {
+		throw std::invalid_argument("lexical_cast_no_ws<T>(\""+ str +"\")");
+	}
+	return ret;
 }

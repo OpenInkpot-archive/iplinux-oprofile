@@ -15,6 +15,7 @@
 #include <string>
 #include <vector>
 #include <sstream>
+#include <stdexcept>
 
 /**
  * @param str string
@@ -113,18 +114,24 @@ T lexical_cast_no_ws(std::string const & str)
 	in >> value;
 
 	if (in.fail()) {
-		throw std::invalid_argument("lexical_cast<T>(\""+ str +"\")");
+		throw std::invalid_argument("lexical_cast_no_ws<T>(\""+ str +"\")");
 	}
 
 	// we can't check eof here, eof is reached at next read.
-	// FIXME: dubious code, at least we should put back the char
 	char ch;
 	in >> ch;
 	if (!in.eof()) {
-		throw std::invalid_argument("lexical_cast<T>(\""+ str +"\")");
+		throw std::invalid_argument("lexical_cast_no_ws<T>(\""+ str +"\")");
 	}
 
 	return value;
 }
+
+// FIXME: a hack to accept hexadecimal for unsigned int. We must fix it in a
+// better way (removing touint(), tobool(), tostr()). Do we really need
+// a strict checking against WS ? (this strict conversion was to help
+// validating sample filename)
+template <>
+unsigned int lexical_cast_no_ws<unsigned int>(std::string const & str);
 
 #endif /* !STRING_MANIP_H */

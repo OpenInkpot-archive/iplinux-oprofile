@@ -1,3 +1,11 @@
+2003-05-28  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libutil++/string_manip.h:
+	* libutil++/string_manip.cpp: specialize
+	  lexical_cast_no_ws<unsigned int> to accept hexadecimal input
+
+	* pp/common_option.cpp: missing << endl
+
 2003-05-27  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* doc/oprofile.xml: update example in "Interpreting profiling results"
