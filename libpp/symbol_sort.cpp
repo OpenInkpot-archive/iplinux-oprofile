@@ -61,13 +61,15 @@ int compare_by(sort_options::sort_order order,
 
 
 struct symbol_compare {
-	symbol_compare(vector<sort_options::sort_order> const & _compare_order)
-		: compare_order(_compare_order) {}
+	symbol_compare(vector<sort_options::sort_order> const & _compare_order,
+		       bool _reverse_sort)
+		: compare_order(_compare_order), reverse_sort(_reverse_sort) {}
 
 	bool operator()(symbol_entry const * lhs,
 			symbol_entry const * rhs) const;
 private:
 	vector<sort_options::sort_order> const & compare_order;
+	bool reverse_sort;
 };
 
 
@@ -76,6 +78,9 @@ bool symbol_compare::operator()(symbol_entry const * lhs,
 {
 	for (size_t i = 0; i < compare_order.size(); ++i) {
 		int ret = compare_by(compare_order[i], lhs, rhs);
+
+		if (reverse_sort)
+			ret = -ret;
 		if (ret != 0)
 			return ret < 0;
 	}
@@ -85,9 +90,11 @@ bool symbol_compare::operator()(symbol_entry const * lhs,
 } // anonymous namespace
 
 
-void sort_options::sort_by(std::vector<symbol_entry const *> & syms) const
+void sort_options::sort_by(std::vector<symbol_entry const *> & syms,
+			bool reverse_sort) const
 {
-	stable_sort(syms.begin(), syms.end(), symbol_compare(sort));
+	stable_sort(syms.begin(), syms.end(),
+		    symbol_compare(sort, reverse_sort));
 }
 
 

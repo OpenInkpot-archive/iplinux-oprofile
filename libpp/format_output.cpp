@@ -74,20 +74,13 @@ void formatter::output(ostream & out, symbol_entry const * symb)
 
 void formatter::output(ostream & out,
                        vector<symbol_entry const *> const & symbols,
-                       bool reverse, bool vma_64_)
+		       bool vma_64_)
 {
 	vma_64 = vma_64_;
 
-	if (reverse) {
-		vector<symbol_entry const *>::const_reverse_iterator it;
-		for (it = symbols.rbegin(); it != symbols.rend(); ++it) {
-			output(out, *it);
-		}
-	} else {
-		vector<symbol_entry const *>::const_iterator it;
-		for (it = symbols.begin(); it != symbols.end(); ++it) {
-			output(out, *it);
-		}
+	vector<symbol_entry const *>::const_iterator it;
+	for (it = symbols.begin(); it != symbols.end(); ++it) {
+		output(out, *it);
 	}
 }
 

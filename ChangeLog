@@ -1,5 +1,14 @@
 2003-05-12  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* libpp/format_output.h:
+	* libpp/format_output.cpp:
+	* libpp/symbol_sort.h:
+	* libpp/symbol_sort.cpp: handle reverse sort in sorting not in output
+	* pp/opannotate.cpp:
+	* pp/opreport.cpp: update according
+
+2003-05-12  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libpp/symbol_sort.h:
 	* libpp/symbol_sort.cpp: handle sort order as specified on command line
 

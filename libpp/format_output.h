@@ -40,8 +40,7 @@ public:
 	/** output a vector of symbols to out according to the output format
 	 * specifier previously set by call(s) to add_format() */
 	void output(std::ostream & out,
-		    std::vector<symbol_entry const *> const & v,
-		    bool reverse, bool vma_64);
+		    std::vector<symbol_entry const *> const & v, bool vma_64);
 
 	/// set the output_details boolean
 	void show_details();

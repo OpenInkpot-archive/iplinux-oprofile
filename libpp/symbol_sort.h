@@ -34,7 +34,8 @@ struct sort_options {
 	/**
 	 * Sort the vector by the given criteria.
 	 */
-	void sort_by(std::vector<symbol_entry const *> & syms) const;
+	void sort_by(std::vector<symbol_entry const *> & syms,
+		     bool reverse_sort) const;
 
 private:
 	std::vector<sort_order> sort;

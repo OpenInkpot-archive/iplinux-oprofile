@@ -420,7 +420,7 @@ void output_asm(string const & app_name)
 
 	sort_options options;
 	options.add_sort_option(sort_options::sample);
-	options.sort_by(symbols);
+	options.sort_by(symbols, false);
 
 	output_info(cout);
 

@@ -303,7 +303,7 @@ void output_symbols(profile_container const & samples)
 	profile_container::symbol_choice choice;
 	choice.threshold = options::threshold;
 	vector<symbol_entry const *> symbols = samples.select_symbols(choice);
-	options::sort_by.sort_by(symbols);
+	options::sort_by.sort_by(symbols, options::reverse_sort);
 
 	format_output::formatter out(samples);
 
@@ -333,8 +333,7 @@ void output_symbols(profile_container const & samples)
 
 	out.add_format(flags);
 
-	out.output(cout, symbols, options::reverse_sort,
-	           choice.hints & cf_64bit_vma);
+	out.output(cout, symbols, choice.hints & cf_64bit_vma);
 }
 
 
