@@ -362,7 +362,6 @@ do_start() {
 		if test "$?" -eq 0; then
 			echo "oprofiled appears to be running already." >&2
 			echo "delete $LOCK_FILE if this is not the case." >&2
-			exit 1
 		fi
 	fi
  
@@ -379,24 +378,26 @@ do_start() {
 
 	vecho "cpu speed (estimation) : $cpu_speed"
 
-	vecho "executing oprofiled $OPD_ARGS"
-	oprofiled $OPD_ARGS
- 
-	COUNT=0
-	while ! test -f "$DIR/lock"
-	do
-		sleep 1
-		COUNT=`expr $COUNT + 1`
-		if [ "$COUNT" -eq 30 ]; then
-			echo "Couldn't start oprofiled." >&2
-			echo "Check the log file \"$LOG_FILE\" and /var/log/messages" >&2
-			exit 1
-		fi
-	done
+	if test ! -f $LOCK_FILE; then
+		vecho "executing oprofiled $OPD_ARGS"
+		oprofiled $OPD_ARGS
+	 
+		COUNT=0
+		while ! test -f "$DIR/lock"
+		do
+			sleep 1
+			COUNT=`expr $COUNT + 1`
+			if [ "$COUNT" -eq 30 ]; then
+				echo "Couldn't start oprofiled." >&2
+				echo "Check the log file \"$LOG_FILE\" and /var/log/messages" >&2
+				exit 1
+			fi
+		done
+	fi
  
 	echo 1 >$MOUNT/enable
  
-	echo "Daemon started."
+	echo "Profiler running."
 }
  
 # main
