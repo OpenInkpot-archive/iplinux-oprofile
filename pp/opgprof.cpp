@@ -68,6 +68,12 @@ void get_vma_range(bfd_vma & min, bfd_vma & max,
 		if (it->second.vma > max)
 			max = it->second.vma;
 	}
+
+	if (min != bfd_vma(-1))
+		min = 0;
+	// we must return a range [min, max) not a range [min, max]
+	if (max != 0)
+		max += 1;
 }
 
 
