@@ -16,6 +16,8 @@
 #include <vector>
 #include <list>
 
+#include "split_sample_filename.h"
+
 /**
  * store merging options options used to partition samples filename
  */
@@ -55,20 +57,15 @@ std::ostream & operator<<(std::ostream & out, unmergeable_profile const & lhs);
 class partition_files {
 
 public:
-	typedef std::list<std::string> filename_set;
+	typedef std::list<split_sample_filename> filename_set;
 
 	/**
 	 * @param files a list of filename to partition
-	 * @param merge_cpu allow to merge regardless of cpu spec
-	 * @param merge_lib allow to merge regardless of lib spec
-	 * @param merge_tid allow to merge regardless of tid spec
-	 * @param merge_tgid allow to merge regardless of tgid spec
-	 * @param merge_unimask allow to merge regardless of unitmask spec
-	 *
+	 * @param merge_by  specify what merging are allowed
 	 *
 	 * complexity: f(N*log(N)) N: files.size()
 	 */
-	partition_files(std::list<std::string> const & files,
+	partition_files(list<string> const & files,
 			merge_option const & merge_by);
 
 

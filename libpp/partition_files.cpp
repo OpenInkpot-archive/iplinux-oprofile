@@ -70,9 +70,9 @@ vector<unmergeable_profile> merge_profile(list<string> const & files)
 class merge_compare {
 public:
 	merge_compare(merge_option const & merge_by);
-	bool operator()(string const & lhs, string const & rhs) const;
+	bool operator()(split_sample_filename const & lhs,
+			split_sample_filename const & rhs) const;
 private:
-	split_sample_filename lhs;
 	merge_option merge_by;
 };
 
@@ -84,11 +84,9 @@ merge_compare::merge_compare(merge_option const & merge_by_)
 }
 
 
-bool merge_compare::operator()(string const & lhs_, string const & rhs_) const
+bool merge_compare::operator()(split_sample_filename const & lhs,
+			       split_sample_filename const & rhs) const
 {
-	split_sample_filename lhs = split_sample_file(lhs_);
-	split_sample_filename rhs = split_sample_file(rhs_);
-
 	if (merge_by.merge_lib) {
 		if (lhs.lib_image != rhs.lib_image)
 			return lhs.lib_image < rhs.lib_image;
@@ -124,11 +122,14 @@ bool merge_compare::operator()(string const & lhs_, string const & rhs_) const
 partition_files::partition_files(list<string> const & filename,
 				 merge_option const & merge_by)
 {
-	typedef multiset<string, merge_compare> spec_set;
+	typedef multiset<split_sample_filename, merge_compare> spec_set;
 
 	merge_compare compare(merge_by);
 	spec_set files(compare);
-	copy(filename.begin(), filename.end(), inserter(files, files.begin()));
+
+	list<string>::const_iterator cit;
+	for (cit = filename.begin(); cit != filename.end(); ++cit)
+		files.insert(split_sample_file(*cit));
 
 	spec_set::const_iterator it = files.begin();
 	while (it != files.end()) {
@@ -143,11 +144,11 @@ partition_files::partition_files(list<string> const & filename,
 	}
 
 	cverb << "Partition entries: " << nr_set() << endl;
-	filename_partition::const_iterator cit;
-	for (cit = filenames.begin(); cit != filenames.end(); ++cit) {
+	filename_partition::const_iterator fit;
+	for (fit = filenames.begin(); fit != filenames.end(); ++fit) {
 		cverb << "Partition entry:\n";
-		copy(cit->begin(), cit->end(), 
-		     ostream_iterator<string>(cverb, "\n"));
+		copy(fit->begin(), fit->end(), 
+		     ostream_iterator<split_sample_filename>(cverb, ""));
 	}
 }
 

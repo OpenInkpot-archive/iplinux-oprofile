@@ -1,3 +1,12 @@
+2003-04-28  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/partition_files.h:
+	* libpp/partition_files.cpp:
+	* libpp/split_sample_filename.h:
+	* libpp/split_sample_filename.cpp:
+	* pp/opreport.cpp: replace some use of std::string sample_filename
+	  by a split_sample_filename struct
+
 2003-04-28  John Levon  <levon@movementarian.org>
 
 	* libutil++/filename_match.h:

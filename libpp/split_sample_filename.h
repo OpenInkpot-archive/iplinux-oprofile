@@ -27,7 +27,13 @@ struct split_sample_filename
 	std::string tgid;
 	std::string tid;
 	std::string cpu;
+
+	/// the original sample filename from where above components are built
+	std::string sample_filename;
 };
+
+/// debugging helper
+ostream & operator<<(ostream &, split_sample_filename const&);
 
 
 /**

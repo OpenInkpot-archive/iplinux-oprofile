@@ -43,7 +43,7 @@ struct files_count {
 	files_count() : count(0) {}
 	size_t count;
 	string image_name;
-	string sample_filename;
+	string lib_image;
 	vector<merged_file_count> files;
 };
 
@@ -74,20 +74,19 @@ files_count counts(partition_files::filename_set const & files)
 {
 	files_count count;
 
-	count.sample_filename = *files.begin();
-	split_sample_filename sp = split_sample_file(count.sample_filename);
-	count.image_name = sp.image;
+	count.image_name = files.begin()->image;
+	count.lib_image = files.begin()->lib_image;
 
 	partition_files::filename_set::const_iterator it;
 	for (it = files.begin(); it != files.end(); ++it) {
 		merged_file_count sub_count;
 
-		sub_count.filename = *it;
-		profile_t samples(*it);
+		sub_count.filename = it->sample_filename;
+		profile_t samples(it->sample_filename);
 		sub_count.count = samples.accumulate_samples(0, ~0);
 
 		count.count += sub_count.count;
-		count.files.push_back(sub_count);		
+		count.files.push_back(sub_count);
 	}
 
 	sort(count.files.begin(), count.files.end(),
@@ -172,12 +171,10 @@ void output_files_count(partition_files const & files)
 		if (!options::merge_by.merge_lib) {
 			cout << get_filename(it->image_name);
 		} else {
-			split_sample_filename sp =
-					split_sample_file(it->sample_filename);
-			if (sp.lib_image.empty())
+			if (it->lib_image.empty())
 				cout << get_filename(it->image_name);
 			else
-				cout << get_filename(sp.lib_image);
+				cout << get_filename(it->lib_image);
 		}
 		cout << endl;
 		if (!options::hide_dependent && !options::merge_by.merge_lib) {
@@ -206,11 +203,9 @@ void output_symbols_count(partition_files const & files)
 
 		partition_files::filename_set::const_iterator it;
 		for (it = file_set.begin(); it != file_set.end(); ++it) {
-			split_sample_filename sp = split_sample_file(*it);
-
-			string app_name = sp.image;
-			string image_name = sp.lib_image.empty() ?
-				sp.image : sp.lib_image;
+			string app_name = it->image;
+			string image_name = it->lib_image.empty() ?
+				it->image : it->lib_image;
 
 			if (options::merge_by.merge_lib) {
 				app_name = image_name;
@@ -223,7 +218,8 @@ void output_symbols_count(partition_files const & files)
 				// FIXME: inneficient since we can have
 				// multiple time the same binary file open bfd
 				// openened
-				add_samples(samples, *it, image_name, app_name,
+				add_samples(samples, it->sample_filename,
+					    image_name, app_name,
 					    options::exclude_symbols,
 					    options::include_symbols);
 			}

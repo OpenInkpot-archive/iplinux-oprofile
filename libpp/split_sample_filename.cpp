@@ -99,6 +99,8 @@ split_sample_filename split_sample_file(string const & filename)
 
 	split_sample_filename result = split_event_spec(event_spec);
 
+	result.sample_filename = filename;
+
 	vector<string> path;
 	separate_token(path, filename_spec, '/');
 
@@ -149,4 +151,16 @@ split_sample_filename split_sample_file(string const & filename)
 	}
 
 	return result;
+}
+
+ostream & operator<<(ostream & out, split_sample_filename const & data)
+{
+	out << data.sample_filename << endl;
+	out << data.base_dir << " " << data.image << " "
+	    << data.lib_image << " " << data.event << " "
+	    << data.count << " " << data.unitmask << " "
+	    << data.tgid << " " << data.tid << " "
+	    << data.cpu << endl;
+
+	return out;
 }
