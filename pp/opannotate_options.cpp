@@ -47,7 +47,7 @@ string include_file;
 string exclude_file;
 
 popt::option options_array[] = {
-	popt::option(options::demangle, "demangle", 'd',
+	popt::option(options::demangle, "demangle", '\0',
 		     "demangle GNU C++ symbol names (default on)"),
 	popt::option(options::demangle, "no-demangle", '\0',
 		     "don't demangle GNU C++ symbol names"),
@@ -69,7 +69,7 @@ popt::option options_array[] = {
 		     "exclude these comma separated symbols", "symbols"),
 	popt::option(options::objdump_params, "objdump-params", 'p',
 		     "additionnal params to pass to objdump", "parameters"),
-	popt::option(options::exclude_dependent, "exclude-dependent", 'n',
+	popt::option(options::exclude_dependent, "exclude-dependent", 'x',
 		     "exclude libs, kernel, and module samples for applications"),
 	popt::option(options::source, "source", 's', "output source"),
 	popt::option(options::assembly, "assembly", 'a', "output assembly"),

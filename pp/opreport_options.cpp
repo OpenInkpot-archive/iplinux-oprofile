@@ -54,7 +54,7 @@ vector<string> exclude_symbols;
 vector<string> include_symbols;
 
 popt::option options_array[] = {
-	popt::option(options::demangle, "demangle", 'd',
+	popt::option(options::demangle, "demangle", '\0',
 		     "demangle GNU C++ symbol names (default on)"),
 	popt::option(options::demangle, "no-demangle", '\0',
 		     "don't demangle GNU C++ symbol names"),
@@ -65,9 +65,9 @@ popt::option options_array[] = {
 	// PP:5
 	popt::option(options::symbols, "symbols", 'l',
 		     "list all symbols"),
-	popt::option(options::debug_info, "debug-info", 'b',
+	popt::option(options::debug_info, "debug-info", 'g',
 		     "add source file and line number to output"),
-	popt::option(options::details, "details", 'a',
+	popt::option(options::details, "details", 'd',
 		     "output detailed samples for each symbol"),
 	popt::option(options::exclude_dependent, "exclude-dependent", 'x',
 		     "exclude libs, kernel, and module samples for applications"),
@@ -79,15 +79,15 @@ popt::option options_array[] = {
 		     "include these comma separated symbols", "symbols"),
 	popt::option(mergespec, "merge", 'm',
 		     "comma separated list", "cpu,pid,lib"),
-	popt::option(options::show_header, "no-header", '\0',
+	popt::option(options::show_header, "no-header", 'n',
 		     "remove all header from output"),
-	popt::option(options::long_filenames, "long-filenames", '\0',
+	popt::option(options::long_filenames, "long-filenames", 'f',
 		     "show the full path of filenames"),
-	popt::option(options::accumulated, "accumulated", '\0',
+	popt::option(options::accumulated, "accumulated", 'c',
 		     "percentage field show accumulated count"),
 	popt::option(options::reverse_sort, "reverse-sort", 'r',
 		     "use reverse sort"),
-	popt::option(options::global_percent, "global-percent", '\0',
+	popt::option(options::global_percent, "global-percent", 'p',
 		     "percentage are not relative to symbol count or image "
 		     "count but total sample count"),
 };

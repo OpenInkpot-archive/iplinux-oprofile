@@ -15,7 +15,6 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
  o we show a header but not column headers for image report
  o write the man page and xml doc (i'll do this right at the end - john)
 
- o --debug-info is really slow
  o test opannotate -s -a on an application containing relative path debug
   info and profiled in another directory than the application build once.
   can objdump retrieve the source file and if no can we work-around ?
@@ -29,8 +28,6 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
  o disallow --accumulated without -l
  o opreport unhandled option (probably not exhaustive) 
   --global-percent is not handled according to pp_interface
- o pp/opreport --exclude-dependent --merge lib /lib/i686/libc-2.3.2.so doesn't do anything when using
-   separate, you need to remove --exclude-dependent ... makes sense ???
 
  o merging vmlinux as dependent library and as primary image
    $ pp/opreport --merge=lib | more

@@ -1,5 +1,10 @@
 2003-05-17  John Levon  <levon@movementarian.org>
 
+	* pp/opannotate_option.cpp:
+	* pp/opreport_options.cpp: command line changes
+
+2003-05-17  John Levon  <levon@movementarian.org>
+
 	* libpp/name_storage.h:
 	* libpp/name_storage.cpp: add present()
 
