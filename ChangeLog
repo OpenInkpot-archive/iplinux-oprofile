@@ -1,3 +1,7 @@
+2003-04-28  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libutil++/op_bfd.cpp: replace a loop by a std::copy()
+
 2003-04-28  John Levon  <levon@movementarian.org>
 
 	* libutil++/op_bfd.h:

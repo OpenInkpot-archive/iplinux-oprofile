@@ -244,8 +244,7 @@ void op_bfd::add_symbols(op_bfd::symbols_found_t & symbols,
 	it = remove_if(symbols.begin(), symbols.end(), remove_filter(symbol_filter));
 	symbols.erase(it, symbols.end());
 
-	for (it = symbols.begin() ; it != symbols.end(); ++it)
-		syms.push_back(*it);
+	copy(symbols.begin(), symbols.end(), back_inserter(syms));
 
 	cverb << "number of symbols now " << dec << syms.size() << endl;
 }
