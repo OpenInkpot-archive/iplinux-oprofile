@@ -171,11 +171,12 @@ static __inline unsigned int odb_do_hash(samples_odb_t const * hash, odb_key_t v
 	 * and do a lot of tests ... */
 	/* trying to combine high order bits his a no-op: inside a binary image
 	 * high order bits don't vary a lot, hash table start with 7 bits mask
-	 * so this hash coding use bits 3-9 of eip. Hash table is stored in
+	 * so this hash coding use bits 0-7, 8-15. Hash table is stored in
 	 * files avoiding to rebuilding them at profiling re-start so
 	 * on changing do_hash() change the file format!
 	 */
-	return (((value >> 32) ^ (value)) >> 3) & hash->hash_mask;
+	uint32_t temp = (value >> 32) ^ value;
+	return ((temp << 0) ^ (temp >> 8)) & hash->hash_mask;
 }
 
 #ifdef __cplusplus
