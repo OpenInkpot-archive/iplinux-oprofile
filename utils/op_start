@@ -57,7 +57,7 @@ extract_int()
 	local val=`echo $1 | sed 's,--ctr\([0-9]*\)[-A-Za-z]*,\1,'`
 
 	if test -z "$val"; then 
-		echo "invalid option \"$1\"" >&2
+		echo "Invalid option \"$1\"" >&2
 		exit 1
 	fi
 	if (($val >= $OP_MAX_COUNTERS || $val < 0)); then
