@@ -31,11 +31,6 @@ opreport_SOURCES = opreport.cpp \
 	$(pp_commons)
 opreport_LDADD = $(common_libs)
 
-opreport_SOURCES = opreport.cpp \
-	opreport_options.h opreport_options.cpp \
-	$(pp_commons)
-opreport_LDADD = $(common_libs)
-
 opannotate_SOURCES = opannotate.cpp \
 	opannotate_options.h opannotate_options.cpp \
 	$(pp_commons)
