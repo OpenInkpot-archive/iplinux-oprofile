@@ -66,12 +66,12 @@ T strict_convert(std::string const & str)
 	in.unsetf(std::ios::skipws);
 	in >> value;
 	if (in.fail())
-		throw std::invalid_argument("strict_convert<T>::set("+ str +")");
+		throw std::invalid_argument("strict_convert<T>::set(\""+ str +"\")");
 	// we can't check eof here, eof is reached at next read.
 	char ch;
 	in >> ch;
 	if (!in.eof())
-		throw std::invalid_argument("strict_convert<T>::set("+ str +")");
+		throw std::invalid_argument("strict_convert<T>::set(\""+ str +"\")");
 
 	return value;
 }
