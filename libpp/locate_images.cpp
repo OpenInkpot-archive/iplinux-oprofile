@@ -12,6 +12,7 @@
 #include "file_manip.h"
 #include "locate_images.h"
 
+#include <cerrno>
 #include <iostream>
 #include <sstream>
 #include <cstdlib>
