@@ -58,7 +58,7 @@ private:
 
 	typedef std::map<name_id, stored_name> name_map;
 
-	typedef std::map<stored_name, name_id> id_map;
+	typedef std::map<std::string, name_id> id_map;
 
 	name_map names;
 
