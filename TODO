@@ -12,9 +12,21 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
 
    - race with opcontrol --shutdown on odb_open() ?
 
+ o  new format percent in opreport can exceed field width by at least one :
+
+08049610 1        13            2.22786e-05 0.000289621 simple_strtoul          /usr/bin/od
+080496a8 1        14            2.22786e-05 0.0003119  __do_global_dtors_aux   /bin/grep
+
  o default to opreport -n as discussed
  o we show a header but not column headers for image report
- o write the man page and xml doc
+ o write the man page and xml doc (i'll do this right at the end - john)
+ o I think we should have the ability to have *fixed* width headers, e.g. :
+
+vma      samples  cum. samples  %           cum. %     symbol name             image name              app name
+0804c350 64582    64582         35.0757     35.0757    odb_insert              /usr/loc...in/oprofiled /usr/local/oprofile-pp/bin/oprofiled
+
+  Note the ellipsis
+
  o test opannotate -s -a on an application containing relative path debug
   info and profiled in another directory than the application build once.
   can objdump retrieve the source file and if no can we work-around ?
@@ -34,7 +46,6 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
  o inhibit build of opdiff in pp/Makefile.am
  o consider to do the symbol (details too ?) sort at output, format_output receive
   a vector of symbol to consider, we can perhaps sort in format_output
- o cumulative headers do not line up properly
  o disallow --accumulated without -l
  o opreport unhandled option (probably not exhaustive) 
   --global-percent is not handled according to pp_interface
