@@ -59,6 +59,8 @@ private:
 	name_map names;
 
 	id_map ids;
+
+	static int last_id;
 };
 
 /// for images

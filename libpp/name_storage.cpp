@@ -15,12 +15,7 @@
 
 using namespace std;
 
-namespace {
-
-/// id for new allocations
-int global_id = 0;
-
-}
+int name_storage::last_id;
 
 name_storage image_names;
 name_storage debug_names;
@@ -35,9 +30,9 @@ name_id name_storage::create(string const & name)
 {
 	id_map::const_iterator cit = ids.find(name);
 	if (cit == ids.end()) {
-		names[global_id] = name;
-		ids[name] = global_id;
-		return global_id++;
+		names[last_id] = name;
+		ids[name] = last_id;
+		return last_id++;
 	}
 	return cit->second;
 }

@@ -1,6 +1,11 @@
 2003-05-16  John Levon  <levon@movementarian.org>
 
 	* libpp/name_storage.h:
+	* libpp/name_storage.cpp: make ID be per-container
+
+2003-05-16  John Levon  <levon@movementarian.org>
+
+	* libpp/name_storage.h:
 	* libpp/name_storage.cpp: merge processed names
 	into one string, remove the boolean
 
@@ -64,7 +69,7 @@
 
 2003-05-16  John Levon  <levon@movementarian.org>
 
-	* libutil++/op_bdf.cpp: clean up interesting_symbol
+	* libutil++/op_bfd.cpp: clean up interesting_symbol
 	a bit
 
 2003-05-16  John Levon  <levon@movementarian.org>
