@@ -22,7 +22,7 @@
 #include "outsymbflag.h"
 #include "opp_symbol.h"
 
-class profile_container_t;
+class profile_container;
 class symbol_entry;
 
 namespace format_output {
@@ -37,9 +37,9 @@ outsymbflag parse_format(std::string const & option);
 /// class to output in a columned format symbols and associated samples
 class formatter {
 public:
-	/// build an output_symbol object, the profile_container_t life time
+	/// build an output_symbol object, the profile_container life time
 	/// object must be > of the life time of the output_symbol object.
-	formatter(profile_container_t const & profile_container);
+	formatter(profile_container const & profile);
 
 	/// convenience to add output options flags w/o worrying about cast
 	void add_format(outsymbflag flag);
@@ -131,7 +131,7 @@ private:
 	outsymbflag flags;
  
 	/// container we work from
-	profile_container_t const & profile_container;
+	profile_container const & profile;
  
 	/// total sample count
 	unsigned int total_count;

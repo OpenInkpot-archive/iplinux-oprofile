@@ -41,7 +41,7 @@ using namespace std;
  *
  * Lists all the symbols in decreasing sample count order, to standard out.
  */
-static void do_list_symbols(profile_container_t const & samples,
+static void do_list_symbols(profile_container const & samples,
 			    format_output::formatter & out, int sort_by_ctr)
 {
 	vector<symbol_entry const *> symbols =
@@ -61,7 +61,7 @@ static void do_list_symbols(profile_container_t const & samples,
  * Lists all the samples for all the symbols, from the image specified by
  * abfd, in increasing order of vma, to standard out.
  */
-static void do_list_symbols_details(profile_container_t const & samples,
+static void do_list_symbols_details(profile_container const & samples,
 				    format_output::formatter & out, int sort_by_ctr)
 {
 	vector<symbol_entry const *> symbols =
@@ -81,7 +81,7 @@ static void do_list_symbols_details(profile_container_t const & samples,
  * the samples for this symbol from the image
  * specified by abfd.
  */
-static void do_list_symbol(profile_container_t const & samples, format_output::formatter & out)
+static void do_list_symbol(profile_container const & samples, format_output::formatter & out)
 {
 	vector<symbol_entry const *> symbols =
 		samples.find_symbol(options::symbol);
@@ -298,7 +298,7 @@ static int do_oprofpp(int argc, char const * argv[])
 		get_sample_file_list(filelist, dir, name + "}}}*");
 	}
 
-	profile_container_t samples(!options::list_all_symbols_details,
+	profile_container samples(!options::list_all_symbols_details,
 				    options::output_format_flags, options::counter_mask);
 
 	filelist.push_front(options::sample_file);

@@ -93,7 +93,7 @@ bool do_until_more_than_samples;
 /// the cpu type, we fill this var from the header of samples files
 op_cpu cpu_type = CPU_NO_GOOD;
 /// hold all info for samples
-scoped_ptr<profile_container_t> samples(0);
+scoped_ptr<profile_container> samples(0);
 /// field width for the sample count
 unsigned int const count_width = 7;
 /// field width for the sample relative percent
@@ -362,7 +362,7 @@ bool annotate_source(string const & image_name, string const & sample_file,
 	if (!assembly)
 		flag = static_cast<outsymbflag>(flag | osf_linenr_info);
  
-	samples.reset(new profile_container_t(false, flag, -1));
+	samples.reset(new profile_container(false, flag, -1));
 
 	// this lexical scope just optimize the memory use by relaxing
 	// the op_bfd and profile_t as short as we can.
@@ -744,7 +744,7 @@ void do_output_one_file(ostream & out, istream & in, string const & filename, bo
 		// so on user can known total nr of samples for this source
 		// later we must add code that iterate through symbol in this
 		// file to output one annotation for each symbol. To do this we
-		// need a select_symbol(filename); in profile_container_t which
+		// need a select_symbol(filename); in profile_container which
 		// fall back to the implementation in symbol_container
 		// using a lazilly build symbol_map sorted by filename
 		// (necessary functors already exist in symbol_functors.h)

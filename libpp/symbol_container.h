@@ -52,7 +52,7 @@ public:
 	symbol_entry const * find_by_vma(bfd_vma vma) const;
 
 	/// populate the given container with all the symbols, sorted by count
-	void get_symbols_by_count(profile_container_t::symbol_collection & v) const;
+	void get_symbols_by_count(profile_container::symbol_collection & v) const;
 
 private:
 	/// build the symbol by file-location cache

@@ -43,7 +43,7 @@ struct filename_by_samples {
 
 }
 
-profile_container_t::profile_container_t(bool add_zero_samples_symbols_,
+profile_container::profile_container(bool add_zero_samples_symbols_,
 					 outsymbflag flags_,
 					 bool need_details_)
 	:
@@ -55,7 +55,7 @@ profile_container_t::profile_container_t(bool add_zero_samples_symbols_,
 {
 }
 
-profile_container_t::~profile_container_t()
+profile_container::~profile_container()
 {
 }
  
@@ -63,7 +63,7 @@ profile_container_t::~profile_container_t()
 //  the symbols/samples are sorted by increasing vma.
 //  the range of sample_entry inside each symbol entry are valid
 //  the samples_by_file_loc member var is correctly setup.
-void profile_container_t::
+void profile_container::
 add(profile_t const & profile, op_bfd const & abfd,
     string const & app_name, string const & symbol_name)
 {
@@ -121,7 +121,7 @@ add(profile_t const & profile, op_bfd const & abfd,
 	}
 }
 
-void profile_container_t::add_samples(profile_t const & profile,
+void profile_container::add_samples(profile_t const & profile,
 				      op_bfd const & abfd,
 				      symbol_index_t sym_index,
 				      u32 start, u32 end, bfd_vma base_vma,
@@ -158,8 +158,8 @@ void profile_container_t::add_samples(profile_t const & profile,
 	}
 }
 
-profile_container_t::symbol_collection const
-profile_container_t::select_symbols(double threshold,
+profile_container::symbol_collection const
+profile_container::select_symbols(double threshold,
 				    bool until_threshold,
 				    bool sort_by_vma) const
 {
@@ -190,7 +190,7 @@ profile_container_t::select_symbols(double threshold,
 }
 
 
-vector<string> const profile_container_t::select_filename(
+vector<string> const profile_container::select_filename(
 	double threshold, bool until_threshold) const
 {
 	vector<string> result;
@@ -237,51 +237,51 @@ vector<string> const profile_container_t::select_filename(
 
 // Rest here are delegated to our private implementation.
 
-symbol_entry const * profile_container_t::find_symbol(bfd_vma vma) const
+symbol_entry const * profile_container::find_symbol(bfd_vma vma) const
 {
 	return symbols->find_by_vma(vma);
 }
 
-symbol_entry const * profile_container_t::find_symbol(string const & filename,
+symbol_entry const * profile_container::find_symbol(string const & filename,
 						     size_t linenr) const
 {
 	return symbols->find(filename, linenr);
 }
 
 vector<symbol_entry const *> 
-profile_container_t::find_symbol(string const & name) const {
+profile_container::find_symbol(string const & name) const {
 	return symbols->find(name);
 }
 
-sample_entry const * profile_container_t::find_sample(bfd_vma vma) const
+sample_entry const * profile_container::find_sample(bfd_vma vma) const
 {
 	return samples->find_by_vma(vma);
 }
 
-u32 profile_container_t::samples_count() const
+u32 profile_container::samples_count() const
 {
 	return total_count;
 }
 
-unsigned int profile_container_t::samples_count(string const & filename) const
+unsigned int profile_container::samples_count(string const & filename) const
 {
 	return samples->accumulate_samples(filename);
 }
 
-unsigned int profile_container_t::samples_count(string const & filename,
+unsigned int profile_container::samples_count(string const & filename,
 				    size_t linenr) const
 {
 	return samples->accumulate_samples(filename, linenr);
 }
 
-sample_entry const & profile_container_t::get_samples(sample_index_t index) const
+sample_entry const & profile_container::get_samples(sample_index_t index) const
 {
 	sample_container::size_type i =
 		static_cast<sample_container::size_type>(index);
 	return (*samples)[i];
 }
 
-bool add_samples(profile_container_t & samples,
+bool add_samples(profile_container & samples,
 		 string const & sample_filename,
 		 string const & image_name,
 		 string const & app_name,

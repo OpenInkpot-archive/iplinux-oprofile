@@ -92,17 +92,17 @@ void show_help(ostream & out)
 }
 
 
-formatter::formatter(profile_container_t const & profile_container_)
+formatter::formatter(profile_container const & profile_)
 	:
 	flags(osf_none),
-	profile_container(profile_container_),
+	profile(profile_),
 	first_output(true),
 	vma_64(false),
 	need_details(false),
 	need_header(false)
 {
-	total_count = profile_container.samples_count();
-	total_count_details = profile_container.samples_count();
+	total_count = profile.samples_count();
+	total_count_details = profile.samples_count();
 	cumulated_samples = 0;
 	cumulated_percent = 0;
 	cumulated_percent_details = 0;
@@ -235,7 +235,7 @@ void formatter::output_details(ostream & out, symbol_entry const * symb)
 	for (sample_index_t cur = symb->first ; cur != symb->last ; ++cur) {
 		out << ' ';
 
-		do_output(out, symb->name, profile_container.get_samples(cur),
+		do_output(out, symb->name, profile.get_samples(cur),
 			 true);
 	}
 

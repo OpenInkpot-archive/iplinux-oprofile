@@ -37,7 +37,7 @@
 using namespace std;
 
 /* FIXME: if we have a quick read samples files format we can handle a great
- * part of complexity here by using profile_container_t to handle straight
+ * part of complexity here by using profile_container to handle straight
  * op_time. Just create an artificial symbol that cover the whole samples
  * files with the name of the application this allow to remove image_name
  * and sorted_map_t class and all related  stuff and to use output_symbol to
@@ -394,7 +394,7 @@ static void output_files_count(map_t & files)
  */
 static void output_symbols_count(map_t& files, int counter)
 {
-	profile_container_t samples(false, options::output_format_flags, counter);
+	profile_container samples(false, options::output_format_flags, counter);
 
 	map_t::iterator it_f;
 	for (it_f = files.begin() ; it_f != files.end() ; ++it_f) {

@@ -97,7 +97,7 @@ symbol_entry const * symbol_container::find_by_vma(bfd_vma vma) const
 
 
 void symbol_container::get_symbols_by_count(
-	profile_container_t::symbol_collection & v) const
+	profile_container::symbol_collection & v) const
 {
 	symbols_t::const_iterator cit = symbols.begin();
 	symbols_t::const_iterator end = symbols.end();

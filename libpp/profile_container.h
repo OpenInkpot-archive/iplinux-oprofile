@@ -26,7 +26,7 @@ class profile_t;
 
 /** store multiple samples files belonging to the same profiling session.
  * So on can hold samples files for arbitrary counter and binary image */
-class profile_container_t /*:*/ noncopyable {
+class profile_container /*:*/ noncopyable {
 public:
 	/**
 	 * Build an object to store information on samples. All parameters
@@ -40,10 +40,10 @@ public:
 	 * @param need details true if we need to record all samples or to
 	 * to record them at symbol level. This is an optimization hint
 	 */
-	profile_container_t(bool add_zero_samples_symbols, outsymbflag flags,
+	profile_container(bool add_zero_samples_symbols, outsymbflag flags,
 			    bool need_details);
 
-	~profile_container_t();
+	~profile_container();
  
 	/**
 	 * add() -  record symbols/samples in the underlined container
@@ -145,7 +145,7 @@ private:
 	/// provide also a sort order on (filename, linenr)
 	scoped_ptr<sample_container> samples;
 	/// build() must count samples count for each counter so cache it here
-	/// since user of profile_container_t often need it later.
+	/// since user of profile_container often need it later.
 	unsigned int total_count;
 
 	/// parameters passed to ctor
@@ -171,7 +171,7 @@ private:
  * open a bfd object getting symbols name, then populate samples with the
  * relevant samples
  */
-bool add_samples(profile_container_t & samples,
+bool add_samples(profile_container & samples,
 		 std::string const & sample_filename,
 		 std::string const & binary_name,
 		 std::string const & app_name,
