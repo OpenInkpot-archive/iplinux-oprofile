@@ -1,3 +1,8 @@
+2003-04-27  John Levon  <levon@movementarian.org>
+
+	* pp/opreport.cpp: make opreport -l put largest results
+	at the top like opreport does
+
 2003-04-26  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libpp/profile_container.h: comment

@@ -228,7 +228,7 @@ void output_symbols_count(partition_files const & files)
 
 	format_output::formatter out(samples);
 	out.add_format(flags);
-	out.output(cout, symbols, !options::reverse_sort, need_vma64);
+	out.output(cout, symbols, options::reverse_sort, need_vma64);
 }
 
 }  // anonymous namespace
