@@ -94,7 +94,7 @@ void db_open(db_tree_t * tree, const char * filename, size_t sizeof_header)
 
 	tree->fd = open(filename, O_RDWR | O_CREAT, 0644);
 	if (tree->fd < 0) {
-		fprintf(stderr, "db_open() fail to open %s case: %s\n",
+		fprintf(stderr, "db_open() fail to open %s cause: %s\n",
 			filename, strerror(errno));
 		exit(EXIT_FAILURE);
 	}

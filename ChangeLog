@@ -1,3 +1,7 @@
+2002-04-22  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* pp/op_merge.c: implement merging of the new file format files.
+
 2002-04-21  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* oprof_report/Makefile.in:

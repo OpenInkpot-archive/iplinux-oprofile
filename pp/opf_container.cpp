@@ -456,7 +456,7 @@ void samples_files_t::do_add(const opp_samples_files & samples_files,
 
 		// FIXME - kill char * !!!
 		char const * symname = abfd.syms[i]->name;
-		symb_entry.name = (symname) ? demangle_symbol(abfd.syms[i]->name) : "";
+		symb_entry.name = symname ? demangle_symbol(symname) : "";
 
 		if ((flags & (osf_linenr_info | osf_short_linenr_info)) != 0 &&
 		    abfd.get_linenr(i, start, filename, linenr)) {
