@@ -1,5 +1,13 @@
 2003-05-11  John Levon  <levon@movementarian.org>
 
+	* pp/profile_container.h:
+	* pp/profile_container.cpp:
+	* pp/opannotate.cpp:
+	* pp/opreport.cpp: clean up select_symbols
+	interface
+
+2003-05-11  John Levon  <levon@movementarian.org>
+
 	* pp/opreport.cpp: make --threshold work for
 	image summaries too
 

@@ -281,8 +281,7 @@ void output_symbols(profile_container const & samples)
 	// FIXME: it's a weird API that requires a string() as first
 	// arg here ...
 	vector<symbol_entry const *> symbols =
-		samples.select_symbols(string(),
-			options::threshold / 100.0, false);
+		samples.select_symbols(string(), options::threshold);
 
 	bool need_vma64 = vma64_p(symbols.begin(), symbols.end());
 

@@ -95,19 +95,15 @@ public:
 	 *  or all if image_name is empty
 	 * @param threshold select symbols which contains more than
 	 *   threshold percent of samples
-	 * @param until_threshold rather to get symbols with more than
-	 *   percent threshold samples select symbols until the cumulated
-	 *   count of samples reach threshold percent
 	 * @param sort_by_vma sort symbols by vma not counter samples
 	 * @return a sorted vector of symbols
 	 *
 	 * until_threshold and threshold acts like the -w and -u options
 	 * of op_to_source. If you need to get all symbols call it with
-	 * threshold == 0.0 and !until_threshold
+	 * threshold == 0.0
 	 */
 	symbol_collection const select_symbols(std::string const & image_name,
-		double threshold, bool until_threshold,
-		bool sort_by_vma = false) const;
+		double threshold, bool sort_by_vma = false) const;
 
 	/// Like select_symbols for filename without allowing sort by vma.
 	std::vector<std::string> const select_filename(

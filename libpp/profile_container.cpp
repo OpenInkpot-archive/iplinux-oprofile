@@ -158,17 +158,18 @@ profile_container::add_samples(profile_t const & profile,
 
 profile_container::symbol_collection const
 profile_container::select_symbols(string const & image_name,
-				  double threshold, bool until_threshold,
-                                  bool sort_by_vma) const
+				  double threshold, bool sort_by_vma) const
 {
 	symbol_collection v;
 	symbol_collection result;
+
+	threshold /= 100.0;
 
 	symbols->get_symbols_by_count(v);
 
 	symbol_collection::const_iterator it = v.begin();
 	symbol_collection::const_iterator const end = v.end();
-	for (; it < end && threshold >= 0; ++it) {
+	for (; it < end; ++it) {
 		if (!image_name.empty() &&
 		    (*it)->image_name != image_name)
 			continue;
@@ -176,11 +177,8 @@ profile_container::select_symbols(string const & image_name,
 		double const percent =
 			op_ratio((*it)->sample.count, samples_count());
 
-		if (until_threshold || percent >= threshold)
+		if (percent >= threshold)
 			result.push_back(*it);
-
-		if (until_threshold)
-			threshold -= percent;
 	}
 
 	if (sort_by_vma) {

@@ -33,7 +33,7 @@ namespace options {
 	bool symbols;
 	bool debug_info;
 	bool details;
-	double threshold;
+	double threshold = 0.0;
 	bool include_dependent;
 	bool hide_dependent;
 	bool sort_by_vma;
