@@ -119,6 +119,8 @@ bool merge_compare::operator()(string const & lhs_, string const & rhs_) const
 	return false;
 }
 
+// FIXME: use a temp struct instead of lots of params
+//
 // f(N*log(N)) N: filename.size()
 list<list<string> > partition_files(list<string> const & filename,
 				    bool merge_cpu, bool merge_lib,

@@ -1,5 +1,5 @@
 /**
- * @file sample_container_imp.h
+ * @file sample_container.h
  * Internal implementation of sample container
  *
  * @remark Copyright 2002 OProfile authors
@@ -15,7 +15,7 @@
 #include <vector>
 #include <string>
 
-class sample_container_imp_t {
+class sample_container {
 public:
 	sample_entry const & operator[](sample_index_t index) const;
 

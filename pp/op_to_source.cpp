@@ -745,7 +745,7 @@ void do_output_one_file(ostream & out, istream & in, string const & filename, bo
 		// later we must add code that iterate through symbol in this
 		// file to output one annotation for each symbol. To do this we
 		// need a select_symbol(filename); in profile_container_t which
-		// fall back to the implementation in symbol_container_imp_t
+		// fall back to the implementation in symbol_container
 		// using a lazilly build symbol_map sorted by filename
 		// (necessary functors already exist in symbol_functors.h)
 	}

@@ -1,5 +1,5 @@
 /**
- * @file symbol_container_imp.cpp
+ * @file symbol_container.cpp
  * Internal container for symbols
  *
  * @remark Copyright 2002 OProfile authors
@@ -15,28 +15,31 @@
 #include <vector>
 
 #include "symbol_functors.h"
-#include "symbol_container_imp.h"
+#include "symbol_container.h"
 #include "profile_container.h"
 
 using namespace std;
 
-symbol_index_t symbol_container_imp_t::size() const
+symbol_index_t symbol_container::size() const
 {
 	return symbols.size();
 }
 
-symbol_entry const & symbol_container_imp_t::operator[](symbol_index_t index) const
+
+symbol_entry const & symbol_container::operator[](symbol_index_t index) const
 {
 	return symbols[index];
 }
 
-void symbol_container_imp_t::push_back(symbol_entry const & symbol)
+
+void symbol_container::push_back(symbol_entry const & symbol)
 {
 	symbols.push_back(symbol);
 }
 
+
 symbol_entry const *
-symbol_container_imp_t::find(string filename, size_t linenr) const
+symbol_container::find(string filename, size_t linenr) const
 {
 	build_by_file_loc();
 
@@ -53,8 +56,9 @@ symbol_container_imp_t::find(string filename, size_t linenr) const
 	return 0;
 }
 
+
 vector<symbol_entry const *>
-symbol_container_imp_t::find(string name) const
+symbol_container::find(string name) const
 {
 	vector<symbol_entry const *> v;
 
@@ -67,7 +71,8 @@ symbol_container_imp_t::find(string name) const
 	return v;
 }
 
-void  symbol_container_imp_t::build_by_file_loc() const
+
+void  symbol_container::build_by_file_loc() const
 {
 	if (symbols.size() && symbol_entry_by_file_loc.empty()) {
 		for (symbol_index_t i = 0 ; i < symbols.size() ; ++i)
@@ -75,7 +80,8 @@ void  symbol_container_imp_t::build_by_file_loc() const
 	}
 }
 
-symbol_entry const * symbol_container_imp_t::find_by_vma(bfd_vma vma) const
+
+symbol_entry const * symbol_container::find_by_vma(bfd_vma vma) const
 {
 	symbol_entry value;
 
@@ -91,7 +97,8 @@ symbol_entry const * symbol_container_imp_t::find_by_vma(bfd_vma vma) const
 	return 0;
 }
 
-void symbol_container_imp_t::get_symbols_by_count(
+
+void symbol_container::get_symbols_by_count(
 	profile_container_t::symbol_collection & v) const
 {
 	for (symbol_index_t i = 0 ; i < symbols.size() ; ++i)

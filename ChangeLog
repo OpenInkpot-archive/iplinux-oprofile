@@ -1,3 +1,18 @@
+2003-04-24  John Levon  <levon@movementarian.org>
+
+	* libpp/symbol_container_imp.h:
+	* libpp/symbol_container_imp.cpp:
+	* libpp/sample_container_imp.h:
+	* libpp/sample_container_imp.cpp: These classes weren't using
+	the pimpl idiom, so the _imp was spurious. Remove that as well
+	as removing the _t from the names, and rename to ...
+
+	* libpp/symbol_container.h:
+	* libpp/symbol_container.cpp:
+	* libpp/sample_container.h:
+	* libpp/sample_container.cpp: ...files moved from the above with
+	new names.
+
 2003-04-23  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libutil++/generic_spec.h: minor formating tweak

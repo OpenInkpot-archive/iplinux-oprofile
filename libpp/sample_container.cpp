@@ -1,5 +1,5 @@
 /**
- * @file sample_container_imp.cpp
+ * @file sample_container.cpp
  * Internal container for samples
  *
  * @remark Copyright 2002 OProfile authors
@@ -16,7 +16,7 @@
 
 #include "opp_symbol.h"
 #include "symbol_functors.h"
-#include "sample_container_imp.h"
+#include "sample_container.h"
 
 using namespace std;
 
@@ -29,22 +29,22 @@ inline unsigned int add_counts(unsigned int count, sample_entry const * s)
 
 } // namespace anon
 
-sample_entry const & sample_container_imp_t::operator[](sample_index_t index) const
+sample_entry const & sample_container::operator[](sample_index_t index) const
 {
 	return samples[index];
 }
 
-sample_index_t sample_container_imp_t::size() const
+sample_index_t sample_container::size() const
 {
 	return samples.size();
 }
 
-void sample_container_imp_t::push_back(sample_entry const & sample)
+void sample_container::push_back(sample_entry const & sample)
 {
 	samples.push_back(sample);
 }
 
-unsigned int sample_container_imp_t::accumulate_samples(
+unsigned int sample_container::accumulate_samples(
 			string const & filename) const
 {
 	flush_input_counter();
@@ -63,7 +63,7 @@ unsigned int sample_container_imp_t::accumulate_samples(
 	return accumulate(it1, it2, 0, add_counts);
 }
 
-sample_entry const * sample_container_imp_t::find_by_vma(bfd_vma vma) const
+sample_entry const * sample_container::find_by_vma(bfd_vma vma) const
 {
 	sample_entry value;
 
@@ -79,7 +79,7 @@ sample_entry const * sample_container_imp_t::find_by_vma(bfd_vma vma) const
 	return 0;
 }
 
-unsigned int sample_container_imp_t::accumulate_samples(
+unsigned int sample_container::accumulate_samples(
 	string const & filename, size_t linenr) const
 {
 	flush_input_counter();
@@ -97,7 +97,7 @@ unsigned int sample_container_imp_t::accumulate_samples(
 	return accumulate(p_it.first, p_it.second, 0, add_counts);
 }
 
-void sample_container_imp_t::flush_input_counter() const
+void sample_container::flush_input_counter() const
 {
 	if (!samples.size() || !samples_by_file_loc.empty())
 		return;

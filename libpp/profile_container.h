@@ -20,8 +20,8 @@
 #include "utility.h"
 #include "op_bfd.h"
 
-class sample_container_imp_t;
-class symbol_container_imp_t;
+class sample_container;
+class symbol_container;
 class profile_t;
 
 /** store multiple samples files belonging to the same profiling session.
@@ -140,10 +140,10 @@ private:
 
 	/// The symbols collected by oprofpp sorted by increased vma, provide
 	/// also a sort order on samples count for each counter.
-	scoped_ptr<symbol_container_imp_t> symbols;
+	scoped_ptr<symbol_container> symbols;
 	/// The samples count collected by oprofpp sorted by increased vma,
 	/// provide also a sort order on (filename, linenr)
-	scoped_ptr<sample_container_imp_t> samples;
+	scoped_ptr<sample_container> samples;
 	/// build() must count samples count for each counter so cache it here
 	/// since user of profile_container_t often need it later.
 	unsigned int total_count;

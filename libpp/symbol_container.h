@@ -1,5 +1,5 @@
 /**
- * @file symbol_container_imp.h
+ * @file symbol_container.h
  * Internal container for symbols
  *
  * @remark Copyright 2002 OProfile authors
@@ -9,8 +9,8 @@
  * @author John Levon
  */
 
-#ifndef SYMBOL_CONTAINER_IMP_H
-#define SYMBOL_CONTAINER_IMP_H
+#ifndef SYMBOL_CONTAINER_H
+#define SYMBOL_CONTAINER_H
 
 #include <vector>
 #include <string>
@@ -18,7 +18,7 @@
 
 #include "profile_container.h"
 
-class symbol_container_imp_t {
+class symbol_container {
 public:
 	symbol_index_t size() const;
 
@@ -53,4 +53,4 @@ private:
 	mutable set_symbol_by_file_loc symbol_entry_by_file_loc;
 };
 
-#endif /* SYMBOL_CONTAINER_IMP_H */
+#endif /* SYMBOL_CONTAINER_H */

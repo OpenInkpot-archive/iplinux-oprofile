@@ -18,8 +18,8 @@
 #include "symbol_functors.h"
 #include "profile_container.h"
 #include "profile.h"
-#include "sample_container_imp.h"
-#include "symbol_container_imp.h"
+#include "sample_container.h"
+#include "symbol_container.h"
 
 using namespace std;
 
@@ -47,8 +47,8 @@ profile_container_t::profile_container_t(bool add_zero_samples_symbols_,
 					 outsymbflag flags_,
 					 bool need_details_)
 	:
-	symbols(new symbol_container_imp_t),
-	samples(new sample_container_imp_t),
+	symbols(new symbol_container),
+	samples(new sample_container),
 	add_zero_samples_symbols(add_zero_samples_symbols_),
 	flags(flags_),
 	need_details(need_details_)

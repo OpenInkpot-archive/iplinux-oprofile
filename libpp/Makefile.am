@@ -25,14 +25,14 @@ libpp_a_SOURCES = \
 	profile.h \
 	profile_container.cpp \
 	profile_container.h \
-	sample_container_imp.cpp \
-	sample_container_imp.h \
+	sample_container.cpp \
+	sample_container.h \
 	session.cpp \
 	session.h \
 	split_sample_filename.cpp \
 	split_sample_filename.h \
-	symbol_container_imp.cpp \
-	symbol_container_imp.h \
+	symbol_container.cpp \
+	symbol_container.h \
 	outsymbflag.h \
 	opp_symbol.h \
 	symbol_functors.h
