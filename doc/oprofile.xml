@@ -1311,6 +1311,25 @@ excepting <filename>boring-test</filename> :
 -->
 </variablelist>
 
+</sect2>
+
+<sect2>
+<title>Locating and managing binary images</title>
+<para>
+Each session's sample files can be found in the <filename>/var/lib/oprofile/samples/</filename> directory.
+These are used, along with the binary image files, to produce human-readable data.
+In some circumstances (kernel modules in an initrd, or modules on 2.5 kernels), OProfile
+will not be able to find the binary images. All the tools have an <option>--image-path</option>
+to which you can pass a comma-separated list of alternate paths to search. For example,
+I can let OProfile find my 2.5 modules by using <command>--image-path /lib/modules/2.5.69/kernel/</command>.
+It is your responsibility to ensure that the correct images are found when using this
+option.
+</para>
+<para>
+Note that if a binary image changes after the sample file was created, you won't be able to get useful
+symbol-based data out. This situation is detected for you. If you replace a binary, you should
+make sure to save the old binary if you need to do comparative profiles.
+</para>
 
 </sect2>
 
@@ -1318,38 +1337,198 @@ excepting <filename>boring-test</filename> :
 
 <sect1 id="opreport-details">
 <title>Usage of <command>opreport</command></title>
-<!-- FIXME -->
+
+<sect2 id="opreport-merging">
+<title>Merging separate profiles</title>
+
+If you have used one of the <option>--separate=</option> options
+whilst profiling, there can be several separate profiles for
+a single binary image within a session. Normally the output
+will keep these images separated (so, for example, the image summary
+output shows library image summaries on a per-application basis,
+when using <option>--separate=lib</option>).
+Sometimes it can be useful to merge these results back together
+before getting results. The <option>--merge</option> option allows
+you to do that.
+</sect2>
+
+<sect2 id="opreport-options">
+<title>Options for <command>opreport</command></title>
+
+<variablelist>
+<varlistentry><term><option>--accumulated / -c</option></term><listitem><para>
+Accumulate sample and percentage counts in the symbol list.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--debug-info / -g</option></term><listitem><para>
+Show source file and line for each symbol.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--details / -d</option></term><listitem><para>
+Show per-instruction details for all selected symbols.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--exclude-dependent / -x</option></term><listitem><para>
+Do not include application-specific images for libraries, kernel modules
+and the kernel. This option only makes sense if the profile session
+used --separate.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--exclude-symbols / -e [symbols]</option></term><listitem><para>
+Exclude all the symbols in the given comma-separated list.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--global-percent</option></term><listitem><para>
+Make dependent image summary percentages relative to the whole profile,
+not just the application image.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--help / -? / --usage</option></term><listitem><para>
+Show help message.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--image-path / -p [paths]</option></term><listitem><para>
+Comma-separated list of additional paths to search for binaries.
+This is needed to find modules in kernels 2.5 and upwards.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--include-symbols / -i [symbols]</option></term><listitem><para>
+Only include symbols in the given comma-separated list.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--long-filenames / -l</option></term><listitem><para>
+Output full paths instead of basenames.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--merge / -m [cpu,pid,lib]</option></term><listitem><para>
+Merge any profiles separated in a --separate session.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--no-demangle</option></term><listitem><para>
+Do not attempt to demangle C++ symbols.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--no-header</option></term><listitem><para>
+Don't output a header detailing profiling parameters.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--output-file / -o [file]</option></term><listitem><para>
+Output to the given file instead of stdout.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--reverse-sort / -r</option></term><listitem><para>
+Reverse the sort from the default.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--smart-demangle / -D</option></term><listitem><para>
+Use pattern-matching to make C++ symbol demangling more readable.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--sort / -s [vma,sample,symbol,debug,image]</option></term><listitem><para>
+Sort the list of symbols by, respectively, symbol address,
+number of samples, symbol name, debug filename and line number,
+binary image filename.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--symbols / -l</option></term><listitem><para>
+List per-symbol information instead of a binary image summary.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--threshold / -t [percentage]</option></term><listitem><para>
+Only output data for symbols that have more than the given percentage
+of total samples.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--verbose / -V</option></term><listitem><para>
+Give verbose debugging output.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--version / -v</option></term><listitem><para>
+Show version.
+</para></listitem></varlistentry>
+</variablelist>
+
+</sect2>
+
 </sect1> <!-- opreport-details -->
 
 <sect1 id="opannotate-details">
 <title>Usage of <command>opannotate</command></title>
-<!-- FIXME -->
+
+<variablelist>
+<varlistentry><term><option>--assembly / -a</option></term><listitem><para>
+Output annotated assembly. If this is combined with --source, then mixed
+source / assembly annotations are output.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--base-dir / -b [dir]</option></term><listitem><para>
+FIXME
+</para></listitem></varlistentry>
+<varlistentry><term><option>--exclude-dependent / -x</option></term><listitem><para>
+Do not include application-specific images for libraries, kernel modules
+and the kernel. This option only makes sense if the profile session
+used --separate.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--exclude-file [files]</option></term><listitem><para>
+Exclude all files in the given comma-separated list of glob patterns.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--exclude-symbols / -e [symbols]</option></term><listitem><para>
+Exclude all the symbols in the given comma-separated list.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--help / -? / --usage</option></term><listitem><para>
+Show help message.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--image-path / -p [paths]</option></term><listitem><para>
+Comma-separated list of additional paths to search for binaries.
+This is needed to find modules in kernels 2.5 and upwards.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--include-file [files]</option></term><listitem><para>
+Only include files in the given comma-separated list of glob patterns.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--include-symbols / -i [symbols]</option></term><listitem><para>
+Only include symbols in the given comma-separated list.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--no-demangle</option></term><listitem><para>
+Do not attempt to demangle C++ symbols.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--objdump-params [params]</option></term><listitem><para>
+Pass the given parameters as extra values when calling objdump.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--output-dir / -o [dir]</option></term><listitem><para>
+Output directory. This makes opannotate output one annotated file for each
+source file.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--source / -s</option></term><listitem><para>
+Output annotated source. This requires debugging information to be available
+for the binaries.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--source-dir / -d [dir]</option></term><listitem><para>
+Top source directory for the source files.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--smart-demangle / -D</option></term><listitem><para>
+Use pattern-matching to make C++ symbol demangling more readable.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--threshold / -t [percentage]</option></term><listitem><para>
+Only output data for symbols that have more than the given percentage
+of total samples.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--verbose / -V</option></term><listitem><para>
+Give verbose debugging output.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--version / -v</option></term><listitem><para>
+Show version.
+</para></listitem></varlistentry>
+</variablelist>
+
+
 </sect1> <!-- opannotate-details -->
 
 <sect1 id="opgprof-details">
 <title>Usage of <command>opgprof</command></title>
-<!-- FIXME -->
+
+<variablelist>
+<varlistentry><term><option>--help / -? / --usage</option></term><listitem><para>
+Show help message.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--version / -v</option></term><listitem><para>
+Show version.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--verbose / -V</option></term><listitem><para>
+Give verbose debugging output.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--image-path / -p [paths]</option></term><listitem><para>
+Comma-separated list of additional paths to search for binaries.
+This is needed to find modules in kernels 2.5 and upwards.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--threshold / -t [percentage]</option></term><listitem><para>
+Only output data for symbols that have more than the given percentage
+of total samples.
+</para></listitem></varlistentry>
+<varlistentry><term><option>--output-filename / -o [file]</option></term><listitem><para>
+Output to the given file instead of the default, gmon.out
+</para></listitem></varlistentry>
+</variablelist>
+
 </sect1> <!-- opgprof-details -->
-
-<!-- FIXME: put this somewhere useful and update
-These work on sample files in the <filename>/var/lib/oprofile/samples/</filename> directory,
-along with the binary files being profiled, to produce human-readable data. Note that if the binary file changes
-after the sample file was created, you won't be able to get useful data out. This situation is detected for you.
-Several instances of a binary are merged into one sample file. By default, all samples from a dynamically linked library
-are merged into one sample file as well.
-</para>
-<para>
-
-A different scenario happen when re-starting profiling with different parameters, as the old sample files from previous sessions don't
-get deleted (allowing you to build profiles over many distinct profiling sessions).
-If the last session is determined to be out of date due to the use of different profiling parameters, all the samples files are
-backed up in a sub-directory named session-#nr.
-If during profiling the daemon detects a change to a binary image and a sample file belonging to this binary exists, the sample file is silently deleted.
-So if during profiling, you change a binary, it is your responsibility to save the binary image <emphasis>and</emphasis> the sample file, if 
-you need it.
-</para>
-
--->
 
 </chapter>
 

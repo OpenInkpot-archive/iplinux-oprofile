@@ -1,5 +1,9 @@
 2003-05-26  John Levon  <levon@movementarian.org>
 
+	* doc/oprofile.xml: add new pp tools options
+
+2003-05-26  John Levon  <levon@movementarian.org>
+
 	* doc/opreport.1.in:
 	* doc/opgprof.1.in:
 	* doc/opannotate.1.in:
