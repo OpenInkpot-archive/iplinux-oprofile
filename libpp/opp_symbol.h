@@ -24,7 +24,7 @@ struct file_location {
 	/// empty if not valid.
 	std::string filename;
 	/// 0 means invalid or code is generated internally by the compiler
-	int linenr;
+	unsigned int linenr;
 
 	bool operator<(file_location const & rhs) const {
 		return filename < rhs.filename ||

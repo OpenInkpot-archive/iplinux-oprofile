@@ -353,7 +353,12 @@ bool op_bfd::get_linenr(symbol_index_t sym_idx, uint offset,
 				      &cfilename, &functionname, &linenr);
 	}
 
-	filename = (cfilename) ? cfilename : "";
+	if (cfilename) {
+		filename = cfilename;
+	} else {
+		filename = "";
+		linenr = 0;
+	}
 
 	return ret;
 }

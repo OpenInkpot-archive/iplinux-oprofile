@@ -78,8 +78,6 @@ void profile_container::add(profile_t const & profile,
 	for (symbol_index_t i = 0; i < abfd.syms.size(); ++i) {
 
 		u32 start, end;
-		string filename;
-		uint linenr;
 		symbol_entry symb_entry;
 
 		abfd.get_symbol_range(i, start, end);
@@ -96,11 +94,11 @@ void profile_container::add(profile_t const & profile,
 
 		symb_entry.name = abfd.syms[i].name();
 
-		if (debug_info && abfd.get_linenr(i, start, filename, linenr)) {
-			symb_entry.sample.file_loc.filename = filename;
-			symb_entry.sample.file_loc.linenr = linenr;
-		} else {
-			symb_entry.sample.file_loc.linenr = 0;
+		symb_entry.sample.file_loc.linenr = 0;
+		if (debug_info) {
+		       abfd.get_linenr(i, start,
+				symb_entry.sample.file_loc.filename,
+				symb_entry.sample.file_loc.linenr);
 		}
 
 		symb_entry.image_name = image_name;
@@ -130,20 +128,17 @@ profile_container::add_samples(profile_t const & profile,
 {
 
 	for (u32 pos = start; pos < end ; ++pos) {
-		string filename;
 		sample_entry sample;
-		uint linenr;
 
 		sample.count = profile.accumulate_samples(pos);
 		if (!sample.count)
 			continue;
 
-		if (debug_info && sym_index != nil_symbol_index &&
-		    abfd.get_linenr(sym_index, pos, filename, linenr)) {
-			sample.file_loc.filename = filename;
-			sample.file_loc.linenr = linenr;
-		} else {
-			sample.file_loc.linenr = 0;
+		sample.file_loc.linenr = 0;
+		if (debug_info && sym_index != nil_symbol_index) {
+			abfd.get_linenr(sym_index, pos,
+			                sample.file_loc.filename,
+			                sample.file_loc.linenr);
 		}
 
 		sample.vma = (sym_index != nil_symbol_index)
