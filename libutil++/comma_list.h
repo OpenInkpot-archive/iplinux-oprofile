@@ -52,10 +52,14 @@ public:
 	 * stored values in items
 	 */
 	bool match(generic_spec<T> const & value) const;
+
 private:
+	typedef T value_type;
+	typedef std::vector<value_type> container_type;
+	typedef typename container_type::const_iterator const_iterator;
 	bool is_all;
 	bool set_p;
-	std::vector<T> items;
+	container_type items;
 };
 
 
@@ -97,27 +101,20 @@ void comma_list<T>::set(std::string const & str, bool cumulative)
 
 
 template <class T>
-bool comma_list<T>::match(T foo) const
+bool comma_list<T>::match(generic_spec<T> const & value) const
 {
 	if (is_all)
 		return true;
 
-	for (size_t i = 0; i < items.size(); ++i) {
-		if (items[i] == foo) {
+	const_iterator cit = items.begin();
+	const_iterator const end = items.end();
+
+	for (; cit != end; ++cit) {
+		if (value.match(*cit))
 			return true;
-		}
 	}
 
 	return false;
-}
-
-template <class T>
-bool comma_list<T>::match(generic_spec<T> const & value) const
-{
-	if (value.is_all) {
-		return true;
-	}
-	return match(value.data);
 }
 
 

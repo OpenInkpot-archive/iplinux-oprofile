@@ -25,7 +25,6 @@ template <class T> class comma_list;
 template <class T>
 class generic_spec
 {
-	friend class comma_list<T>;
 public:
 	/**
 	 * build a default spec which match anything
@@ -44,6 +43,7 @@ public:
 	bool match(generic_spec<T> const & rhs) const {
 		return is_all || rhs.is_all || rhs.data == data;
 	}
+
 private:
 	T data;
 	bool is_all;

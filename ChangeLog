@@ -1,5 +1,13 @@
 2003-05-19  John Levon  <levon@movementarian.org>
 
+	* libutil++/generic_spec.h: comma_list isn't a friend
+	any more
+
+	* libutil++/comma_list.h: use generic_spec<>::match()
+	directly
+
+2003-05-19  John Levon  <levon@movementarian.org>
+
 	* libpp/name_storage.h: s/name_map/stored_names/, it's not
 	a map any more.
 
