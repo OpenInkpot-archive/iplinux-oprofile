@@ -11,7 +11,7 @@
 
 	* dae/opd_kernel.c:
 	* daemon/opd_kernel.c: remove leading '/' on module name fixing 2.5
-	 module not under {dep} and similar case for "no-vmlinux" with 2.4/2.5
+	 module not under {kern} and similar case for "no-vmlinux" with 2.4/2.5
 
 	* libutil/op_file.c: tiny tidy
 
