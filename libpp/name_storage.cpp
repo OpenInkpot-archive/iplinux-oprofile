@@ -31,9 +31,10 @@ name_id name_storage::create(string const & name)
 {
 	id_map::const_iterator cit = ids.find(name);
 	if (cit == ids.end()) {
+		++last_id;
 		names[last_id] = name;
 		ids[name] = last_id;
-		return last_id++;
+		return last_id;
 	}
 	return cit->second;
 }

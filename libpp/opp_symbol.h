@@ -22,6 +22,7 @@
 
 /// A simple container for a fileno:linenr location.
 struct file_location {
+	file_location() : filename(0), linenr(0) {}
 	/// empty if not valid.
 	name_id filename;
 	/// 0 means invalid or code is generated internally by the compiler
@@ -36,6 +37,7 @@ struct file_location {
 
 /// associate vma address with a file location and a samples count
 struct sample_entry {
+	sample_entry() : vma(0), count(0) {}
 	/// From where file location comes the samples
 	file_location file_loc;
 	/// From where virtual memory address comes the samples
@@ -47,6 +49,7 @@ struct sample_entry {
 
 /// associate a symbol with a file location, samples count and vma address
 struct symbol_entry {
+	symbol_entry() : image_name(0), app_name(0), name(0), size(0) {}
 	/// which image this symbol belongs to
 	name_id image_name;
 	/// owning application name: identical to image name if profiling

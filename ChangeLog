@@ -1,5 +1,15 @@
 2003-05-17  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* libutil++/op_bfd.cpp: get_linenr() init linenr to zero
+
+	* libpp/name_storage.cpp: don't use id zero
+	* libpp/opp_symbol.h: now we use id and not string we must provide
+	  default ctor to initialize the id
+	* libpp/profile_container.cpp: init debug info entry only if
+	  get_linenr() succeed
+
+2003-05-17  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libdb/db_manage.c: better handling of zero sample file size when
 	  opening in read only mode
 

@@ -97,10 +97,11 @@ void profile_container::add(profile_t const & profile,
 		symb_entry.sample.file_loc.linenr = 0;
 		if (debug_info) {
 			string filename;
-			abfd.get_linenr(i, start, filename,
-				symb_entry.sample.file_loc.linenr);
-			symb_entry.sample.file_loc.filename =
-				debug_names.create(filename);
+			if (abfd.get_linenr(i, start, filename,
+					symb_entry.sample.file_loc.linenr)) {
+				symb_entry.sample.file_loc.filename =
+					debug_names.create(filename);
+			}
 		}
 
 		symb_entry.image_name = image_names.create(image_name);
@@ -139,10 +140,11 @@ profile_container::add_samples(profile_t const & profile,
 		sample.file_loc.linenr = 0;
 		if (debug_info && sym_index != nil_symbol_index) {
 			string filename;
-			abfd.get_linenr(sym_index, pos, filename,
-			                sample.file_loc.linenr);
-			sample.file_loc.filename =
-				debug_names.create(filename);
+			if (abfd.get_linenr(sym_index, pos, filename,
+					    sample.file_loc.linenr)) {
+				sample.file_loc.filename =
+					debug_names.create(filename);
+			}
 		}
 
 		sample.vma = (sym_index != nil_symbol_index)
@@ -215,9 +217,11 @@ vector<string> const profile_container::select_filename(double threshold) const
 	sample_container::samples_iterator const send = samples->end();
 
 	for (; sit != send; ++sit) {
-		string const & file =
-			debug_names.name(sit->second.file_loc.filename);
-		filename_set.insert(file);
+		int name_id = sit->second.file_loc.filename;
+		if (name_id) {
+			string const & file = debug_names.name(name_id);
+			filename_set.insert(file);
+		}
 	}
 
 	// Give a sort order on filename for the selected counter.
