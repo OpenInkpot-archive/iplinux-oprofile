@@ -1,5 +1,5 @@
 /**
- * @file derive_files.cpp
+ * @file locate_images.cpp
  * Command-line helper
  *
  * @remark Copyright 2002 OProfile authors
@@ -10,7 +10,7 @@
  */
 
 #include "file_manip.h"
-#include "derive_files.h"
+#include "locate_images.h"
 
 #include <iostream>
 #include <sstream>

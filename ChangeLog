@@ -1,5 +1,13 @@
 2003-05-07  John Levon  <levon@movementarian.org>
 
+	* derive_files.h:
+	* derive_files.cpp: rename files as ...
+
+	* locate_images.h:
+	* locate_images.cpp: this.
+
+2003-05-07  John Levon  <levon@movementarian.org>
+
 	* libpp/derive_files.h:
 	* libpp/derive_files.cpp: rework into extra_images
 	class

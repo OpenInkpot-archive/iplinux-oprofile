@@ -1,6 +1,6 @@
 /**
- * @file derive_files.h
- * Command-line helper
+ * @file locate_images.h
+ * Location of binary images
  *
  * @remark Copyright 2002 OProfile authors
  * @remark Read the file COPYING
@@ -9,8 +9,8 @@
  * @author John Levon
  */
 
-#ifndef DERIVE_FILES_H
-#define DERIVE_FILES_H
+#ifndef LOCATE_IMAGES_H
+#define LOCATE_IMAGES_H
 
 #include <string>
 #include <map>
@@ -72,4 +72,4 @@ std::string const find_image_path(extra_images const & extra_images,
                                   std::string const & image_name,
                                   std::string const & samples_filename);
 
-#endif /* ! DERIVE_FILES_H */
+#endif /* LOCATE_IMAGES_H */
