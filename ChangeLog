@@ -1,5 +1,18 @@
 2003-05-16  John Levon  <levon@movementarian.org>
 
+	* libpp/name_storage.h:
+	* libpp/name_storage.cpp: split into three
+	stores for debug filenames, symbols, and images
+
+	* libpp/format_output.cpp:
+	* libpp/profile_container.cpp:
+	* libpp/sample_container.cpp:
+	* libpp/symbol_container.cpp:
+	* libpp/symbol_sort.cpp:
+	* pp/opannotate.cpp: changes from above
+
+2003-05-16  John Levon  <levon@movementarian.org>
+
 	* libpp/Makefile.am:
 	* libpp/name_storage.h:
 	* libpp/name_storage.cpp: add shared storage

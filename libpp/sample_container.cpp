@@ -81,7 +81,7 @@ sample_container::accumulate_samples(string const & filename) const
 
 	sample_entry lower, upper;
 
-	name_id const id = name_store.create(filename);
+	name_id const id = debug_names.create(filename);
 
 	lower.file_loc.filename = upper.file_loc.filename = id;
 	lower.file_loc.linenr = 0;
@@ -116,7 +116,7 @@ sample_container::accumulate_samples(string const & filename,
 
 	sample_entry sample;
 
-	sample.file_loc.filename = name_store.create(filename);
+	sample.file_loc.filename = debug_names.create(filename);
 	sample.file_loc.linenr = linenr;
 
 	typedef pair<samples_by_loc_t::const_iterator,

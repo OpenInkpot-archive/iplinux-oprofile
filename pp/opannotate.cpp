@@ -233,7 +233,7 @@ string symbol_annotation(symbol_entry const * symbol)
 	if (annot.empty())
 		return  string();
 
-	string const & symname = name_store.demangle(symbol->name);
+	string const & symname = symbol_names.demangle(symbol->name);
 
 	string str = " ";
 	str += begin_comment + symname + " total: ";

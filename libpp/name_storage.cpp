@@ -22,7 +22,9 @@ int global_id = 0;
 
 }
 
-name_storage name_store;
+name_storage image_names;
+name_storage debug_names;
+name_storage symbol_names;
 
 name_storage::name_storage()
 {

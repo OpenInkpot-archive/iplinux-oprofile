@@ -92,7 +92,7 @@ void profile_container::add(profile_t const & profile,
 
 		total_count += symb_entry.sample.count;
 
-		symb_entry.name = name_store.create(abfd.syms[i].name());
+		symb_entry.name = symbol_names.create(abfd.syms[i].name());
 
 		symb_entry.sample.file_loc.linenr = 0;
 		if (debug_info) {
@@ -100,11 +100,11 @@ void profile_container::add(profile_t const & profile,
 			abfd.get_linenr(i, start, filename,
 				symb_entry.sample.file_loc.linenr);
 			symb_entry.sample.file_loc.filename =
-				name_store.create(filename);
+				debug_names.create(filename);
 		}
 
-		symb_entry.image_name = name_store.create(image_name);
-		symb_entry.app_name = name_store.create(app_name);
+		symb_entry.image_name = image_names.create(image_name);
+		symb_entry.app_name = image_names.create(app_name);
 
 		bfd_vma base_vma = abfd.syms[i].vma();
 
@@ -142,7 +142,7 @@ profile_container::add_samples(profile_t const & profile,
 			abfd.get_linenr(sym_index, pos, filename,
 			                sample.file_loc.linenr);
 			sample.file_loc.filename =
-				name_store.create(filename);
+				debug_names.create(filename);
 		}
 
 		sample.vma = (sym_index != nil_symbol_index)
@@ -167,7 +167,7 @@ profile_container::select_symbols(symbol_choice & choice) const
 
 	for (; it != end; ++it) {
 		if (choice.match_image
-		    && (name_store.name(it->image_name) != choice.image_name))
+		    && (image_names.name(it->image_name) != choice.image_name))
 			continue;
 
 		double const percent =
@@ -177,8 +177,8 @@ profile_container::select_symbols(symbol_choice & choice) const
 			result.push_back(&*it);
 
 			if (app_name.empty()) {
-				app_name = name_store.name(it->app_name);
-			} else if (app_name != name_store.name(it->app_name)) {
+				app_name = image_names.name(it->app_name);
+			} else if (app_name != image_names.name(it->app_name)) {
 				choice.hints = column_flags(
 					choice.hints | cf_multiple_apps);
 			}
@@ -216,7 +216,7 @@ vector<string> const profile_container::select_filename(double threshold) const
 
 	for (; sit != send; ++sit) {
 		string const & file =
-			name_store.name(sit->second.file_loc.filename);
+			debug_names.name(sit->second.file_loc.filename);
 		filename_set.insert(file);
 	}
 

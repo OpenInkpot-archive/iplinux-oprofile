@@ -23,11 +23,19 @@ namespace {
 
 bool long_filenames;
 
-inline string const & get(name_id id)
+int image_compare(name_id l, name_id r)
 {
 	if (long_filenames)
-		return name_store.name(id);
-	return name_store.basename(id);
+		return image_names.name(l).compare(image_names.name(r));
+	return image_names.basename(l).compare(image_names.basename(r));
+}
+
+
+int debug_compare(name_id l, name_id r)
+{
+	if (long_filenames)
+		return debug_names.name(l).compare(debug_names.name(r));
+	return debug_names.basename(l).compare(debug_names.basename(r));
 }
 
 
@@ -41,30 +49,35 @@ int compare_by(sort_options::sort_order order,
 			if (lhs->sample.count > rhs->sample.count)
 				return -1;
 			return 0;
+
 		case sort_options::symbol:
-			return name_store.demangle(lhs->name).compare(
-				name_store.demangle(rhs->name));
-		case sort_options::image: {
-			return get(lhs->image_name).compare(
-				get(rhs->image_name));
-		}
+			return symbol_names.demangle(lhs->name).compare(
+				symbol_names.demangle(rhs->name));
+
+		case sort_options::image:
+			return debug_compare(lhs->image_name, rhs->image_name);
+
 		case sort_options::vma:
 			if (lhs->sample.vma < rhs->sample.vma)
 				return -1;
 			if (lhs->sample.vma > rhs->sample.vma)
 				return 1;
 			return 0;
+
 		case sort_options::debug: {
 			file_location const & f1 = lhs->sample.file_loc;
 			file_location const & f2 = rhs->sample.file_loc;
-			int ret = get(f1.filename).compare(get(f2.filename));
+			int ret = debug_compare(f1.filename, f2.filename);
 			if (ret == 0)
 				ret = f1.linenr - f2.linenr;
+			return ret;
 		}
-		default:
+
+		default: {
 			cerr << "compare_by(): unknown sort option: "
 			     << order << endl;
 			exit(EXIT_FAILURE);
+		}
 	}
 
 	return false;

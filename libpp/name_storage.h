@@ -65,6 +65,13 @@ private:
 	id_map ids;
 };
 
-extern name_storage name_store;
+/// for images
+extern name_storage image_names;
+
+/// for debug filenames
+extern name_storage debug_names;
+
+/// for symbols
+extern name_storage symbol_names;
 
 #endif /* !NAME_STORAGE_H */

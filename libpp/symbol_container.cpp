@@ -45,7 +45,7 @@ symbol_container::find(string const & filename, size_t linenr) const
 	build_by_loc();
 
 	symbol_entry symbol;
-	symbol.sample.file_loc.filename = name_store.create(filename);
+	symbol.sample.file_loc.filename = debug_names.create(filename);
 	symbol.sample.file_loc.linenr = linenr;
 
 	symbols_by_loc_t::const_iterator it = symbols_by_loc.find(&symbol);
@@ -65,7 +65,7 @@ symbol_collection const symbol_container::find(string const & name) const
 	symbols_t::const_iterator end = symbols.end();
 
 	for (; cit != end; ++cit) {
-		if (name_store.name(cit->name) == name)
+		if (symbol_names.name(cit->name) == name)
 			v.push_back(&*cit);
 	}
 
@@ -92,7 +92,7 @@ symbol_entry const * symbol_container::find_by_vma(string const & image_name,
 	symbols_t::const_iterator it;
 	for (it = symbols.begin(); it != symbols.end(); ++it) {
 		if (it->sample.vma == vma &&
-		    name_store.name(it->image_name) == image_name)
+		    image_names.name(it->image_name) == image_name)
 			return &*it;
 	}
 

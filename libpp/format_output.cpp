@@ -244,16 +244,16 @@ string formatter::format_vma(field_datum const & f)
  
 string formatter::format_symb_name(field_datum const & f)
 {
-	return name_store.demangle(f.symbol.name);
+	return symbol_names.demangle(f.symbol.name);
 }
 
 
 namespace {
 
-inline string const & get(name_id id, bool lf)
+inline string const & get_image(name_id id, bool lf)
 {
-	return lf ? name_store.name(id)
-		: name_store.basename(id);
+	return lf ? image_names.name(id)
+		: image_names.basename(id);
 }
 
 }
@@ -261,13 +261,13 @@ inline string const & get(name_id id, bool lf)
  
 string formatter::format_image_name(field_datum const & f)
 {
-	return get(f.symbol.image_name, long_filenames);
+	return get_image(f.symbol.image_name, long_filenames);
 }
 
  
 string formatter::format_app_name(field_datum const & f)
 {
-	return get(f.symbol.app_name, long_filenames);
+	return get_image(f.symbol.app_name, long_filenames);
 }
 
  
@@ -275,8 +275,9 @@ string formatter::format_linenr_info(field_datum const & f)
 {
 	ostringstream out;
 
-	string const & filename =
-		get(f.sample.file_loc.filename, long_filenames);
+	string const & filename = long_filenames
+		? debug_names.name(f.sample.file_loc.filename)
+		: debug_names.basename(f.sample.file_loc.filename);
 
 	if (!filename.empty()) {
 		out << filename << ":" << f.sample.file_loc.linenr;
