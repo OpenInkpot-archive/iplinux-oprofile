@@ -8,7 +8,7 @@ AM_CPPFLAGS = \
 	-I ${top_srcdir}/libregex \
 	-I ${top_srcdir}/libpp
 
-bin_PROGRAMS = opannotate opdiff opgprof opreport # op_merge
+bin_PROGRAMS = opannotate opdiff opgprof opreport
 
 LIBS=@POPT_LIBS@ @BFD_LIBS@
 
@@ -36,12 +36,3 @@ opgprof_LDADD = $(common_libs)
 opreport_SOURCES = opreport.cpp opreport_options.cpp $(pp_commons)
 opreport_LDADD = $(common_libs)
 
-#op_merge_SOURCES = op_merge.cpp
-#op_merge_LDADD = \
-#	../libpp/libpp.a \
-#	../libopt++/libopt++.a \
-#	../libop++/libop++.a \
-#	../libutil++/libutil++.a \
-#	../libop/libop.a \
-#	../libutil/libutil.a \
-#	../libdb/libodb.a
