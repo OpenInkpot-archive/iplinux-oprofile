@@ -18,7 +18,6 @@
 #include "common_option.h"
 #include "utility.h"
 #include "string_filter.h"
-#include "derive_files.h"
 
 class partition_files;
 class merge_option;

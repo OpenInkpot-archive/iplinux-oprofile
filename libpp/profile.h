@@ -23,18 +23,23 @@
 
 class opd_header;
 
-/** A class to store sample files over all counters */
+/**
+ * Class containing a single sample file contents,
+ * i.e. set of count values for VMA offsets for
+ * a particular binary.
+ */
 class profile_t /*:*/  noncopyable {
 public:
 	/**
-	 * profile_t - construct an profile_t object
+	 * profile_t - construct a profile_t object
 	 * @param sample_file  sample file name
+	 * @param start_offset the offset for kernel files, \sa start_offset
 	 *
 	 * store samples for one sample file, sample file header is sanitized.
 	 *
 	 * all error are fatal
 	 */
-	profile_t(std::string const & sample_file);
+	profile_t(std::string const & sample_file, u32 start_offset);
 
 	~profile_t();
  
@@ -61,15 +66,7 @@ public:
 		return *file_header;
 	}
 
-	/**
-	 * Set the start offset of the underlying samples files
-	 * to non-zero (derived from the BFD) iff this contains
-	 * the kernel or kernel module sample files.
-	 */
-	void set_start_offset(u32 start_offset);
-
 private:
-	std::string sample_filename;
 
 	/// storage type for samples sorted by eip
 	typedef std::map<odb_key_t, odb_value_t> ordered_samples_t;

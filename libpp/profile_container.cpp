@@ -323,10 +323,9 @@ bool add_samples(profile_container & samples,
 		 op_bfd const & abfd,
 		 string const & app_name)
 {
-	profile_t profile(sample_filename);
+	profile_t profile(sample_filename, abfd.get_start_offset());
 
 	check_mtime(abfd.get_filename(), profile.get_header());
-	profile.set_start_offset(abfd.get_start_offset());
 	
 	samples.add(profile, abfd, app_name);
 

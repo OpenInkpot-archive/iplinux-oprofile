@@ -45,10 +45,11 @@ public:
 
 	/**
 	 * @param rhs  right hand side of the match operator
-	 * @param binary  if binary is non empty matching the binary name
-	 *  or lib_name must use it rather the once in rhs
+	 * @param binary  if binary is non-empty, and matches
+	 * the binary or lib name, use it rather than the
+	 * one in rhs.
 	 *
-	 * return true if *this match rhs, matching is:
+	 * return true if *this match rhs, matching if:
 	 *  - image_name are identical
 	 *  - lib_name are identical
 	 *  - event_spec match

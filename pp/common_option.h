@@ -12,7 +12,7 @@
 #ifndef COMMON_OPTION_H
 #define COMMON_OPTION_H
 
-#include "derive_files.h"
+#include "locate_images.h"
 
 namespace options {
 	extern bool verbose;

@@ -9,12 +9,12 @@ AM_CPPFLAGS = \
 
 noinst_LIBRARIES = libpp.a
 libpp_a_SOURCES = \
-	derive_files.cpp \
-	derive_files.h \
 	filename_spec.cpp \
 	filename_spec.h \
 	format_output.cpp \
 	format_output.h \
+	locate_images.cpp \
+	locate_images.h \
 	parse_cmdline.cpp \
 	parse_cmdline.h \
 	partition_files.h \

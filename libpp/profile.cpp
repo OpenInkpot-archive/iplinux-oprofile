@@ -25,18 +25,16 @@
 
 using namespace std;
 
-profile_t::profile_t(string const & sample_file)
-	:
-	sample_filename(sample_file),
-	start_offset(0)
+profile_t::profile_t(string const & sample_file, u32 offset)
+	: start_offset(0)
 {
-	if (access(sample_filename.c_str(), R_OK) == 0) {
-		build_ordered_samples(sample_file);
-	} else {
-		cerr << "profile_t:profile_t() Opening " << sample_filename
-		     <<  "failed." << strerror(errno) << endl;
-		exit(EXIT_FAILURE);
-	}
+	build_ordered_samples(sample_file);
+	start_offset = offset;
+
+	if (!get_header().is_kernel)
+		return;
+
+	start_offset = offset;
 }
 
 
@@ -69,15 +67,6 @@ unsigned int profile_t::accumulate_samples(uint start, uint end) const
 }
 
 
-void profile_t::set_start_offset(u32 start_offset_)
-{
-	if (!get_header().is_kernel)
-		return;
-
-	start_offset = start_offset_;
-}
-
-
 void profile_t::build_ordered_samples(string const & filename)
 {
 	samples_odb_t samples_db;
@@ -101,6 +90,7 @@ void profile_t::build_ordered_samples(string const & filename)
 		exit(EXIT_FAILURE);
 	}
 
+	// FIXME: this code not used currently - phe will need it
 	if (file_header.get()) {
 		op_check_header(head, *file_header);
 	}

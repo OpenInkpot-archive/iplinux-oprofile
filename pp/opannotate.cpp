@@ -88,7 +88,11 @@ void save_sample_file_header(partition_files const & files)
 {
 	if (files.nr_set()) {
 		partition_files::filename_set const & file_set = files.set(0);
-		profile_t profile(file_set.begin()->sample_filename);
+		// FIXME: using profile_t as a way to get the header ?
+		// seems like a bit of a hack. Abstract out the code
+		// that opens the sample file and then  get the header
+		// from that directly, surely ?
+		profile_t profile(file_set.begin()->sample_filename, 0);
 		header.reset(new opd_header(profile.get_header()));
 	}
 }

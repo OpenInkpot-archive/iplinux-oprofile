@@ -15,7 +15,6 @@
 #include <string>
 
 #include "utility.h"
-#include "derive_files.h"
 #include "common_option.h"
 
 class partition_files;

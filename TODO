@@ -59,6 +59,16 @@ odb_open() unable to resize file /var/lib/oprofile/samples/current/{root}/bin/ca
   not a profile_container, this will also avoid multiple message "last modified
   time ... does not match ..."
 
+ o #pp/opreport -l -p /lib/modules/2.5.69/kernel/ oprofile.ko
+   No samples files found: profile specification too strict ?
+   # pp/opreport -l -p /lib/modules/2.5.69/kernel/ oprofile
+   No samples files found: profile specification too strict ?
+   # pp/opreport -l -p /lib/modules/2.5.69/kernel/ /oprofile
+   Cpu type: PIII
+   ...
+
+   It would be nice to allow at least the first alternate form.
+
  o fix John movement on 2.5: odb_insert failure (and message error corrupted ?)
 
 After merging with trunk

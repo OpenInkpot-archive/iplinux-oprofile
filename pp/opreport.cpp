@@ -84,7 +84,11 @@ files_count counts(partition_files::filename_set const & files)
 
 		sub_count.image_name = it->image;
 		sub_count.lib_image  = it->lib_image;
-		profile_t samples(it->sample_filename);
+		profile_t samples(it->sample_filename, 0);
+		// THere's another FIXME on this elsewhere. Note
+		// that the use of profile_t for this means we
+		// pass in an offset of "0" instead of the real
+		// abfd offset. This is perhaps a bit dubious...
 		sub_count.count = samples.accumulate_samples(0, ~0);
 
 		count.count += sub_count.count;
@@ -115,7 +119,8 @@ void output_header(partition_files const & files)
 {
 	if (files.nr_set()) {
 		partition_files::filename_set const & file_set = files.set(0);
-		profile_t profile(file_set.begin()->sample_filename);
+		// See FIXME in opannotate.cpp  for similar code
+		profile_t profile(file_set.begin()->sample_filename, 0);
 		output_header(cout, profile.get_header());
 	}
 }

@@ -19,7 +19,7 @@
 #include <map>
 
 #include "split_sample_filename.h"
-#include "derive_files.h"
+#include "locate_images.h"
 
 /**
  * store merging options options used to partition samples filename

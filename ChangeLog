@@ -1,10 +1,27 @@
 2003-05-07  John Levon  <levon@movementarian.org>
 
+	* profile.h:
+	* profile.cpp: remove sample_filename member,
+	bogus old spurious check, set_start_offset().
+
+	* libpp/profile_container.cpp:
+	* pp/opannotate.cpp:
+	* pp/opreport.cpp: changes from above
+
+2003-05-07  John Levon  <levon@movementarian.org>
+
 	* derive_files.h:
 	* derive_files.cpp: rename files as ...
 
 	* locate_images.h:
 	* locate_images.cpp: this.
+
+	* libpp/Makefile.am:
+	* libpp/partition_files.h:
+	* pp/common_option.h:
+	* pp/opgprof.cpp:
+	* pp/opgprof_options.h:
+	* pp/opreport_options.h: changes from above
 
 2003-05-07  John Levon  <levon@movementarian.org>
 
