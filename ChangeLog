@@ -1,3 +1,7 @@
+2003-04-22  John Levon  <levon@movementarian.org>
+
+	* pp/opreport_options.cpp: compile fix
+
 2003-04-21  Philippe Elie  <phil.el@wanadoo.fr>
 
 	* libutil++/filename_match.h:
