@@ -41,8 +41,6 @@ popt::option options_array[] = {
 };
 
 
-// FIXME: pass merge_option as parameter and re-use in opreport_options.cpp
-// *probably*
 bool try_partition_file(profile_spec const & spec, bool exclude_dependent)
 {
 	list<string> sample_files = spec.generate_file_list(exclude_dependent);
@@ -50,26 +48,6 @@ bool try_partition_file(profile_spec const & spec, bool exclude_dependent)
 	cverb << "Matched sample files: " << sample_files.size() << endl;
 	copy(sample_files.begin(), sample_files.end(),
 	     ostream_iterator<string>(cverb, "\n"));
-
-	vector<unmergeable_profile>
-		unmerged_profile = merge_profile(sample_files);
-
-	cverb << "Unmergeable profile specification:\n";
-	copy(unmerged_profile.begin(), unmerged_profile.end(),
-	     ostream_iterator<unmergeable_profile>(cverb, "\n"));
-
-	if (unmerged_profile.empty() && !exclude_dependent) {
-		cerr << "No samples files found: profile specification too "
-		     << "strict ?" << endl;
-		exit(EXIT_FAILURE);
-	}
-
-	if (unmerged_profile.size() > 1) {
-		cerr << "Too many unmergeable profile specifications." << endl;
-		cerr << "Use event:xxxx and/or count:yyyyy to restrict "
-		     << "sample files considered.\n" << endl;
-		exit(EXIT_FAILURE);
-	}
 
 	// opgprof merge all by default
 	merge_option merge_by;
@@ -82,7 +60,6 @@ bool try_partition_file(profile_spec const & spec, bool exclude_dependent)
 	sample_file_partition.reset(
 		new partition_files(sample_files, merge_by));
 
-	// FIXME: above check should be suppressed
 	if (sample_file_partition->nr_set() > 1) {
 		// FIXME: we can do a lot better in telling the user the
 		// *exact* problem: sample_file_partition::report()
@@ -93,7 +70,14 @@ bool try_partition_file(profile_spec const & spec, bool exclude_dependent)
 		exit(EXIT_FAILURE);
 	}
 
-	return sample_file_partition->nr_set() == 1;
+	size_t nr_set = sample_file_partition->nr_set();
+	if (nr_set == 0 && !exclude_dependent) {
+		cerr << "No samples files found: profile specification too "
+		     << "strict ?" << endl;
+		exit(EXIT_FAILURE);
+	}
+
+	return nr_set == 1;
 }
 
 }  // anonymous namespace
