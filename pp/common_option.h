@@ -16,7 +16,7 @@
 
 namespace options {
 	extern bool verbose;
-	extern alt_filename_t alternate_filename;
+	extern extra_images extra_found_images;
 };
 
 /**

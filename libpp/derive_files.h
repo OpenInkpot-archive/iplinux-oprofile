@@ -17,36 +17,59 @@
 #include <vector>
 
 /**
- * container type used to store alternative location of binary image. We need a
- * multimap to warn against ambiguity between mutiple time found image name.
- * \sa add_to_alternate_filename(), check_image_name()
- */
-typedef std::multimap<std::string, std::string> alt_filename_t;
-
-/**
- * @param alternate_filename a container where all filename belonging to the
- * following path are stored
- * @param path_names a vector of path to consider
+ * A class containing mappings from an image basename,
+ * such as 'floppy.ko', to locations in the paths passed
+ * in to populate().
  *
- * add all file name below path_name recursively, to the the set of
- * alternative filename used to retrieve image name when a samples image name
- * directory is not accurate
+ * The name may exist multiple times; all locations are recorded
+ * in this container.
  */
-void add_to_alternate_filename(alt_filename_t & alternate_filename,
-			       std::vector<std::string> const & path_names);
+class extra_images {
+public:
+	extra_images() {};
+
+	/// add all filenames found in the given paths, recursively
+	void populate(std::vector<std::string> const & paths);	
+
+	struct matcher {
+		std::string const & value;
+	public:
+		explicit matcher(std::string const & v) : value(v) {}
+		virtual bool operator()(std::string const & str) const {
+			return str == value;
+		}
+	};
+
+	/**
+	 * return a vector of all directories that match the functor
+	 */
+	std::vector<std::string> const find(matcher const & match) const;
+
+	/// return a vector of all directories that match the given name
+	std::vector<std::string> const find(std::string const & name) const;
+
+private:
+	typedef std::multimap<std::string, std::string> images_t;
+	typedef images_t::value_type value_type;
+	typedef images_t::const_iterator const_iterator;
+
+	/// map from image basename to owning directory
+	images_t images;
+};
+
 
 /**
- * @param alternate_filename container where all candidate filename are stored
+ * @param extra_images container where all extra candidate filenames are stored
  * @param image_name binary image name
- * @param samples_filename samples filename
+ * @param samples_filename sample file path, used for warnings only
  *
- * check than image_name belonging to samples_filename exist. If not it try to
- * retrieve it through the alternate_filename location. If we fail to retrieve
- * the file or if it is not readable we provide a warning and return an empty
- * string
+ * Locate a (number of) matching absolute paths to the given image name.
+ * We return an empty vector if nothing could be found to match.
+ * If we fail to find the file or if it is not readable we provide a warning
+ * and return an empty string.
  */
-std::string check_image_name(alt_filename_t const & alternate_filename,
-			     std::string const & image_name,
-			     std::string const & samples_filename);
+std::string const find_image_path(extra_images const & extra_images,
+                                  std::string const & image_name,
+                                  std::string const & samples_filename);
 
 #endif /* ! DERIVE_FILES_H */

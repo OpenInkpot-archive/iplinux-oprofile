@@ -172,7 +172,7 @@ partition_files::filename_set const & partition_files::set(size_t index) const
 
 
 image_set sort_by_image(partition_files const & files,
-			alt_filename_t const & alternate_filename)
+			extra_images const & extra_images)
 {
 	image_set result;
 
@@ -186,7 +186,7 @@ image_set sort_by_image(partition_files const & files,
 
 
 			// if the image files does not exist try to retrieve it
-			image_name = check_image_name(alternate_filename,
+			image_name = find_image_path(extra_images,
 				image_name, it->sample_filename);
 
 			// no need to warn if image_name is not readable

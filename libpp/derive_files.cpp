@@ -19,74 +19,98 @@
 
 using namespace std;
 
-void add_to_alternate_filename(alt_filename_t & alternate_filename,
-			       vector<string> const & path_names)
+
+void extra_images::populate(vector<string> const & paths)
 {
-	vector<string>::const_iterator path;
-	for (path = path_names.begin() ; path != path_names.end() ; ++path) {
+	vector<string>::const_iterator cit = paths.begin();
+	vector<string>::const_iterator end = paths.end();
+	for (; cit != end; ++cit) {
 		list<string> file_list;
-		create_file_list(file_list, *path, "*", true);
-		list<string>::const_iterator it;
-		for (it = file_list.begin() ; it != file_list.end() ; ++it) {
-			typedef alt_filename_t::value_type value_t;
-			value_t value(basename(*it), dirname(*it));
-			alternate_filename.insert(value);
+		create_file_list(file_list, *cit, "*", true);
+		list<string>::const_iterator lit = file_list.begin();
+		list<string>::const_iterator lend = file_list.end();
+		for (; lit != lend; ++lit) {
+			value_type v(basename(*lit), dirname(*lit));
+			images.insert(v);
 		}
 	}
 }
 
-/**
- * @param candidate  the condidate filename
- * @param image  the image name to match
- *
- * helper for check_module_name - return true if candidate match image name
- */
-static bool match_module_name(string const & candidate, string const & image)
+
+vector<string> const extra_images::find(string const & name) const
 {
-	if (candidate.length() != image.length()) {
-		return false;
-	}
-
-	for (string::size_type i = 0 ; i < image.length() ; ++i) {
-		if (image[i] == candidate[i])
-			continue;
-		if (image[i] == '_' && (candidate[i] == ',' || candidate[i] == '-'))
-			continue;
-		return false;
-	}
-
-	return true;
+	extra_images::matcher match(name);
+	return find(match);
 }
 
+
+vector<string> const extra_images::find(extra_images::matcher const & match) const
+{
+	vector<string> matches;
+
+	const_iterator cit = images.begin();
+	const_iterator end = images.end();
+
+	for (; cit != end; ++cit) {
+		if (match(cit->first))
+			matches.push_back(cit->second + '/' + cit->first);
+	}
+
+	return matches;
+}
+
+
+namespace {
+
 /**
- * @param alt_filename container where all candidate filename are stored
+ * Function object for matching a module filename, which
+ * has its own special mangling rules in 2.5 kernels.
+ */
+struct module_matcher : public extra_images::matcher {
+public:
+	explicit module_matcher(string const & s)
+		: extra_images::matcher(s) {}
+
+	virtual bool operator()(string const & candidate) const {
+		if (candidate.length() != value.length())
+			return false;
+
+		for (string::size_type i = 0 ; i < value.length() ; ++i) {
+			if (value[i] == candidate[i])
+				continue;
+			if (value[i] == '_' &&
+				(candidate[i] == ',' || candidate[i] == '-'))
+				continue;
+			return false;
+		}
+
+		return true;
+	}
+};
+
+
+/**
+ * @param extra_images container where all candidate filename are stored
  * @param image_name binary image name
  * @param samples_filename samples filename
  *
- * helper for check_image_name either return image name on success or an empty
+ * helper for find_image_path either return image name on success or an empty
  * string, output also a warning if we failt to retrieve the image name. All
  * this handling is special for 2.5/2.6 module where daemon are no way to know
  * full path name of module
  */
-static string check_module_name(alt_filename_t const & alt_filename,
-				string const & image_name,
-				string const & samples_filename)
+string const find_module_path(extra_images const & extra_images,
+                              string const & module_name,
+                              string const & samples_filename)
 {
-	vector<string> result;
-	typedef alt_filename_t::const_iterator it_t;
-
-	for (it_t it = alt_filename.begin(); it != alt_filename.end(); ++it) {
-		string const & candidate = it->first;
-		if (match_module_name(candidate, image_name)) {
-			result.push_back(it->second + "/" + candidate);
-		}
-	}
+	vector<string> result =
+		extra_images.find(module_matcher(module_name));
 
 	if (result.empty()) {
 		static bool first_warn = true;
 		if (first_warn) {
-			cerr << "I can't locate some binary image file, all\n"
-			     << "of this file(s) will be ignored in statistics"
+			cerr << "I can't locate some binary image files, all\n"
+			     << "of these files will be ignored in statistics"
 			     << endl
 			     << "Have you provided the right -p option ?"
 			     << endl;
@@ -108,43 +132,44 @@ static string check_module_name(alt_filename_t const & alt_filename,
 	return result[0];
 }
 
+} // anon namespace
 
-string check_image_name(alt_filename_t const & alternate_filename,
-			string const & image_name,
-			string const & samples_filename)
+
+string const find_image_path(extra_images const & extra_images,
+                             string const & image_name,
+                             string const & samples_filename)
 {
+	// simplest case
 	if (op_file_readable(image_name))
 		return image_name;
 
 	if (errno == EACCES) {
 		static bool first_warn = true;
 		if (first_warn) {
-			cerr << "You do not have read access to some binary images"
-			     << ", all\nof these files will be ignored in"
-			     << " the statistics\n";
+			cerr << "You do not have read access to some binary "
+			     << "images, all\nof these files will be ignored "
+			     << "in the results.\n";
 			first_warn = false;
 		}
-		cerr << "Access denied for : " << image_name << endl;
+		cerr << "access denied for : " << image_name << endl;
 
 		return string(); 
 	}
 
-	typedef alt_filename_t::const_iterator it_t;
-	pair<it_t, it_t> p_it =
-		alternate_filename.equal_range(basename(image_name));
+	vector<string> result = extra_images.find(basename(image_name));
 
-	// Special handling for 2.5/2.6 module
-	if (p_it.first == p_it.second) {
-		return check_module_name(alternate_filename,
-					 basename(image_name) + ".ko",
-					 samples_filename);
+	// not found, try a module search
+	if (result.empty()) {
+		return find_module_path(extra_images,
+			basename(image_name) + ".ko", samples_filename);
 	}
 
-	if (distance(p_it.first, p_it.second) != 1) {
+	if (result.size() > 1) {
 		cerr << "The image name " << samples_filename
-		     << " matches more than one filename, and will be ignored." << endl;
+		     << " matches more than one filename, "
+		     << "and will be ignored." << endl;
 		return string();
 	}
 
-	return p_it.first->second + '/' + p_it.first->first;
+	return result[0];
 }

@@ -95,15 +95,14 @@ typedef std::multimap<std::string, split_sample_filename const> image_set;
 /**
  * @param files a set of sample filename to sort
  * @param merge_lib true if the image name must be derived from lib name
- * @param alternate_filename alternate filename set to retrieve binary file
- *  if needed
+ * @param extra_images container of extra images found
  *
  * return the same set as passed in files but sorted by image name, where
  * image name will be the bfd file to open. This is to allow caller to avoid
  * to bfd_open more than one time each binary image
  */
 image_set sort_by_image(partition_files const & files,
-			alt_filename_t const & alternate_filename);
+			extra_images const & extra_images);
 
 
 #endif /* !PARTITION_FILES_H */

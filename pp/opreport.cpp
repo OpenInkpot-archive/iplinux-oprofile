@@ -195,7 +195,7 @@ void output_files_count(partition_files const & files)
 
 void output_symbols_count(partition_files const & files)
 {
-	image_set images = sort_by_image(files, options::alternate_filename);
+	image_set images = sort_by_image(files, options::extra_found_images);
 
 	profile_container samples(false, options::debug_info, options::details);
 

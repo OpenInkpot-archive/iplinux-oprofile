@@ -19,7 +19,7 @@ using namespace std;
 
 namespace options {
 	bool verbose;
-	alt_filename_t alternate_filename;
+	extra_images extra_found_images;
 }
 
 namespace {
@@ -33,6 +33,7 @@ popt::option options_array[] = {
 		     "comma-separated path to search missing binaries","path"),
 };
 
+
 vector<string> get_options(int argc, char const * argv[])
 {
 	vector<string> non_options;
@@ -40,12 +41,13 @@ vector<string> get_options(int argc, char const * argv[])
 
 	set_verbose(options::verbose);
 
-	add_to_alternate_filename(options::alternate_filename, image_path);
+	options::extra_found_images.populate(image_path);
 
 	return non_options;
 }
 
 }
+
 
 int run_pp_tool(int argc, char const * argv[], pp_fct_run_t fct)
 {

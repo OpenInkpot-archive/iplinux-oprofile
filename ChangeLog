@@ -1,5 +1,19 @@
 2003-05-07  John Levon  <levon@movementarian.org>
 
+	* libpp/derive_files.h:
+	* libpp/derive_files.cpp: rework into extra_images
+	class
+
+	* libpp/partition_files.h:
+	* libpp/partition_files.cpp:
+	* pp/common_option.h:
+	* pp/common_option.cpp:
+	* pp/opannotate.cpp:
+	* pp/opgprof.cpp:
+	* pp/opreport.cpp: use the above
+
+2003-05-07  John Levon  <levon@movementarian.org>
+
 	* libpp/Makefile.am:
 	* session.h:
 	* session.cpp: remove session.{h,cpp}

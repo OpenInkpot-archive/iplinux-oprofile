@@ -202,7 +202,7 @@ int opgprof(vector<string> const & non_options)
 	profile_container samples(false, false, true);
 
 	image_set images = sort_by_image(*sample_file_partition,
-					 options::alternate_filename);
+					 options::extra_found_images);
 
 	// FIXME: symbol_filter would be allowed through option
 	op_bfd abfd(images.begin()->first, string_filter());

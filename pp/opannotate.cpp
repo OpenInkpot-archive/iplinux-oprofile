@@ -61,7 +61,7 @@ image_set populate_samples(profile_container & samples,
 			   partition_files const & files,
 			   bool merge_lib)
 {
-	image_set images = sort_by_image(files, alternate_filename);
+	image_set images = sort_by_image(files, extra_found_images);
 
 	image_set::const_iterator it;
 	for (it = images.begin(); it != images.end(); ) {
