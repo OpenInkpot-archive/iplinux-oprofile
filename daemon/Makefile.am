@@ -3,19 +3,17 @@ dist_sources = \
 	opd_stats.c \
 	opd_kernel.c \
 	opd_image.c \
-	opd_sample_files.c \
 	opd_image.h \
 	opd_printf.h \
 	opd_stats.h \
 	opd_kernel.h \
-	opd_sample_files.h \
-	opd_cookie.h
+	opd_cookie.h \
+	opd_sample_files.c \
+	opd_sample_files.h
 
 EXTRA_DIST = $(dist_sources)
 
 LIBS=@POPT_LIBS@ @LIBERTY_LIBS@
-
-if kernel_support
 
 AM_CPPFLAGS = \
 	-I ${top_srcdir}/libabi \
@@ -26,12 +24,21 @@ AM_CPPFLAGS = \
 
 AM_CFLAGS = @OP_CFLAGS@
 
+# code shared with 2.4 daemon
+noinst_LIBRARIES = libdaemon.a
+libdaemon_a_SOURCES = \
+	opd_util.h \
+	opd_util.c
+
+if kernel_support
+
 bin_PROGRAMS = oprofiled
 
 oprofiled_SOURCES = $(dist_sources)
 
 if enable_abi
 oprofiled_LDADD = \
+	libdaemon.a \
 	../libabi/libabi.a \
 	../libdb/libodb.a \
 	../libcgdb/libocgdb.a \
@@ -40,6 +47,7 @@ oprofiled_LDADD = \
 LINKER=$(CXX)
 else
 oprofiled_LDADD = \
+	libdaemon.a \
 	../libdb/libodb.a \
 	../libcgdb/libocgdb.a \
 	../libop/libop.a \

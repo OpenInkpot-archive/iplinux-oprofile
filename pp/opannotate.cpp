@@ -58,7 +58,7 @@ unsigned int const count_width = 6;
 // FIXME share with opgprof.cpp and opreport.cpp
 image_set populate_samples(profile_container & samples,
 			   partition_files const & files,
-			   bool merge_lib)
+			   bool merge_lib, size_t count_group)
 {
 	image_set images = sort_by_image(files, extra_found_images);
 
@@ -82,7 +82,7 @@ image_set populate_samples(profile_container & samples,
 
 		check_mtime(abfd.get_filename(), profile.get_header());
 	
-		samples.add(profile, abfd, app_name);
+		samples.add(profile, abfd, app_name, count_group);
 	}
 
 	return images;
@@ -187,12 +187,14 @@ void output_info(ostream & out)
 }
 
 
-string counter_str(size_t counter, size_t total)
+string count_str(count_array_t const & count,
+		   count_array_t const & total)
 {
 	ostringstream os;
-	os << setw(count_width) << counter << ' ';
+	os << setw(count_width) << count[0] << ' ';
 
-	os << format_double(op_ratio(counter, total) * 100.0,
+	// FIXME: multiple counts
+	os << format_double(op_ratio(count[0], total[0]) * 100.0,
 			    percent_int_width, percent_fract_width);
 	return os.str();
 }
@@ -212,7 +214,7 @@ string asm_line_annotation(symbol_entry const * last_symbol,
 
 	sample_entry const * sample = samples->find_sample(last_symbol, vma);
 	if (sample)
-		str += counter_str(sample->count, samples->samples_count());
+		str += count_str(sample->counts, samples->samples_count());
 
 	if (str.empty())
 		str = annotation_fill;
@@ -227,16 +229,16 @@ string symbol_annotation(symbol_entry const * symbol)
 	if (!symbol)
 		return string();
 
-	string annot = counter_str(symbol->sample.count,
-				   samples->samples_count());
+	string annot = count_str(symbol->sample.counts,
+	                         samples->samples_count());
 	if (annot.empty())
-		return  string();
+		return string();
 
 	string const & symname = symbol_names.demangle(symbol->name);
 
 	string str = " ";
 	str += begin_comment + symname + " total: ";
-	str += counter_str(symbol->sample.count, samples->samples_count());
+	str += count_str(symbol->sample.counts, samples->samples_count());
 	str += end_comment;
 	return str;
 }
@@ -434,9 +436,9 @@ string const source_line_annotation(debug_name_id filename, size_t linenr)
 {
 	string str;
 
-	u32 count = samples->samples_count(filename, linenr);
-	if (count)
-		str += counter_str(count, samples->samples_count());
+	count_array_t counts = samples->samples_count(filename, linenr);
+	if (!counts.zero())
+		str += count_str(counts, samples->samples_count());
 
 	if (str.empty())
 		str = annotation_fill;
@@ -455,14 +457,14 @@ string source_symbol_annotation(debug_name_id filename, size_t linenr)
 
 
 void output_per_file_info(ostream & out, debug_name_id filename,
-			  u32 total_count_for_file)
+			  count_array_t const & total_file_count)
 {
 	out << begin_comment << '\n'
 	     << in_comment << "Total samples for file : "
 	     << '"' << debug_names.name(filename) << '"'
 	     << '\n';
 	out << in_comment << '\n' << in_comment
-	    << counter_str(total_count_for_file, samples->samples_count())
+	    << count_str(total_file_count, samples->samples_count())
 	    << '\n';
 	out << end_comment << '\n' << '\n';
 }
@@ -481,9 +483,9 @@ string const line0_info(debug_name_id filename)
 
 
 void do_output_one_file(ostream & out, istream & in, debug_name_id filename,
-			bool header)
+                        bool header)
 {
-	u32 count = samples->samples_count(filename);
+	count_array_t count = samples->samples_count(filename);
 
 	if (header) {
 		output_per_file_info(out, filename, count);
@@ -519,48 +521,33 @@ void do_output_one_file(ostream & out, istream & in, debug_name_id filename,
 
 
 void output_one_file(istream & in, debug_name_id filename,
-		     bool output_separate_file)
+                     string const & source)
 {
-	if (!output_separate_file) {
+	if (output_dir.empty()) {
 		do_output_one_file(cout, in, filename, true);
 		return;
 	}
 
-	string out_filename = debug_names.name(filename);
-	string original_out_filename = out_filename;
+	string const out_file = relative_to_absolute_path(output_dir + source);
 
-	size_t pos = out_filename.find(source_dir);
-	if (pos == 0) {
-		out_filename.erase(0, source_dir.length());
-	} else if (pos == string::npos) {
-		// filename is outside the source dir: ignore this file
-		cerr << "opannotate: file "
-		     << '"' << out_filename << '"' << " ignored" << endl;
+	/* Just because you're paranoid doesn't mean they're not out to
+	 * get you ... */
+	if (is_files_identical(out_file, source)) {
+		cerr << "input and output files are identical: "
+		     << out_file << endl;
 		return;
 	}
 
-	out_filename = relative_to_absolute_path(output_dir + out_filename);
-
-	if (create_path(out_filename.c_str())) {
+	if (create_path(out_file.c_str())) {
 		cerr << "unable to create directory: "
-		     << '"' << dirname(out_filename) << '"' << endl;
+		     << '"' << dirname(out_file) << '"' << endl;
 		return;
 	}
 
-	// paranoid checking: out_filename and filename must be distinct file.
-	if (is_files_identical(original_out_filename, out_filename)) {
-		cerr << "input and output_filename are identical: "
-		     << '"' << original_out_filename << '"'
-		     << ','
-		     << '"' << out_filename << '"'
-		     << endl;
-		return;
-	}
-
-	ofstream out(out_filename.c_str());
+	ofstream out(out_file.c_str());
 	if (!out) {
 		cerr << "unable to open output file "
-		     << '"' << out_filename << '"' << endl;
+		     << '"' << out_file << '"' << endl;
 	} else {
 		do_output_one_file(out, in, filename, false);
 		output_info(out);
@@ -568,34 +555,78 @@ void output_one_file(istream & in, debug_name_id filename,
 }
 
 
-void output_source(path_filter const & filter, bool output_separate_file)
+/* Locate a source file from debug info, which may be relative */
+string const locate_source_file(debug_name_id filename_id)
 {
-	if (!output_separate_file)
+	string const origfile = debug_names.name(filename_id);
+	string file = origfile;
+
+	if (file.empty())
+		return file;
+
+	/* Allow absolute paths to be relocated to a different directory */
+	if (file[0] == '/') {
+		vector<string>::const_iterator cit = base_dirs.begin();
+		vector<string>::const_iterator end = base_dirs.end();
+		for (; cit != end; ++cit) {
+			string path = relative_to_absolute_path(*cit);
+
+			if (is_prefix(file, path)) {
+				file = file.substr(path.length());
+				break;
+			}
+		}
+	}
+
+	vector<string>::const_iterator cit = search_dirs.begin();
+	vector<string>::const_iterator end = search_dirs.end();
+
+	for (; cit != end; ++cit) {
+		string const absfile =
+			relative_to_absolute_path(*cit + "/" + file);
+
+		if (op_file_readable(absfile)) {
+			return absfile;
+		}
+	}
+
+	/* We didn't find a relocated absolute file, or a relative file,
+	 * assume the original is correct */
+	return origfile;
+}
+
+
+void output_source(path_filter const & filter)
+{
+	bool const separate_file = !output_dir.empty();
+
+	if (!separate_file)
 		output_info(cout);
 
 	vector<debug_name_id> filenames =
 		samples->select_filename(options::threshold);
 
 	for (size_t i = 0 ; i < filenames.size() ; ++i) {
-		string filename = debug_names.name(filenames[i]);
-		if (!filter.match(filename))
+		string const & source = locate_source_file(filenames[i]);
+
+		if (!filter.match(source))
 			continue;
 
-		ifstream in(filename.c_str());
+		ifstream in(source.c_str());
 
 		if (!in) {
 			// it is common to have empty filename due to the lack
 			// of debug info (eg _init function) so warn only
 			// if the filename is non empty. The case: no debug
 			// info at all has already been checked.
-			if (filename.length())
+			if (source.length())
 				cerr << "opannotate (warning): unable to "
 				     << "open for reading: "
-				     << filename << endl;
-		} 
+				     << source << endl;
+		}
 
-		if (filename.length()) {
-			output_one_file(in, filenames[i], output_separate_file);
+		if (source.length()) {
+			output_one_file(in, filenames[i], source);
 		}
 	}
 }
@@ -605,36 +636,25 @@ bool annotate_source(image_set const & images)
 {
 	annotation_fill = get_annotation_fill();
 
-	bool output_separate_file = false;
-	if (!source_dir.empty()) {
-		output_separate_file = true;
-
-		source_dir = relative_to_absolute_path(source_dir);
-		if (source_dir.length() &&
-		    source_dir[source_dir.length() - 1] != '/')
-			source_dir += '/';
-	}
-
-	if (!output_dir.empty() || output_separate_file) {
-		output_separate_file = true;
+	if (!output_dir.empty()) {
 
 		output_dir = relative_to_absolute_path(output_dir);
 		if (output_dir.length() &&
 		    output_dir[output_dir.length() - 1] != '/')
 			output_dir += '/';
 
+		/* Don't let the user stomp on their sources */
+		if (output_dir == "/") {
+			cerr << "Output path of / would over-write the "
+				"source files" << endl;
+			return false;
+		}
 
 		if (create_path(output_dir.c_str())) {
 			cerr << "unable to create " << output_dir
 			     << " directory: " << endl;
 			return false;
 		}
-	}
-
-	if (output_separate_file && output_dir == source_dir) {
-		cerr << "You cannot specify the same directory for "
-		     << "--output-dir and --source-dir" << endl;
-		return false;
 	}
 
 	if (assembly) {
@@ -655,7 +675,7 @@ bool annotate_source(image_set const & images)
 			     << "the selected symbol\n";
 		}
 	} else {
-		output_source(file_filter, output_separate_file);
+		output_source(file_filter);
 	}
 
 	return true;
@@ -671,7 +691,7 @@ int opannotate(vector<string> const & non_options)
 	save_sample_file_header(*sample_file_partition);
 
 	image_set images = populate_samples(*samples, *sample_file_partition,
-					    false);
+					    false, 0);
 	annotate_source(images);
 
 	return 0;

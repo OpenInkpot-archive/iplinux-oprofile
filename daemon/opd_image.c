@@ -210,7 +210,7 @@ void opd_check_image_mtime(struct opd_image * image)
 			odb_close(db);
 		}
 		if (ctr_event[i]) {
-			mangled = opd_mangle_filename(image, i, 0);
+			mangled = opd_mangle_filename(image, i);
 			verbprintf("Deleting out of date \"%s\"\n", mangled);
 			remove(mangled);
 			free(mangled);
@@ -241,8 +241,7 @@ void opd_put_image_sample(struct opd_image * image, vma_t offset, int counter)
 	sample_file = &image->sample_files[counter];
  
 	if (!sample_file->base_memory) {
-		opd_open_sample_file(image, counter);
-		if (!sample_file->base_memory) {
+		if (opd_open_sample_file(image, counter)) {
 			/* opd_open_sample_file output an error message */
 			return;
 		}

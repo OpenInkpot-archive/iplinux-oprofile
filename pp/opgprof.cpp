@@ -192,7 +192,7 @@ void output_gprof(op_bfd const & abfd, profile_container const & samples,
 		sample_container::samples_iterator end = samples.end(*sit);
 		for (; it != end ; ++it) {
 			u32 pos = (it->second.vma - low_pc) / multiplier;
-			u32 count = it->second.count;
+			u32 count = it->second.counts[0];
 
 			if (pos >= histsize) {
 				cerr << "Bogus histogram bin " << pos
@@ -240,7 +240,7 @@ string load_samples(op_bfd const & abfd, image_set const & images,
 
 		check_mtime(abfd.get_filename(), profile.get_header());
 
-		samples.add(profile, abfd, app_name);
+		samples.add(profile, abfd, app_name, 0);
 	}
 
 	return images.begin()->first;

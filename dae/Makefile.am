@@ -5,17 +5,16 @@ dist_sources = \
 	opd_image.c \
 	opd_mapping.c \
 	opd_parse_proc.c \
-	opd_sample_files.c \
 	oprofiled.c \
 	opd_image.h \
 	opd_mapping.h \
-	opd_printf.h \
-	opd_sample_files.h \
 	p_module.h \
 	opd_kernel.h \
 	opd_parse_proc.h \
 	opd_proc.h \
-	opd_stats.h
+	opd_stats.h \
+	opd_sample_files.c \
+	opd_sample_files.h
 
 EXTRA_DIST = $(dist_sources)
 
@@ -27,7 +26,8 @@ AM_CPPFLAGS = \
 	-I ${top_srcdir}/libabi \
 	-I ${top_srcdir}/libutil \
 	-I ${top_srcdir}/libop \
-	-I ${top_srcdir}/libdb
+	-I ${top_srcdir}/libdb \
+	-I ${top_srcdir}/daemon
 
 bin_PROGRAMS = oprofiled
 
@@ -35,6 +35,7 @@ oprofiled_SOURCES = $(dist_sources)
 
 if enable_abi
 oprofiled_LDADD = \
+	../daemon/libdaemon.a \
 	../libabi/libabi.a \
 	../libdb/libodb.a \
 	../libop/libop.a \
@@ -42,6 +43,7 @@ oprofiled_LDADD = \
 LINKER=$(CXX)
 else
 oprofiled_LDADD = \
+	../daemon/libdaemon.a \
 	../libdb/libodb.a \
 	../libop/libop.a \
 	../libutil/libutil.a

@@ -87,7 +87,7 @@ struct group_summary {
 };
 
 
-/// all group_summary belonging to a counter
+/// all group_summary belonging to a count group
 struct event_group_summary {
 	event_group_summary() : total_count(0.0) {}
 
@@ -96,7 +96,7 @@ struct event_group_summary {
 	}
 
 	vector<group_summary> groups;
-	/// total count of samples for this counter
+	/// total count of samples for this count group
 	double total_count;
 
 	index_mapper_t index_mapper;
@@ -134,7 +134,7 @@ string get_filename(string const & filename)
 
 
 /// Output a count and a percentage
-void output_counter(double total_count, size_t count)
+void output_count(double total_count, size_t count)
 {
 	cout << setw(9) << count << " ";
 	double ratio = op_ratio(count, total_count);
@@ -193,7 +193,7 @@ output_deps(vector<event_group_summary> const & summaries,
 			double tot_count = options::global_percent
 				? summaries[i].total_count : group.count;
 
-			output_counter(tot_count, file.count);
+			output_count(tot_count, file.count);
 		}
 
 		summary const & file = event_group[0].file(j);
@@ -286,9 +286,9 @@ index_mapper_t create_index_mapper(vector<group_summary> const & summaries)
  * the added items contain zero samples.
  *
  * @internal a multimap<name, <data, vector entry index>> is used to partition
- * the input data (coming from all counter). Then we iterate over equivalence
- * class, each class contain item for an unique name and associated info
- * contains the counter nr for this data.
+ * the input data (coming from all count groups). Then we iterate over
+ * equivalence class, each class contain item for an unique name and
+ * associated info contains the counter nr for this data.
  */
 vector<group_summary>
 populate_summaries(vector<event_group_summary> const & unfilled, size_t index)
@@ -362,7 +362,7 @@ void output_summaries(vector<event_group_summary> const & summaries)
 
 		for (size_t j = 0; j < summaries.size(); ++j) {
 			group_summary const & group = summaries[j].group(i);
-			output_counter(summaries[j].total_count, group.count);
+			output_count(summaries[j].total_count, group.count);
 		}
 
 		string image = group.image_name;
@@ -437,7 +437,7 @@ create_index_mapper(vector<event_group_summary> const & summaries)
  * the added items contain zero samples.
  *
  * @internal a multimap<name, <data, vector entry index>> is used to partition
- * the input data (coming from all counter). Then we iterate over equivalence
+ * the input data (coming from all count groups). Then we iterate over equivalence
  * class, each class contain item for an unique name and associated info
  * contains the counter nr for this data.
  */
@@ -506,7 +506,8 @@ vector<event_group_summary> populate_group_summaries()
  * Load the given samples container with the profile data from
  * the files container, merging as appropriate.
  */
-void populate_profiles(partition_files const & files, profile_container & samples)
+void populate_profiles(partition_files const & files,
+                       profile_container & samples, size_t count_group)
 {
 	image_set images = sort_by_image(files, options::extra_found_images);
 
@@ -533,7 +534,7 @@ void populate_profiles(partition_files const & files, profile_container & sample
 
 			check_mtime(abfd.get_filename(), profile.get_header());
 	
-			samples.add(profile, abfd, app_name);
+			samples.add(profile, abfd, app_name, count_group);
 		} else {
 			for (; it != p_it.second; ++it) {
 				string app_name = it->second.image;
@@ -546,7 +547,8 @@ void populate_profiles(partition_files const & files, profile_container & sample
 				check_mtime(abfd.get_filename(),
 					    profile.get_header());
 	
-				samples.add(profile, abfd, app_name);
+				samples.add(profile, abfd,
+				            app_name, count_group);
 			}
 		}
 	}
@@ -576,7 +578,7 @@ format_flags const get_format_flags(column_flags const & cf)
 }
 
 
-void output_symbols(profile_container const & samples)
+void output_symbols(profile_container const & samples, size_t nr_groups)
 {
 	profile_container::symbol_choice choice;
 	choice.threshold = options::threshold;
@@ -585,6 +587,8 @@ void output_symbols(profile_container const & samples)
 	                      options::long_filenames);
 
 	format_output::formatter out(samples);
+
+	out.set_nr_groups(nr_groups);
 
 	if (options::details)
 		out.show_details();
@@ -616,8 +620,9 @@ int opreport(vector<string> const & non_options)
 
 	profile_container samples(false,
 		options::debug_info, options::details);
-	populate_profiles(sample_file_partition[0], samples);
-	output_symbols(samples);
+	for (size_t i = 0; i < sample_file_partition.size(); ++i)
+		populate_profiles(sample_file_partition[i], samples, i);
+	output_symbols(samples, sample_file_partition.size());
 	return 0;
 }
 

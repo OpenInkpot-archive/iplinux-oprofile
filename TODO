@@ -6,7 +6,8 @@ for some pointers and/or read HACKING and doc/CodingStyle.
 0.7 release
 -----------
 
- o sample-file: / binary: don't work in any useful way
+ o sample-file: / binary: don't work in any useful way - can we fix this
+   by peeking at binary: value and faking the split_sample_file somehow ?
  o separate debug info stuff
  o debian build stuff
  o side-by-side opreport output (--compare - needs UI spec)
@@ -29,26 +30,32 @@ Before 1.0 big stuff
 
  o add support for samples not belonging to any symbols probably through
    artificially created symbols
+ o there is a design problem in libpp/partition_files, class partition_files
+  can handle sample filename with different event/count but I choose (phe)
+  to handle different count/event through an array of partition_files. It's
+  difficult to say if the original design allowed simpler code in opreport
+  w/o rewritting most of pp/opreport.cpp. We will retrieve this problem
+  when allowing !merge_by.cpu tid/tgid.  I'll investigate that after
+  re-writting opreport (w/o -l --details)
  o opdiff
  
 Before 1.0 little stuff
 -----------------------
 
+ o is relative_to_absolute_path guaranteeing a trailing '/' documented ?
+ o create_path API is weird
+ o opannotate should error out with a msg if no debug symbols are found at all
  o oprof_start dialog size is too small initially
  o oprof_start key movement through events doesn't change help text
  o add -Wdeclaration-after-statement for $CC
  o GUI still has a physical-counter interface, should have a general one
    like opcontrol --event
- o test opannotate -s -a on an application containing relative path debug
-  info and profiled in another directory than the application build once.
-  can objdump retrieve the source file and if no can we work-around ?
  o implement pp_interface alias
  o look if we must remove help_str support from libopt++
  o move oprofiled.log to OP_SAMPLE_DIR/current ?
  o OPD_MAX_MODULES is stupid, use a list instead
  o improve the *non* verbose daemon log to be a bit more informative
  o --buffer-size is useless on 2.5 without tuning of watershed
- o is --reset racy ? it's certainly too slow ...
  o oprof_start: check lib samples when kernel samples checkbox is checked
  o fix /dev/null mappings (see sf) (I've seen this once - john)
  o mask SIGTERM over critical daemon operations that could corrupt sample files
@@ -61,7 +68,6 @@ Before 1.0 little stuff
    - a C++ rewrite can handle this, and also the rlimit problem via caching name id's
      and opening when necessary etc.
  o remove 2.2 / gcc 2.91 support ?
- o opannotate unhandled option: --base-dir
  o the way we show kernel modules in 2.5 is not very obvious - "/oprofile"
 
 Documentation
@@ -106,7 +112,7 @@ vma      samples  cum. samples  %           cum. %     symbol name             i
 	o hard code ${typename} regular definition to remove all current limitations (difficult, perhaps after 1.0 ?).
  o allow --event to take event numbers. (is it worth ?)
  o i18n. We need a good formatter, and also remember format_percent()
- o op_to_source --source-dir=~moz/src/oprofile/ --output-dir=op /usr/bin/oprofiled
+ o opannotate --source --output-dir=~moz/op/ /usr/bin/oprofiled
    will fail because the ~ is not expanded (no space around it) (popt bug I say)
  o cpu names instead of numbers in 2.4 module/ ?
  o remove 1 and 2 magic numbers for oprof_ready

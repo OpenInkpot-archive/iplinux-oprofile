@@ -36,6 +36,15 @@ public:
 	/// add a given column
 	void add_format(format_flags flag);
 
+	/**
+	 * Set the number of collected count groups. Each group
+	 * will output sample count and percentage in extra columns.
+	 *
+	 * This class assumes that the profile information has been
+	 * populated with the right number of groups.
+	 */
+	void set_nr_groups(size_t nr_count_groups);
+
 	/** output a vector of symbols to out according to the output format
 	 * specifier previously set by call(s) to add_format() */
 	void output(std::ostream & out, symbol_collection const & v);
@@ -54,10 +63,12 @@ private:
 	/// data passed for output
 	struct field_datum {
 		field_datum(symbol_entry const & sym,
-		            sample_entry const & s)
-			: symbol(sym), sample(s) {}
+		            sample_entry const & s,
+			    size_t group)
+			: symbol(sym), sample(s), count_group(group) {}
 		symbol_entry const & symbol;
 		sample_entry const & sample;
+		size_t count_group;
 	};
  
 	/// format callback type
@@ -111,10 +122,9 @@ private:
 	void output_header(std::ostream & out);
  
 	/// returns the nr of char needed to pad this field
-	size_t output_field(std::ostream & out,
-	                   symbol_entry const & symbol,
-			   sample_entry const & sample,
-			   format_flags fl, size_t padding);
+	size_t output_field(std::ostream & out, field_datum const & datum,
+			   format_flags fl, size_t padding,
+			   bool hide_immutable);
  
 	/// returns the nr of char needed to pad this field
 	size_t output_header_field(std::ostream & out, format_flags fl,
@@ -123,19 +133,22 @@ private:
 	/// formatting flags set
 	format_flags flags;
  
+	/// count groups
+	size_t nr_groups;
+
 	/// container we work from
 	profile_container const & profile;
  
 	/// total sample count
-	unsigned int total_count;
+	count_array_t total_count;
 	/// samples so far
-	unsigned int cumulated_samples;
+	count_array_t cumulated_samples;
 	/// percentage so far
-	unsigned int cumulated_percent;
+	count_array_t cumulated_percent;
 	/// detailed total count
-	unsigned int total_count_details;
+	count_array_t total_count_details;
 	/// detailed percentage so far
-	unsigned int cumulated_percent_details;
+	count_array_t cumulated_percent_details;
 	/// used for outputting header
 	bool first_output;
 	/// true if we need to format as 64 bits quantities

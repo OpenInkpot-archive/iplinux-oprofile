@@ -22,10 +22,6 @@ Output annotated assembly. If this is combined with --source, then mixed
 source / assembly annotations are output.
 .br
 .TP
-.BI "--base-dir / -b [dir]"
-FIXME
-.br
-.TP
 .BI "--exclude-dependent / -x"
 Do not include application-specific images for libraries, kernel modules
 and the kernel. This option only makes sense if the profile session
@@ -70,13 +66,19 @@ Output directory. This makes opannotate output one annotated file for each
 source file.
 .br
 .TP
+.BI "--search-dirs / -d [paths]"
+Comma-separated list of paths to search for source files. You may need to use
+this option when the debug information for an image contains relative paths.
+.br
+.TP
+.BI "--base-dirs / -b [paths]"
+Comma-separated list of paths to strip from debug source files, prior to
+looking for them in --search-dirs.
+.br
+.TP
 .BI "--source / -s"
 Output annotated source. This requires debugging information to be available
 for the binaries.
-.br
-.TP
-.BI "--source-dir / -d [dir]"
-Top source directory for the source files.
 .br
 .TP
 .BI "--smart-demangle / -D"

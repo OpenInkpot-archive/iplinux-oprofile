@@ -72,7 +72,7 @@ popt::option options_array[] = {
 	popt::option(options::exclude_dependent, "exclude-dependent", 'x',
 		     "exclude libs, kernel, and module samples for applications"),
 	popt::option(sort, "sort", 's',
-		     "sort by", "vma,sample,symbol,debug,image"),
+		     "sort by", "sample,image,app-name,symbol,debug,vma"),
 	popt::option(exclude_symbols, "exclude-symbols", 'e',
 		     "exclude these comma separated symbols", "symbols"),
 	popt::option(include_symbols, "include-symbols", 'i',
@@ -241,6 +241,7 @@ void handle_options(vector<string> const & non_options)
 		exit(EXIT_FAILURE);
 	}
 
+/* This should probably be removed now ? */
 #if 0
 	if (unmerged_profile.size() > 1) {
 		// quick and dirty check for now

@@ -1,3 +1,204 @@
+2003-08-11  John Levon  <levon@movementarian.org>
+
+	* libpp/count_array.cpp:
+	* libpp/count_array.h: auto-resize the number of groups
+	based on how we index.
+
+	* libpp/profile_container.cpp: remove check
+
+	* pp/opannotate.cpp: count_array.zero() not .empty()
+
+2003-08-11  John Levon  <levon@movementarian.org>
+
+	* libpp/filename_spec.h:
+	* libpp/profile_spec.cpp:
+	* libpp/profile_spec.h: add comments, allow comma lists
+	for event, count, and unit mask
+
+	* libutil++/comma_list.h: implement missing method
+
+2003-08-11  John Levon  <levon@movementarian.org>
+
+	* libpp/format_output.cpp:
+	* libpp/format_output.h: add set_nr_groups(), remove
+	pp_nr_counters.
+
+	* libpp/profile_container.cpp:
+	* libpp/profile_container.h:
+	* pp/opannotate.cpp:
+	* pp/opgprof.cpp:
+	* pp/opreport.cpp: count_group not counter
+
+2003-08-11  John Levon  <levon@movementarian.org>
+
+	* libpp/Makefile.am:
+	* libpp/counter_array.cpp:
+	* libpp/counter_array.h: rename to ...
+
+	* libpp/count_array.h:
+	* libpp/count_array.cpp: ... this ...
+
+	* libpp/format_output.cpp:
+	* libpp/format_output.h:
+	* libpp/profile.cpp:
+	* libpp/profile.h:
+	* libpp/profile_container.cpp:
+	* libpp/profile_container.h:
+	* libpp/sample_container.cpp:
+	* libpp/sample_container.h:
+	* libpp/symbol.h:
+	* pp/opannotate.cpp:
+	* pp/opgprof.cpp:
+	* pp/opreport.cpp: ... and several renamings to starting
+	change the notion from "counters" to the more general notion
+	of "count groups"
+
+2003-08-10  Philippe Elie  <phil.el@wanadoo.fr>
+
+	Multiple counter support for pp tools.
+
+	* libpp/counter_array.h:
+	* libpp/counter_array.cpp: resurected from pp-interface-branch, for now
+	 memory use is inefficient.
+	* libpp/Makefile.am: add counter_array.cpp .h
+	* libpp/format_out.h:
+	* libpp/format_out.cpp: handle multiple counter + a general tidy
+	* libpp/format_flags.h: remove ff_immutable_mask and some nasty
+	  requisite on flags value
+	* libpp/profile_container.h:
+	* libpp/profile_container.cpp:
+	* libpp/sample_container.h:
+	* libpp/sample_container.cpp:
+	* libpp/symbol.h:
+	* libpp/symbol_container.cpp:
+	* libpp/symbol_sort.cpp:
+	* pp/opreport.cpp: handle multiple counter
+	* pp/opannotate.cpp: partial handling of multiple counter
+	* pp/opgprof.cpp:
+	* pp/opreport.cpp: minor bits
+
+2003-08-08  Will Cohen  <wcohen@redhat.com>
+
+	* dae/Makefile.am:
+	* daemon/Makefile.am: Correct library linking order.
+	* daemon/opd_util.c: Add needed include files.
+
+2003-08-08  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* utils/opcontrol: move_and_remove() do nothing if source doesn't exist
+
+2003-08-08  Philippe Elie  <phil.el@wanadoo.fr>
+
+	revert the previous patch
+	* dae/Makefile.am:
+	* dae/opd_sample_files.h:
+	* dae/opd_sample_files.c:
+	* daemon/Makefile.am:
+	* daemon/opd_sample_files.c: un-share opd_sample_files
+	code
+
+2003-08-08  John Levon  <levon@movementarian.org>
+
+	* dae/Makefile.am:
+	* dae/opd_sample_files.h:
+	* dae/opd_sample_files.c:
+	* daemon/Makefile.am:
+	* daemon/opd_sample_files.c: share opd_sample_files
+	code
+
+2003-08-08  John Levon  <levon@movementarian.org>
+
+	* dae/oprofiled.c:
+	* daemon/oprofiled.c:
+	* daemon/opd_util.h:
+	* daemon/opd_util.c: share opd_write_abi()
+
+2003-08-08  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libop/op_alloc_counter.c:
+	* libop/op_events.h: minor doxgen fix
+
+2003-08-08  John Levon  <levon@movementarian.org>
+
+	* dae/Makefile.am:
+	* dae/oprofiled.c:
+	* daemon/Makefile.am:
+	* daemon/oprofiled.c:
+	* daemon/opd_util.h:
+	* daemon/opd_util.c: share some small bits of code
+	between the daemons
+
+2003-08-08  John Levon  <levon@movementarian.org>
+
+	* dae/oprofiled.c:
+	* daemon/oprofiled.c: remove mypid, unused
+
+2003-08-08  John Levon  <levon@movementarian.org>
+
+	* dae/Makefile.am:
+	* dae/opd_printf.h: remove duplicate header
+	and use daemon/opd_printf.h
+
+2003-08-08  John Levon  <levon@movementarian.org>
+
+	* dae/opd_image.c:
+	* dae/opd_sample_files.h:
+	* dae/opd_sample_files.c:
+	* daemon/opd_image.c:
+	* daemon/opd_sample_files.h:
+	* daemon/opd_sample_files.c: remove "create" bool
+	from opd_mangle_filename(): only one callsite needs
+	that functionality, open code the create instead
+
+	* dae/opd_proc.c:
+	* dae/opd_sample_files.h:
+	* dae/opd_sample_files.c:
+	* daemon/opd_sample_files.h:
+	* daemon/opd_sample_files.c: return error from
+	opd_open_sample_filename(). Do not fail when odb_open
+	fails due to --reset races.
+
+	* dae/oprofiled.c:
+	* daemon/oprofiled.c: a little more verbosity.
+
+	* libutil/op_file.h:
+	* libutil/op_file.c: fix create_dir/path() comments,
+	don't use access()
+
+	* utils/opcontrol: reduce chance of --reset races
+
+2003-08-06  Philippe Elie  <phil.el@wanadoo.fr>
+
+	* libpp/symbol_sort.h:
+	* libpp/symbol_sort.cpp: add app_name sort order, force sort order
+	  for criteria unspecified by user.
+	* pp/opreport_options.cpp: update --sort option help string.
+
+2003-08-04  John Levon  <levon@movementarian.org>
+
+	* doc/oprofile.xml:
+	* doc/opannotate.1.in:
+	* pp/opannotate.cpp:
+	* pp/opannotate_options.h:
+	* pp/opannotate_options.cpp: add --base-dirs
+
+2003-08-04  John Levon  <levon@movementarian.org>
+
+	* doc/oprofile.xml:
+	* doc/opannotate.1.in:
+	* pp/opannotate.cpp:
+	* pp/opannotate_options.h:
+	* pp/opannotate_options.cpp: add --search-dirs
+
+2003-08-04  John Levon  <levon@movementarian.org>
+
+	* doc/oprofile.xml:
+	* doc/opannotate.1.in:
+	* pp/opannotate.cpp:
+	* pp/opannotate_options.h:
+	* pp/opannotate_options.cpp: remove --source-dir and --base-dir,
+	  they're confusing and not useful in the current form
+
 2003-08-03  John Levon  <levon@movementarian.org>
 
 	* utils/opcontrol: avoid using ps, it's very slow with kallsyms
