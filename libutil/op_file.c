@@ -279,7 +279,6 @@ int create_path(char * path)
 	for ( ; (pos = strchr(pos, '/')) != NULL; ++pos) {
 		*pos = '\0';
 		ret = create_dir(path);
-		printf("creating %s %s\n", path, strerror(errno));
 		*pos = '/';
 		if (ret)
 			return ret;

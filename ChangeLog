@@ -1,5 +1,13 @@
 2003-04-17  Philippe Elie  <phil.el@wanadoo.fr>
 
+	* dae/opd_kernel.c:
+	* daemon/opd_kernel.c: remove leading '/' on module name fixing 2.5
+	 module not under {dep} and similar case for "no-vmlinux" with 2.4/2.5
+
+	* libutil/op_file.c: tiny tidy
+
+2003-04-17  Philippe Elie  <phil.el@wanadoo.fr>
+
 	* libop/op_mangle.c: app_name and image was reversed, {dep} was missing
 
 2003-04-17  John Levon  <levon@movementarian.org>
