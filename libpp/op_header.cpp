@@ -87,7 +87,7 @@ void check_mtime(string const & file, opd_header const & header)
 		static bool warned_already = false;
 
 		cerr << "warning: the last modified time of the binary file "
-		     " does not match that of the sample file for " << file
+		     "does not match that of the sample file for " << file
 		     << "\n";
 
 		if (!warned_already) {
