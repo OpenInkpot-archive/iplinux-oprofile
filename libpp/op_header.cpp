@@ -34,12 +34,6 @@ void op_check_header(opd_header const & h1, opd_header const & h2)
 		exit(EXIT_FAILURE);
 	}
 
-	if (h1.cpu_speed != h2.cpu_speed) {
-		cerr << "header cpu speeds are different ("
-		     << h1.cpu_speed << ", " << h2.cpu_speed << ")\n";
-		exit(EXIT_FAILURE);
-	}
-
 	if (h1.separate_lib_samples != h2.separate_lib_samples) {
 		cerr << "header separate_lib_samples are different ("
 		     << h1.separate_lib_samples << ", " 
@@ -53,6 +47,9 @@ void op_check_header(opd_header const & h1, opd_header const & h2)
 		     << h2.separate_kernel_samples << ")\n";
 		exit(EXIT_FAILURE);
 	}
+
+	// note than we don't check cpu_speed since the reported cpu_speed
+	// can vary at each reboot.
 }
 
 
