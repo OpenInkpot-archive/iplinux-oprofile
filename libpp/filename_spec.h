@@ -24,7 +24,7 @@ class parse_cmdline;
  */
 class filename_spec
 {
-	friend parse_cmdline;
+	friend class parse_cmdline;
 public:
 	/**
 	 * @param filename  the samples filename

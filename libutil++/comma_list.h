@@ -69,7 +69,7 @@ comma_list<T>::comma_list()
 
 
 template <class T>
-void comma_list<T>::set(string const & str, bool cumulative)
+void comma_list<T>::set(std::string const & str, bool cumulative)
 {
 	if (!cumulative)
 		items.clear();
@@ -83,7 +83,7 @@ void comma_list<T>::set(string const & str, bool cumulative)
 	is_all = false;
 	set_p = true;
 
-	vector<string> result;
+	std::vector<std::string> result;
 	separate_token(result, str, ',');
 	for (size_t i = 0 ; i < result.size() ; ++i) {
 		if (result[i] == "all") {
