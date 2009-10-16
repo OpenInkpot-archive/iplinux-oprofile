@@ -1,0 +1,9 @@
+#!/bin/sh -e
+
+if [ "$1" = "configure" ]; then
+    addgroup -S oprofile
+    adduser -S -h /var/lib/oprofile -H -G oprofile -g "OProfile JIT sandbox user" oprofile
+    chown oprofile:oprofile /var/lib/oprofile
+fi
+
+exit 0

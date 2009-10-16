@@ -1,0 +1,617 @@
+oprofile (0.9.5-1) asimov; urgency=low
+
+  * New upstream release.
+  * First build for IPlinux.
+
+ -- Mikhail Gusarov <dottedmag@dottedmag.net>  Fri, 16 Oct 2009 03:09:52 +0700
+
+oprofile (0.9.3-2.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Actually link with the static libbfd.  Build-depend on zlib1g-dev because
+    binutils-dev doesn't depend on it, and on automake so we can run
+    autoreconf.  Closes: #515908.
+
+ -- Julien Cristau <jcristau@debian.org>  Thu, 02 Apr 2009 11:19:14 +0200
+
+oprofile (0.9.3-2) unstable; urgency=low
+
+  * Closes: bug#415827 -- manpage corrected upstream so that all options are
+    now unique
+  * Update to latest Debian standards version.
+  * Closes: bug#420815 -- find separate debug files in archive properly (patch
+    applied)
+  * Closes: bug#450607 -- oprof_start no longer links against libbfd.so (used
+    patch from submitter)
+  * Closes: bug#446360 -- similar problem with libbfd; the patch for 450607
+    was more inclusive, though, so it also fixes this problem; thanks for the
+    NMU, nonetheless.
+  * Closes: bug#447797 -- remove bashisms from opcontrol (used patch from
+    ubuntu)
+  * Closes: bug#420760 -- cannot reproduce this problem in 0.9.3 (was reported
+    with 0.9.2)
+  * Closes: bug#422178 -- cannot reproduce this problem in 0.9.3 (was reported
+    with 0.9.2)
+  * Closes: bug#428299 -- latest Linux kernel (2.6.23-1 on dual core Intel) no
+    longer shows this problem.
+  * Closes: bug#424760 -- invalid arithmetic expression in opcontrol script
+    replaced in newer versions
+  * Closes: bug#456069 -- patched C++ files to accommodate changes in the
+    header files for g++ 4.3
+
+ -- Al Stone <ahs3@debian.org>  Sun, 10 Feb 2008 11:51:49 -0700
+
+oprofile (0.9.3-1) unstable; urgency=low
+
+  * Update to latest upstream.
+  * Convert packaging so that it now uses quilt
+  * Remove invocation of autogen.sh -- no longer necessary to do this
+  * Closes: bug#417472 -- should no longer FTBS with g++ 4.3
+  * Closes: bug#424478 -- acknowledge NMU
+  * Closes: bug#434003 -- new upstream, armel support
+  * Closes: bug#436697 -- simplified packaging as suggested
+
+ -- Al Stone <ahs3@debian.org>  Sun, 09 Sep 2007 18:40:25 -0600
+
+
+oprofile (0.9.2-4.1) unstable; urgency=low
+
+  * Non-maintainer upload.
+  * Closes: bug#424478 -- Force rebuild with newer binutils, to let orprofile
+    understand binaries with --hash-style=gnu.
+
+ -- Pierre Habouzit <madcoder@debian.org>  Fri, 31 Aug 2007 18:18:56 +0200
+
+oprofile (0.9.2-4) unstable; urgency=low
+
+  * Closes: bug#411286 -- does not work on AMD64, 2.6.19.2 kernel (used
+    the patch from bug report).  From Philippe Coval <rzr@users.sf.net>.
+  * Closes: bug#410827 -- clean out some bashisms (used the patch from the
+    bug report).  This applies the patches from 
+    http://lkml.org/lkml/2006/11/22/170 and 
+    http://lkml.org/lkml/2006/11/22/172 to make oprofile work on newer
+    kernels.  From Jochen Voss <voss@debian.org>.
+  
+ -- Al Stone <ahs3@debian.org>  Fri, 16 Mar 2007 11:04:46 -0600
+
+oprofile (0.9.2-3) unstable; urgency=low
+
+  * Closes: bug#396749 -- FTBFS: no suitably configured kernel include tree
+    found; ./configure needs --with-kernel-support, and not --without.
+  * Closes: bug#398506 -- Shouldn't build depend on an unversioned automake;
+    corrected dependency.
+
+ -- Al Stone <ahs3@debian.org>  Sat, 18 Nov 2006 20:06:11 -0700
+
+
+oprofile (0.9.2-2) unstable; urgency=low
+
+  * Deprecating use of oprofile-source; this is only needed for 2.4
+    kernels, and is no longer actively maintained.  The functionality
+    provided is now included in Linux 2.6 kernels by default.
+  * Closes: bug#394017 -- oprofile-source: Obsolete - please remove 
+  * Closes: bug#392836 -- oprofile-source: fails to build
+  * Closes: bug#395014 -- [PATCH] Make opcontrol work with bash (used
+    the patch directly)
+
+ -- Al Stone <ahs3@debian.org>  Sat, 28 Oct 2006 11:41:45 -0600
+
+oprofile (0.9.2-1) unstable; urgency=low
+
+  * Updated to latest upstream source. 
+  * Closes: bug#387948 -- OProfile 0.9.2 has been released (request to
+    update to latest source)
+  * Closes: bug#380462 -- Support for core CPUs (added in this release)
+  * Closes: bug#378285 -- missing Depends:binutils in debian/control
+  * Since the prospect package no longer exists, remove all references
+    to it.
+
+ -- Al Stone <ahs3@debian.org>  Thu, 21 Sep 2006 21:38:42 -0600
+
+oprofile (0.9.1-11) unstable; urgency=low
+
+  * Closes: bug#376879 -- remove 'Recommends' for unavailable package
+    oprofile-modules0.9
+  * Update Debian Standards-Version.
+
+ -- Al Stone <ahs3@debian.org>  Wed,  5 Jul 2006 18:04:01 -0600
+
+
+oprofile (0.9.1-10) unstable; urgency=low
+
+  * Closes: bug#357324 -- FTBFS with G++ 4.1: method definition was not in 
+    proper enclosing namespace (NB: already fixed in upstream CVS HEAD)
+
+ -- Al Stone <ahs3@debian.org>  Sun,  2 Apr 2006 20:24:49 -0600
+
+oprofile (0.9.1-9) unstable; urgency=low
+
+  * Closes: bug#352910 -- CVE-2006-0576: Untrusted search path vulnerability
+    in opcontrol (re-used patch from CVS HEAD)
+
+ -- Al Stone <ahs3@debian.org>  Fri, 17 Feb 2006 11:22:41 -0700
+
+oprofile (0.9.1-8) unstable; urgency=low
+
+  * Closes: bug#344665: minot typo in --start portion of opcontrol man
+    page (#344667 is a duplicate of this bug and was merged with this one).
+
+ -- Al Stone <ahs3@debian.org>  Thu, 29 Dec 2005 17:31:03 -0700
+
+oprofile (0.9.1-7) unstable; urgency=low
+
+  * Convert oprofile-source so it uses automake1.9 (instead of 1.7) 
+
+ -- Al Stone <ahs3@debian.org>  Sun, 27 Nov 2005 17:30:36 -0700
+
+oprofile (0.9.1-6) unstable; urgency=low
+
+  * Closes: bug#340381: Cosmetic fix for oprofile.1 manpage 
+  * Convert to newer automake (1.9)
+
+ -- Al Stone <ahs3@debian.org>  Sun, 27 Nov 2005 14:59:50 -0700
+
+oprofile (0.9.1-5) unstable; urgency=low
+
+  * Closes: bug#332057: oprofile depends on debconf without | debconf-2.0
+    alternate; blocks cdebconf transition 
+
+ -- Al Stone <ahs3@debian.org>  Sat,  8 Oct 2005 12:48:50 -0600
+
+oprofile (0.9.1-4) unstable; urgency=low
+
+  * Closes: bug#328069 -- oprofile-common: Conflicts with old oprofile;
+    added proper Replaces and Conflicts
+
+ -- Al Stone <ahs3@debian.org>  Fri, 16 Sep 2005 19:31:04 -0600
+
+oprofile (0.9.1-3) unstable; urgency=low
+
+  * Update to latest standards version.
+  * Update to latest libqt3-mt-dev.
+  * The bug #300683 is closed by the existence of the 'oprofile-source'
+    package.  If a 2.[24].x kernel is used, it will be necessary to build
+    your own kernel module; 'oprofile-source' provides the module source.
+    For 2.6.x kernels, the module is built by default and included in the
+    standard Debian kernel images.  Hence, the goofy pbuilder change listed
+    in the previous entry has been removed and the bug closed via another
+    mechanism -- you need to build your own oprofile kernel modules.
+
+ -- Al Stone <ahs3@debian.org>  Sat, 10 Sep 2005 13:59:27 -0600
+
+oprofile (0.9.1-2) unstable; urgency=low
+
+  * The 'oprofile-modules' package needed to have a proper Provides: for
+    oprofile-modules0.9, not 0.8
+  * Closes: bug#300683: package fails to build from source in a
+    sane way; required adding all of the build process in
+    debian/build-modules.sh.  As of this writing, this package
+    can only be built with pbuilder (if dpkg-buildpackage is used,
+    cdebootstrap fails for an as yet unknown reason).
+
+ -- Al Stone <ahs3@debian.org>  Mon,  5 Sep 2005 15:19:43 -0600
+
+oprofile (0.9.1-1) unstable; urgency=low
+
+  * Update to latest upstream.
+  * Separating 'oprofile' into two source packages was a really bad idea;
+    rejoined them, using this upstream version.
+  * Added ARM, MIPS architectures as they are now supported.
+  * Closes: bug#287767: would also like a version that is command line
+    only (no X GUI) -- install 'oprofile-common' for the command line
+    only portion of 'oprofile'; installing 'oprofile-gui' will bring in
+    'oprofile-common', too; installing 'oprofile' now becomes a meta
+    package so that previous users of 'oprofile' will see no difference.
+  * Closes: bug#305131: new upstream
+  * Closes: bug#319089: does not start -- libbfd-2.15.so not found; it's
+    not supposed to be building against a libbfd.so at all.
+  * Closes: bug#325249: uninstallable because of missing libqt3c102-mt 
+
+ -- Al Stone <ahs3@debian.org>  Sun, 28 Aug 2005 12:25:57 -0600
+
+oprofile (0.8.1-2) unstable; urgency=low
+
+  * Closes: #293354 -- opreport man page errors 
+  * Closes: bug#280970 -- oprofile-source: FTBFS on most arches;
+    changed from using arch-specific control files (a bad idea) to
+    vars in the control file (much easier to maintain -- thanks, Kurt)
+  * Module makefile now has an 'install.debian' target for use with the
+    normal 'make-kpkg' scripts, and an 'install.kernel' target to
+    use when building and installing a module without 'make-kpkg.'
+  * Closes: bug#269954 -- was missing a dependency on the proper
+    kernel-image package in the control file for build a kernel module
+    (debian/control.modules.in).
+
+ -- Al Stone <ahs3@debian.org>  Mon,  7 Mar 2005 15:34:31 -0700
+
+oprofile (0.8.1-1) unstable; urgency=low
+
+  * Update to latest upstream.
+  * Split this package into two source packages: oprofile and
+    oprofile-source.  While this is more work for the maintainer, it
+    should make it easier for the user that wants to create a kernel
+    module (and that's where the most complaints seem to be).
+  * Closes: bug#273849 -- when source was last upgraded, forgot
+    to include the change to configure.in that forces libbfd.a to be
+    used instead of libbfd.so (which is against policy).
+
+ -- Al Stone <ahs3@debian.org>  Mon, 18 Oct 2004 16:13:07 -0600
+
+oprofile (0.8-2) unstable; urgency=low
+
+  * Closes: bug#252530 -- FTBS on amd64.  Added in the new architecture. 
+    To both oprofile _and_ oprofile-source, this time.
+
+ -- Al Stone <ahs3@debian.org>  Thu,  2 Sep 2004 16:30:08 -0600
+
+oprofile (0.8-1) unstable; urgency=low
+
+  * Updating to latest released upstream source.
+  * Closes: bug#257466 -- new upstream available
+  * Closes: bug#252530 -- FTBS on amd64.  Added in the new architecture. 
+  * Closes: bug#265256 -- /lib/modules/2.4.26-1-686/oprofile/oprofile.o:
+    Doesn't work with kernel-image-2.4.26-1-686 version 2.4.26-4 (fixed
+    with upload of new module packages)
+
+ -- Al Stone <ahs3@debian.org>  Tue, 31 Aug 2004 16:37:34 -0600
+
+oprofile (0.7.1-4) unstable; urgency=low
+
+  * Closes: bug#245300: Shouldn't mention just x86/ia64 in description 
+  * Clean up override disparity by setting priority back to 'optional'
+
+ -- Al Stone <ahs3@debian.org>  Thu, 22 Apr 2004 17:43:00 -0600
+
+oprofile (0.7.1-3) unstable; urgency=low
+
+  * Closes: bug#228020 -- please add PPC.  Also added architectures that
+    should work: alpha, i386, ia64, parisc, ppc, sparc
+  * Because this package depends on binutils-dev, and it is an 'extra'
+    package, this one cannot be 'optional'.  Changed priority to be
+    'extra' to conform with policy.
+
+ -- Al Stone <ahs3@debian.org>  Fri, 19 Mar 2004 18:02:08 -0700
+
+oprofile (0.7.1-2) unstable; urgency=low
+
+  * Closes: bug#227576 -- depended on automake1.7 but didn't use it;
+    corrected debian/rules to use AUTOMAKE variable instead of relying
+    on automake 1.7 being set as the default version.
+  * automake was being run twice; cleaned up debian/rules to preclude this.
+  * aclocal was defaulting, usually to the wrong version, so set the
+    ACLOCAL variable in debian/rules to get this done right.
+
+ -- Al Stone <ahs3@debian.org>  Tue, 24 Feb 2004 16:02:32 -0700
+
+oprofile (0.7.1-1) unstable; urgency=low
+
+  * Updated to latest upstream source.
+  * Closes: bug#227135 -- removed dependency on specific version of libbfd
+  * Closes: bug#227248 -- binaries are no longer dynamically linked against
+    libbfd-2.14.90.0.6.so, which is not present
+  * Closes: bug#227075 -- unsatisfied build-depends on docbook-xsl-stylesheets
+    which has been replaced with docbook-xsl
+  * Closes: bug#226767 -- in oprofile-source, 'make-kpkg modules_image' fails
+    if not executed as root; made module source a tar.gz as suggested
+  * Closes: bug#227460 -- in oprofile-source: please provide as archive (this
+    is a duplicate of #226767)
+  * Closes: bug#227378 -- duplicate of #227135, #227248 
+  * Closes: bug#232268 -- oprofile-source uses -liberty but does not have
+    a build-depends on it
+  * module/ia64/op_pmu.c was missing includes needed to compile properly
+
+ -- Al Stone <ahs3@debian.org>  Tue, 17 Feb 2004 21:28:55 -0700
+
+oprofile (0.6.1-3) unstable; urgency=low
+
+  * Since we can't know what kernel is in use, relaxed the dependency
+    on oprofile-modules<n> to a Recommends.  E.g., in 2.6 kernels,
+    the OProfile kernel module is in the kernel and could already be
+    built and available.
+  * Added dependency on binutils-dev (for libbfd.so) to oprofile-modules<n>
+  * The oprofile-modules-* packages incorrectly included a dependency on
+    automake and kernel-package (they are needed in Build-Depends, though).
+  * oprofile-source was missing a dependency on automake1.7, binutils-dev
+  * Changed the Makefile.am files for ./dae and ./daemon to remove the
+    test on whether or not --with-kernel-support was used (but left
+    this in the configure step in debian/rules to force the configure
+    to _not_ look for kernel source since the kernel modules will be
+    built by a different process).  This forces both a 2.4 oprofiled
+    daemon (./dae/oprofiled) and a 2.5 daemon (./daemon/oprofiled)
+    to be built.  At the same time, these now get installed as daemons
+    with different names, and oprofiled becomes a wrapper script that
+    invokes the right daemon for the right kernel.
+  * Added a note to README.Debian about the need to use install_vmlinux
+    when building a kernel image with make-kpkg, if you want to profile
+    the kernel.
+  * oprofile-source now conflicts with known 2.6 kernel packages
+  * initial upload.  Closes: bug#139475 (RFP).
+
+ -- Al Stone <ahs3@debian.org>  Sun, 16 Nov 2003 16:25:45 -0700
+
+oprofile (0.6.1-2) unstable; urgency=low
+
+  * Added a note to README.Debian: the kernel module uses an option
+    called "allow_unload" which changes whether or not the module
+    will ignore rmmod.  Explained what this meant and why it's there.
+  * Improved the text in README.Debian; better wording, "user-space"
+    instead of the more informal (and possibly unclear) "user-land,"
+    and consistent capitalization of "OProfile."
+  * Improved the text in the package descriptions; better wording
+    and consistent capitalization of "OProfile."
+  * oprofile-source package was needed a Depends (not just a
+    Build-Depends) for automake(>=1.6) and binutils-dev.
+  * The kernel module build needed to put the .deb in /usr/src
+    instead of /usr/src/modules.
+  * Updated the build dependency for libqt3-dev (since it's been
+    deprecated, or may be soon) to libqt3-mt-dev.
+
+ -- Al Stone <ahs3@debian.org>  Thu, 18 Sep 2003 17:43:05 -0600
+
+oprofile (0.6.1-1) unstable; urgency=low
+
+  * Updated to latest version.
+
+ -- Al Stone <ahs3@debian.org>  Sun, 14 Sep 2003 21:47:28 -0600
+
+oprofile (0.6-1) unstable; urgency=low
+
+  * Updated to 0.6 version (0.6.1 is pending) 
+
+ -- Al Stone <ahs3@debian.org>  Sat, 13 Sep 2003 17:41:20 -0600
+
+oprofile (0.5.4-4) unstable; urgency=low
+
+  * Incorporate feedback from John Levon. 
+  * Corrected AUTHORS email addresses.
+
+ -- Al Stone <ahs3@debian.org>  Wed,  2 Jul 2003 10:38:05 -0600
+
+oprofile (0.5.4-3) unstable; urgency=low
+
+  * Really Stupid Error: make install did not install all of the user
+    space binaries.  Forgot to bring forward the use of $DESTDIR in
+    the Makefiles.
+
+ -- Al Stone <ahs3@debian.org>  Wed, 25 Jun 2003 10:36:37 -0600
+
+oprofile (0.5.4-2) unstable; urgency=low
+
+  * Missed a dependency on oprofile-modules0.5.2 that should not have
+    been in the control file.
+  * Added code to double check kernel source has been configured before
+    we build the oprofile module
+
+ -- Al Stone <ahs3@debian.org>  Tue, 24 Jun 2003 17:34:25 -0600
+
+oprofile (0.5.4-1) unstable; urgency=low
+
+  * Update to latest source. 
+  * Closes: bug#139475 -- RFP for oprofile
+
+ -- Al Stone <ahs3@debian.org>  Mon, 23 Jun 2003 18:53:55 -0600
+
+oprofile (0.5.3-4) unstable; urgency=low
+
+  * lintian/linda reports oprofile-source debian/postinst script as
+    not an executable script.  Don't have to fix it, but it can't
+    hurt to get to no warnings at all.
+  * Corrected build depends for oprofile-source and oprofile (was missing
+    a dependency on automake)
+  * Minor corrections to the HOWTOs for oprofile-source on further testing
+  * Did not get m4/findkernel.m4 complete enough; added some additional
+    places to check for source, and removed all occurrences of `uname -r`
+    that I could find.
+  * The variable KSRC was also not being set correctly; borrowed the
+    script from findkernel.m4 and re-used it.
+
+ -- Al Stone <ahs3@debian.org>  Mon, 23 Jun 2003 17:48:22 -0600
+
+oprofile (0.5.3-3) unstable; urgency=low
+
+  * Made m4/findkernel.m4 more robust; it only looked in one place to
+    find the kernel source and headers, but there are more places to
+    look.
+  * Cleaned up the commentary in debian/rules
+  * Cut away the cruft from debian/configure.modules.in (it's a subset
+    of configure.in).
+  * Tested kernel module build environment using debootstrap to build a
+    chroot environment; rewrote portions of debian/rules to be cleaner,
+    fixed up the module control file build-depends.
+  * Added HOWTOs for ia64 and i386 to the docs provided by the
+    oprofile-source package, which is used to add oprofile to existing
+    kernels.  Included detailed instructions for building by hand
+    and using make-kpkg.
+  * We now provide oprofile-module0.5 instead of 0.5.x; all the 0.5.x
+    versions are compatible enough, there's no need to introduce any
+    further complexity.
+  * Lots of miscellaneous cleanup of the HOWTOs, debian/rules and the
+    oprofile-source files as part of verifying everything works on all
+    platforms as expected.
+
+ -- Al Stone <ahs3@debian.org>  Wed, 18 Jun 2003 17:56:22 -0600
+
+oprofile (0.5.3-2) unstable; urgency=low
+
+  * Corrected use of obsolete AC_TRY_COMPILE macro in configure.modules.in
+  * Made the debian/rules clean more robust
+  * Updated debian/Makefile.modules.in to debian/Makefile.modules.am,
+    cutting out everything not needed.
+  * Updated debian/configure.in to use the latest version
+  * Corrected debian/rules: it needed to copy the ia64/ia32 versions of
+    some files in the module directory and was not.
+  * Updated debian/rules to correspond to new build model, and still be
+    able to build kernel modules separately
+
+ -- Al Stone <ahs3@debian.org>  Mon, 16 Jun 2003 17:06:59 -0600
+
+oprofile (0.5.3-1) unstable; urgency=low
+
+  * Updated to latest released upstream source; 0.5.2 and 0.5.3, unlike
+    previous releases, seem to be fairly cooperative, with just incremental
+    changes instead of the earlier wholesale replacements.
+  * Added in a copy of the Release Notes from the web site, as part of
+    the documentation.
+  * Made sure release notes went with both packages produced (oprofile
+    _and_ oprofile-sources).
+  * Made sure AUTHORS file was included.
+
+ -- Al Stone <ahs3@debian.org>  Fri, 13 Jun 2003 12:25:17 -0600
+
+oprofile (0.5.2-1) unstable; urgency=low
+
+  * Update to latest released version.  NB: as seems to be normal, this
+    version conflicts with prior versions, so dependencies needed updating.
+  * Added support for ia64 version.
+  * Cleaned up some of the copyright info, added AUTHORS file.
+  * Added in a copy of the Release Notes from the web site, as part of
+    the documentation.
+
+ -- Al Stone <ahs3@debian.org>  Fri, 13 Jun 2003 12:15:49 -0600
+
+oprofile (0.4-5) unstable; urgency=low
+
+  * Added dependency on libpopt-dev for oprofile-source (it was missing). 
+
+ -- Al Stone <ahs3@debian.org>  Mon, 24 Mar 2003 10:41:16 -0700
+
+oprofile (0.4-4) unstable; urgency=low
+
+  * Forgot to make sure that the original source and the diff file
+    were included (!)
+  * Packaging done. Closes: #139475
+
+ -- Al Stone <ahs3@debian.org>  Fri, 21 Mar 2003 21:07:43 -0700
+
+oprofile (0.4-3) unstable; urgency=low
+
+  * Corrected the description to refer to kernel-package as it should,
+    and use the right name for oprofile-modules (not oprofile-modul*e*).
+  * Moved some warnings from debconf to README.Debian so that they are
+    more readily accessible.  Based on suggestions, did some significant
+    rewording of the text to make clearer what's being said.
+  * The oprofile-source kernel module build relied on `uname -r` when
+    it should not have.  The problem was that you could build the module
+    in a chroot environment and have it install in the wrong modules
+    directory.
+  * The build was kind of messed up; even when all you were doing was
+    the build of the user-land components, configure was looking for
+    things like kernel headers that are only needed when building the
+    kernel module.  Fixed the rules file to configure properly depending
+    on what we're building.
+  * A debian/dirs file was being created for the kernel module and was
+    mistakenly creating module directories it should not have.
+  * Cleaned up the oprofile build-depends to be accurate.
+  * -
+
+ -- Al Stone <ahs3@debian.org>  Fri, 21 Mar 2003 21:07:35 -0700
+
+oprofile (0.4-2) unstable; urgency=low
+
+  * Bug report from the oprofile mailing list says that libpp.a is not
+    to be installed at all, so removed it from the installation step
+
+ -- Al Stone <ahs3@debian.org>  Mon, 11 Nov 2002 11:11:00 -0700
+
+oprofile (0.4-1) unstable; urgency=low
+
+  * Update to latest upstream 
+  * Had to fix makefile in pp directory to install libpp.a in /usr/lib
+    instead of /usr/bin.
+
+ -- Al Stone <ahs3@debian.org>  Fri,  8 Nov 2002 13:52:58 -0700
+
+oprofile (0.3-3) unstable; urgency=low
+
+  * Cleanup problems with debian/Makefile.modules.in (install steps were
+    all wrong, leftovers from prior version)
+
+ -- Al Stone <ahs3@debian.org>  Fri,  8 Nov 2002 11:20:04 -0700
+
+oprofile (0.3-2) unstable; urgency=low
+
+  * Cleaned up debian/rules so make-kpkg works *correctly*; was using
+    the wrong paths for kernel header and source files.
+  * Added in the configure.modules.in file to be used by the make-kpkg
+    build as it's configure.in; needed to remove all the dependencies
+    that aren't needed.
+  * Moved Makefile.modules.in and configure.modules.in to the debian
+    directory since that's the only place that uses them (in make-kpkg).
+  * Added debconf warning to oprofile-source; wanted to make sure that
+    you knew that a make clean will be done in your kernel source directory
+    when you do a make-kpkg.
+
+ -- Al Stone <ahs3@debian.org>  Wed,  6 Nov 2002 16:55:10 -0700
+
+oprofile (0.3-1) unstable; urgency=low
+
+  * Upgrade to 0.3 upstream; this forces some dependency touch-up
+  * Rules file for make-kpkg module build was retaining values from
+    an initial config done during the creation of the package and was
+    not using the variable values provided by make-kpkg
+  * Added build dependency on libpopt-dev (it was missing)
+  * Cleaned up debian/rules to accomodate changes since 0.2
+
+ -- Al Stone <ahs3@debian.org>  Wed,  6 Nov 2002 16:22:25 -0700
+
+oprofile (0.2-6) unstable; urgency=low
+
+  * Bug: improved the way configure.in looked for kernel header files;
+    it's not foolproof, but will probably work better for those that use
+    the Debian kernel image/header/source packages.
+
+ -- Al Stone <ahs3@debian.org>  Mon,  4 Nov 2002 14:07:12 -0700
+
+oprofile (0.2-5) unstable; urgency=low
+
+  * Added the events directory to the kernel module source package so
+    it will compile
+  * Added the util directory to the kernel module source package so
+    it will compile
+  * Added the dae directory to the kernel module source package so
+    it will compile
+  * Added a Makefile.modules.in so that make-kpkg would work properly
+    (it only needs a subset of the entire source tree; this subset of
+    Makefile.in compiles the subset).
+  * The "Recommends" should have been "Suggests" in the control files
+  * Changed the name of the virtual package oprofile-modules so that
+    it includes the version number; dpkg cannot handle virtual package
+    versioning well, so this makes sure we have the right modules.
+
+ -- Al Stone <ahs3@debian.org>  Tue, 20 Aug 2002 15:57:59 -0600
+
+oprofile (0.2-4) unstable; urgency=low
+
+  * Completely re-vamped the way this package is built and
+    structured, using some new templates for dh_make specific
+    to kernel module type packages.
+
+ -- Al Stone <ahs3@debian.org>  Mon, 19 Aug 2002 16:34:19 -0600
+
+oprofile (0.2-3) unstable; urgency=low
+
+  * Removed some of the remaining kernel stuff configure.in from
+    the user-land only package; oprofile-module will have all the
+    kernel stuff in it.
+
+ -- Al Stone <ahs3@debian.org>  Fri, 16 Aug 2002 13:44:43 -0600
+
+oprofile (0.2-2) unstable; urgency=low
+
+  * Package cleanup: (1) fix man page problems, (2) clean up rules
+    file, (3) added depends on kernel module
+  * Removed/commented out the steps that build and install the kernel
+    module; those will be in a separate kernel modules package
+  * Added some missing links for man pages
+  * xsltproc was being invoked to create doc/oprofile.html but was
+    producing a zero-length file.  fixed the make to create the
+    html properly.
+
+ -- Al Stone <ahs3@debian.org>  Fri, 16 Aug 2002 11:14:29 -0600
+
+oprofile (0.2-1) unstable; urgency=low
+
+  * Initial Release.
+
+ -- Al Stone <ahs3@debian.org>  Wed, 14 Aug 2002 18:03:29 -0600
+

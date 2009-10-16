@@ -1,0 +1,33 @@
+Source: oprofile
+Section: core
+Priority: optional
+Maintainer: Mikhail Gusarov <dottedmag@dottedmag.net>
+Standards-Version: 3.8.3
+Build-Depends: debhelper (>= 7), quilt, automake, libtool, binutils-dev
+XCS-Cross-Host-Build-Depends: debhelper (>= 7), quilt, automake, libtool
+XCS-Cross-Build-Depends: libbfd-dev, libiberty-dev, libpopt-dev
+
+Package: oprofile
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Description: system-wide profiler for Linux systems
+ OProfile is a performance profiling tool for Linux systems, capable
+ of profiling all running code at low overhead.  It consists of a
+ daemon for collecting sample data, plus several post-profiling tools
+ for turning data into information.  Using OProfile also requires
+ a kernel module, either contained in a separate package called
+ 'oprofile-modules' for 2.2 and 2.4 kernels, or for 2.6 kernels,
+ the OProfile kernel module is part of the Linux kernel source and
+ must be built from the 'kernel-source' package.
+ .
+ OProfile leverages the hardware performance counters of the x86 CPU and
+ the PMU (Performance Monitoring Unit) of the ia64 CPU to enable profiling
+ of a wide variety of interesting statistics, which can also be used for 
+ basic time-spent profiling.  All code is profiled: hardware and software
+ interrupt handlers, kernel modules, the kernel, shared libraries, and 
+ applications (the only exception being the OProfile interrupt handler
+ itself).  Note that different architectures can use different hardware 
+ mechanisms to collect data.
+ .
+ OProfile is currently in alpha status; however it has proven stable over
+ a large number of differing configurations. As always, there is no warranty.

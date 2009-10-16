@@ -1,0 +1,71 @@
+--- a/gui/oprof_start_util.cpp
++++ b/gui/oprof_start_util.cpp
+@@ -14,6 +14,7 @@
+ #include <glob.h>
+ 
+ #include <cerrno>
++#include <cstdlib>
+ #include <vector>
+ #include <cmath>
+ #include <sstream>
+--- a/libabi/opimport.cpp
++++ b/libabi/opimport.cpp
+@@ -13,6 +13,7 @@
+ #include "popt_options.h"
+ #include "op_sample_file.h"
+ 
++#include <cstdlib>
+ #include <fstream>
+ #include <iostream>
+ #include <vector>
+--- a/libpp/sample_container.cpp
++++ b/libpp/sample_container.cpp
+@@ -14,6 +14,7 @@
+ #include <numeric>
+ #include <algorithm>
+ #include <vector>
++#include <climits>
+ 
+ #include "sample_container.h"
+ 
+--- a/libregex/demangle_symbol.h
++++ b/libregex/demangle_symbol.h
+@@ -11,6 +11,7 @@
+ #ifndef DEMANGLE_SYMBOL_H
+ #define DEMANGLE_SYMBOL_H
+ 
++#include <cstdlib>
+ #include <string>
+ 
+ /// demangle type: specify what demangling we use
+--- a/libutil++/bfd_support.cpp
++++ b/libutil++/bfd_support.cpp
+@@ -21,6 +21,7 @@
+ #include <cstdlib>
+ #include <cstring>
+ 
++#include <cstdlib>
+ #include <iostream>
+ #include <fstream>
+ #include <sstream>
+--- a/libutil++/child_reader.cpp
++++ b/libutil++/child_reader.cpp
+@@ -14,6 +14,8 @@
+ #include <limits.h>
+ 
+ #include <cerrno>
++#include <climits>
++#include <cstdlib>
+ #include <sstream>
+ #include <iostream>
+ #include <cstring>
+--- a/libutil++/file_manip.cpp
++++ b/libutil++/file_manip.cpp
+@@ -16,6 +16,7 @@
+ #include <limits.h>
+ #include <stdlib.h>
+ 
++#include <cstdlib>
+ #include <cstdio>
+ #include <cerrno>
+ #include <iostream>

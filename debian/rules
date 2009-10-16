@@ -1,0 +1,75 @@
+#!/usr/bin/make -f
+
+include /usr/share/quilt/quilt.make
+
+DEB_HOST_GNU_TYPE   ?= $(shell dpkg-architecture -qDEB_HOST_GNU_TYPE)
+
+ifneq (,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+NJOBS := -j $(patsubst parallel=%,%,$(filter parallel=%,$(DEB_BUILD_OPTIONS)))
+endif
+
+ifeq (mipsel,$(DEB_HOST_ARCH_CPU))
+  EVENTS_ARCH=mips
+else ifeq (arm,$(DEB_HOST_ARCH_CPU))
+  EVENTS_ARCH=arm
+else ifeq (i386,$(DEB_HOST_ARCH_CPU))
+  EVENTS_ARCH=i386
+else ifeq (amd64,$(DEB_HOST_ARCH_CPU))
+  EVENTS_ARCH=amd64
+else
+  $(error Unknown architecture: $(DEB_HOST_ARCH_CPU))
+endif
+
+ARCH_EVENTS = /usr/share/oprofile/$(EVENTS_ARCH)
+
+clean:
+	dh_testdir
+	dh_testroot
+
+	[ ! -f Makefile ] || $(MAKE) clean
+
+	dh_clean
+
+configure: patch configure-stamp
+configure-stamp:
+	touch NEWS AUTHORS
+	autoreconf -vfi
+	./configure --host=$(DEB_HOST_GNU_TYPE) \
+		--build=$(DEB_BUILD_GNU_TYPE) \
+		--prefix=/usr \
+		--with-kernel-support 
+	touch $@
+
+build: configure build-stamp
+build-stamp: 
+	DESTDIR=$(CURDIR)/debian/oprofile $(MAKE) $(NJOBS)
+	touch $@
+
+install: build
+	dh_testdir
+	dh_testroot
+	dh_prep
+	dh_installdirs
+
+	$(MAKE) install DESTDIR=$(CURDIR)/debian/tmp
+
+binary-indep: build install
+
+binary-arch: build install
+	dh_testdir -s
+	dh_testroot -s
+
+	dh_install -s
+	cp -a $(CURDIR)/debian/tmp/$(ARCH_EVENTS) $(CURDIR)/debian/oprofile/usr/share/oprofile
+	dh_strip -s
+	dh_link -s
+	dh_compress -s
+	dh_compress -s
+	dh_fixperms -s
+	dh_installdeb -s
+	dh_shlibdeps -s
+	dh_gencontrol -s
+	dh_builddeb -s
+
+binary: binary-indep binary-arch
+.PHONY: build clean binary-indep binary-arch binary install patch unpack

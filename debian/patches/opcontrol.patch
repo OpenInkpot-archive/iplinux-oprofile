@@ -1,0 +1,22 @@
+--- a/utils/opcontrol
++++ b/utils/opcontrol
+@@ -13,6 +13,7 @@
+ # NOTE: This script should be as shell independent as possible
+ 
+ SYSCTL=do_sysctl
++OBJDUMP=${OBJDUMP:=objdump}
+ 
+ # A replacement function for the sysctl (procps package) utility which is
+ # missing on some distribution (e.g. slack 7.0).
+@@ -482,9 +483,9 @@
+ 	fi
+ 
+ 	# start at the start of .text, and end at _etext
+-	range_info=`objdump -h $FILE_IMAGE 2>/dev/null | grep " .text "`
++	range_info=`${OBJDUMP} -h $FILE_IMAGE 2>/dev/null | grep " .text "`
+ 	tmp1=`echo $range_info | awk '{print $4}'`
+-	tmp2=`objdump -t $FILE_IMAGE 2>/dev/null | grep "_etext$" | awk '{ print $1 }'`
++	tmp2=`${OBJDUMP} -t $FILE_IMAGE 2>/dev/null | grep "_etext$" | awk '{ print $1 }'`
+ 
+ 	if test -z "$tmp1" -o -z "$tmp2"; then
+ 		echo "The specified file $FILE_IMAGE does not seem to be valid" >&2
